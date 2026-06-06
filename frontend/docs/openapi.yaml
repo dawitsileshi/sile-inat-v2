@@ -1,0 +1,595 @@
+openapi: 3.0.3
+info:
+  title: MomHub API
+  version: 0.1.0
+  description: |
+    Anonymous postpartum wellness platform API.
+    No authentication by design (judge-testability).
+    See API_Contract.md for full conventions.
+servers:
+  - url: http://localhost:5000
+    description: Local Flask dev
+  - url: https://momhub.vercel.app
+    description: Deployed
+
+tags:
+  - name: questions
+  - name: categories
+  - name: experts
+  - name: stories
+  - name: events
+  - name: capsules
+  - name: feed
+
+paths:
+  /api/questions/:
+    get:
+      tags: [questions]
+      summary: List questions
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - in: query
+          name: category
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionListResponse'
+    post:
+      tags: [questions]
+      summary: Create a question
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuestionCreate'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Question' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+
+  /api/questions/{id}/:
+    get:
+      tags: [questions]
+      summary: Get a question with its answers
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/QuestionDetail' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/questions/{id}/answers/:
+    post:
+      tags: [questions]
+      summary: Add an answer to a question
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AnswerCreate' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Answer' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+
+  /api/categories/:
+    get:
+      tags: [categories]
+      summary: List categories
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/Category' }
+
+  /api/experts/:
+    get:
+      tags: [experts]
+      summary: List experts
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ExpertListResponse' }
+    post:
+      tags: [experts]
+      summary: Create an expert
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ExpertCreate' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Expert' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+
+  /api/experts/{id}/:
+    get:
+      tags: [experts]
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Expert' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/stories/:
+    get:
+      tags: [stories]
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StoryListResponse' }
+    post:
+      tags: [stories]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/StoryCreate' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Story' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+
+  /api/stories/{id}/:
+    get:
+      tags: [stories]
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Story' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/events/:
+    get:
+      tags: [events]
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - in: query
+          name: upcoming
+          schema: { type: boolean }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EventListResponse' }
+    post:
+      tags: [events]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EventCreate' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Event' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+
+  /api/events/{id}/:
+    get:
+      tags: [events]
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Event' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/events/{id}/rsvp:
+    post:
+      tags: [events]
+      summary: RSVP anonymously
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [session_token]
+              properties:
+                session_token: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RsvpResponse' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [events]
+      summary: Cancel RSVP
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [session_token]
+              properties:
+                session_token: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RsvpResponse' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/capsules/:
+    get:
+      tags: [capsules]
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - in: query
+          name: type
+          schema: { type: string, enum: [article, video] }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CapsuleListResponse' }
+    post:
+      tags: [capsules]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CapsuleCreate' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Capsule' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+
+  /api/capsules/{id}/:
+    get:
+      tags: [capsules]
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Capsule' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/feed/:
+    get:
+      tags: [feed]
+      summary: Mixed discovery feed
+      parameters:
+        - in: query
+          name: limit
+          schema: { type: integer, default: 20, maximum: 50 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/FeedItem' }
+
+components:
+  parameters:
+    IdPath:
+      in: path
+      name: id
+      required: true
+      schema: { type: integer, minimum: 1 }
+    Page:
+      in: query
+      name: page
+      schema: { type: integer, default: 1, minimum: 1 }
+    Limit:
+      in: query
+      name: limit
+      schema: { type: integer, default: 20, minimum: 1, maximum: 100 }
+
+  responses:
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    ValidationError:
+      description: Validation error
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:    { type: string }
+            message: { type: string }
+            fields:
+              type: object
+              additionalProperties: { type: string }
+
+    Category:
+      type: object
+      properties:
+        slug: { type: string }
+        name: { type: string }
+
+    Question:
+      type: object
+      properties:
+        id:            { type: integer }
+        title:         { type: string }
+        detail:        { type: string }
+        category:      { type: string }
+        display_name:  { type: string }
+        answer_count:  { type: integer }
+        created_at:    { type: string, format: date-time }
+
+    QuestionCreate:
+      type: object
+      required: [title, detail, category]
+      properties:
+        title:        { type: string, minLength: 5,  maxLength: 200 }
+        detail:       { type: string, minLength: 10, maxLength: 4000 }
+        category:     { type: string }
+        display_name: { type: string, maxLength: 40 }
+
+    QuestionDetail:
+      allOf:
+        - $ref: '#/components/schemas/Question'
+        - type: object
+          properties:
+            answers:
+              type: array
+              items: { $ref: '#/components/schemas/Answer' }
+
+    Answer:
+      type: object
+      properties:
+        id:           { type: integer }
+        question_id:  { type: integer }
+        answer:       { type: string }
+        display_name: { type: string }
+        created_at:   { type: string, format: date-time }
+
+    AnswerCreate:
+      type: object
+      required: [answer]
+      properties:
+        answer:       { type: string, minLength: 5, maxLength: 2000 }
+        display_name: { type: string, maxLength: 40 }
+
+    QuestionListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/Question' }
+        page:  { type: integer }
+        limit: { type: integer }
+        total: { type: integer }
+
+    Expert:
+      type: object
+      properties:
+        id:         { type: integer }
+        name:       { type: string }
+        specialty:  { type: string }
+        origin:     { type: string }
+        bio:        { type: string }
+        next_event: { type: string, format: date-time, nullable: true }
+
+    ExpertCreate:
+      type: object
+      required: [name, specialty, origin, bio]
+      properties:
+        name:      { type: string }
+        specialty: { type: string }
+        origin:    { type: string }
+        bio:       { type: string }
+
+    ExpertListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/Expert' }
+        page:  { type: integer }
+        limit: { type: integer }
+        total: { type: integer }
+
+    Story:
+      type: object
+      properties:
+        id:         { type: integer }
+        title:      { type: string }
+        author:     { type: string }
+        detail:     { type: string }
+        created_at: { type: string, format: date-time }
+
+    StoryCreate:
+      type: object
+      required: [title, author, detail]
+      properties:
+        title:  { type: string, minLength: 5,  maxLength: 200 }
+        author: { type: string, minLength: 1,  maxLength: 80 }
+        detail: { type: string, minLength: 10, maxLength: 8000 }
+
+    StoryListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/Story' }
+        page:  { type: integer }
+        limit: { type: integer }
+        total: { type: integer }
+
+    Event:
+      type: object
+      properties:
+        id:         { type: integer }
+        title:      { type: string }
+        detail:     { type: string }
+        location:   { type: string }
+        time:       { type: string, format: date-time }
+        speaker:    { type: string }
+        recurring:  { type: string, enum: [none, daily, weekly, monthly] }
+        rsvp_count: { type: integer }
+
+    EventCreate:
+      type: object
+      required: [title, detail, location, time, speaker]
+      properties:
+        title:     { type: string }
+        detail:    { type: string }
+        location:  { type: string }
+        time:      { type: string, format: date-time }
+        speaker:   { type: string }
+        recurring: { type: string, enum: [none, daily, weekly, monthly], default: none }
+
+    EventListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/Event' }
+        page:  { type: integer }
+        limit: { type: integer }
+        total: { type: integer }
+
+    RsvpResponse:
+      type: object
+      properties:
+        event_id:   { type: integer }
+        rsvp_count: { type: integer }
+        rsvped:     { type: boolean }
+
+    Capsule:
+      type: object
+      properties:
+        id:          { type: integer }
+        title:       { type: string }
+        type:        { type: string, enum: [article, video] }
+        content:     { type: string, nullable: true }
+        content_url: { type: string, nullable: true }
+        author:      { type: string }
+        created_at:  { type: string, format: date-time }
+
+    CapsuleCreate:
+      type: object
+      required: [title, type, author]
+      properties:
+        title:       { type: string }
+        type:        { type: string, enum: [article, video] }
+        content:     { type: string }
+        content_url: { type: string, format: uri }
+        author:      { type: string }
+
+    CapsuleListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/Capsule' }
+        page:  { type: integer }
+        limit: { type: integer }
+        total: { type: integer }
+
+    FeedItem:
+      oneOf:
+        - type: object
+          required: [type, id, title]
+          properties:
+            type:   { type: string, enum: [expert] }
+            id:     { type: integer }
+            title:  { type: string }
+            detail: { type: string }
+        - type: object
+          required: [type, id, title]
+          properties:
+            type:   { type: string, enum: [story] }
+            id:     { type: integer }
+            title:  { type: string }
+            detail: { type: string }
+        - type: object
+          required: [type, id, title, time]
+          properties:
+            type:  { type: string, enum: [event] }
+            id:    { type: integer }
+            title: { type: string }
+            time:  { type: string, format: date-time }
+        - type: object
+          required: [type, id, title]
+          properties:
+            type:   { type: string, enum: [capsule] }
+            id:     { type: integer }
+            title:  { type: string }
+            detail: { type: string }
+        discriminator:
+          propertyName: type

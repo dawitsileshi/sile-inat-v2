@@ -1,0 +1,44 @@
+# ─── Python ───────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+.Python
+
+# ─── Virtual Environments ─────────────────────────────────────────────────────
+venv/
+.venv/
+env/
+ENV/
+
+# ─── Flask / App ──────────────────────────────────────────────────────────────
+instance/
+*.db
+*.sqlite3
+.env               # NEVER commit real secrets
+
+# ─── ML Artifacts ─────────────────────────────────────────────────────────────
+src/ml/artifacts/*.joblib
+src/ml/artifacts/*.json
+# Keep the data directory but not generated CSVs (re-generate with synthesize_data.py)
+src/ml/data/*.csv
+
+# ─── Testing ──────────────────────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ─── macOS ────────────────────────────────────────────────────────────────────
+.DS_Store
+
+# ─── IDE ──────────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ─── Dist / Build ─────────────────────────────────────────────────────────────
+dist/
+build/
+*.egg-info/
