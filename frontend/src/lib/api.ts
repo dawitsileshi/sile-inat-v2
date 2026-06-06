@@ -1,6 +1,6 @@
 import { ANONYMOUS_HEADER, getAnonymousClientId } from './clientId';
 
-const API_URL = '/api';
+const API_URL = import.meta.env.VITE_API_URL ?? '/api';
 
 export async function parseResponse<T>(response: Response): Promise<T> {
   const data = await response.json();
