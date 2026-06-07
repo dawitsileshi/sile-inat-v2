@@ -8,9 +8,10 @@ import { getAnonymousClientId } from '@/lib/clientId'
 import type { AppDispatch, RootState } from '@/store/store'
 
 const suggestions = [
-  'How do I manage postpartum anxiety?',
-  'Tips for establishing a sleep routine',
-  'Is this breastfeeding pain normal?',
+  'Is it normal to regret having a baby?',
+  'How do I know if it\'s postpartum depression?',
+  'Why am I crying for no reason?',
+  'I don\'t feel like a mother yet. What\'s wrong with me?',
 ]
 
 export function AIAssistantPage() {
@@ -49,9 +50,9 @@ export function AIAssistantPage() {
             <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-light">
               <Baby className="h-6 w-6 text-brand" />
             </div>
-            <h1 className="text-2xl font-bold text-text-primary">Welcome to your AI support companion</h1>
+            <h1 className="text-2xl font-bold text-text-primary">Ask me what you'd ask a friend who's been through this.</h1>
             <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-text-secondary">
-              Ask anything about postpartum recovery, breastfeeding, newborn care, mental health, or sleep. I'm here to provide evidence-based guidance.
+              Not what you'd ask a doctor. I'll listen, share what's been studied, and never make you feel ashamed for asking.
             </p>
 
             <div className="mt-8 flex flex-wrap justify-center gap-2">
@@ -125,7 +126,7 @@ export function AIAssistantPage() {
             </button>
           </form>
           <p className="mt-2 text-center text-xs text-text-muted">
-            AI guidance is for informational purposes only. Always consult your healthcare provider for medical advice.
+            I can listen. I can share what's been studied. I can't replace your doctor — and won't pretend to.
           </p>
         </div>
       </div>

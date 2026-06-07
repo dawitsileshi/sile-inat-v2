@@ -21,7 +21,7 @@ export function HomeCTA() {
             to="/community"
             className="rounded-full bg-brand px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-brand-dark"
           >
-            Join MomsHub
+            Join us
           </Link>
           <Link
             to="/events"

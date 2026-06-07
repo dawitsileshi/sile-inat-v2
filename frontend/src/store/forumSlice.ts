@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { API_URL, anonymousHeaders, parseResponse } from '@/lib/api';
 
 export const FORUM_CATEGORIES = [
-  'All Topics',
+  'All',
   'Childbirth',
   'Recovery',
   'Breastfeeding',
@@ -120,7 +120,7 @@ const forumSlice = createSlice({
   name: 'forum',
   initialState: {
     posts: [],
-    activeCategory: 'All Topics' as ForumCategory,
+    activeCategory: 'All' as ForumCategory,
     selectedPost: null,
     status: 'idle',
     submitStatus: 'idle',
@@ -146,7 +146,6 @@ const forumSlice = createSlice({
       .addCase(fetchPosts.fulfilled, (state, action) => {
         state.status = 'succeeded';
         state.posts = action.payload.posts;
-        state.activeCategory = action.payload.category;
       })
       .addCase(fetchPosts.rejected, (state, action) => {
         state.status = 'failed';

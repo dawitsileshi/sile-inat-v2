@@ -14,7 +14,7 @@ export function Hero() {
           className="mb-8 inline-flex items-center gap-2 rounded-full bg-brand-light px-4 py-2"
         >
           <Heart className="h-3.5 w-3.5 fill-brand text-brand" />
-          <span className="text-sm font-medium text-brand">A safe space for postpartum mothers</span>
+          <span className="text-sm font-medium text-brand">For new mothers · Anonymous by default</span>
         </motion.div>
 
         <motion.h1
@@ -23,7 +23,7 @@ export function Hero() {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="text-5xl font-extrabold leading-[1.05] tracking-tight text-text-primary sm:text-6xl lg:text-7xl"
         >
-          You are not alone in this journey
+          For the things you'd only Google at 3am.
         </motion.h1>
 
         <motion.p
@@ -32,7 +32,7 @@ export function Hero() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-text-secondary sm:text-lg"
         >
-          MomsHub is a supportive community designed for mothers navigating the postpartum period. Ask questions anonymously, get AI-powered guidance, track your wellness, and connect with experts.
+          A quiet, anonymous place for new mothers. Ask what you can't ask anyone else. Other mothers — and gentle, evidence-based AI — answer.
         </motion.p>
 
         <motion.div

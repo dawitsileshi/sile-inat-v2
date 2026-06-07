@@ -19,7 +19,7 @@ export const navLinks: NavLink[] = [
     label: 'Home',
     icon: Home,
     description: 'Your safe space',
-    preview: 'Landing page introducing MomsHub.',
+    preview: 'Landing page introducing ስለ እናት.',
     color: 'text-brand',
     iconBg: 'bg-brand-light',
   },

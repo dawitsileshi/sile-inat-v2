@@ -8,14 +8,14 @@ import { useNavigate } from 'react-router-dom'
 import type { AppDispatch, RootState } from '@/store/store'
 
 const moods = [
-  { value: 'rough', label: 'Rough', Icon: Frown, color: 'text-[#c4456b]' },
-  { value: 'low', label: 'Low', Icon: Frown, color: 'text-[#c98a1f]' },
-  { value: 'okay', label: 'Okay', Icon: Meh, color: 'text-[#d6a02f]' },
-  { value: 'good', label: 'Good', Icon: Smile, color: 'text-[#5a9d6a]' },
-  { value: 'great', label: 'Great', Icon: Laugh, color: 'text-brand' },
+  { value: 'rough', label: 'Surviving', Icon: Frown, color: 'text-[#c4456b]' },
+  { value: 'low', label: 'Holding on', Icon: Frown, color: 'text-[#c98a1f]' },
+  { value: 'okay', label: 'Okay-ish', Icon: Meh, color: 'text-[#d6a02f]' },
+  { value: 'good', label: 'Some good moments', Icon: Smile, color: 'text-[#5a9d6a]' },
+  { value: 'great', label: 'Felt like myself', Icon: Laugh, color: 'text-brand' },
 ]
 
-const energyLabels = ['Exhausted', 'Tired', 'Okay', 'Energized', 'Vibrant']
+const energyLabels = ['Empty', 'Running on coffee', 'Holding it together', 'A bit of me back', 'Like myself today']
 
 const MOOD_TO_SCORE: Record<string, number> = {
   rough: 5,
@@ -59,9 +59,9 @@ export function CheckInPage() {
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-light">
             <SmilePlus className="h-6 w-6 text-brand" />
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-text-primary">Daily Wellness Check-In</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight text-text-primary">How are you, really?</h1>
           <p className="mt-2 text-sm text-text-secondary">
-            Take a moment to reflect on how you're feeling today
+            Just for you. Not for anyone else to see.
           </p>
         </motion.div>
 
@@ -192,14 +192,14 @@ export function CheckInPage() {
 
           <div className="mb-8">
             <label htmlFor="note" className="mb-2 block text-base font-semibold text-text-primary">
-              Anything on your mind? <span className="font-normal text-text-muted">(optional)</span>
+              Anything you wish someone would ask you? <span className="font-normal text-text-muted">(optional)</span>
             </label>
             <textarea
               id="note"
               rows={3}
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              placeholder="Write a few words about your day..."
+              placeholder="Whatever it is, it's safe here."
               className="w-full resize-none rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:border-brand focus:outline-none"
             />
           </div>
@@ -214,7 +214,7 @@ export function CheckInPage() {
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark disabled:opacity-60"
           >
             <HeartIcon className="h-4 w-4" />
-            {status === 'loading' ? 'Saving…' : submitted ? 'Check-in saved!' : 'Submit Check-In'}
+            {status === 'loading' ? 'Saving…' : submitted ? 'Got it. Rest now.' : 'Save tonight'}
           </button>
         </motion.form>
       </div>

@@ -19,7 +19,7 @@ export function Navbar() {
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand">
               <Heart className="h-4 w-4 fill-white text-white" />
             </div>
-            <span className="text-lg font-bold text-text-primary">MomsHub</span>
+            <span className="text-lg font-bold text-text-primary">ስለ እናት</span>
           </Link>
 
           <div className="hidden items-center gap-1 lg:flex">

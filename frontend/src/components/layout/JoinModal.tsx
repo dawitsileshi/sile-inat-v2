@@ -18,7 +18,7 @@ export function JoinModal({ open, onClose }: JoinModalProps) {
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-light">
             <Heart className="h-7 w-7 text-brand" />
           </div>
-          <h2 className="text-3xl font-bold text-text-primary">MomsHub</h2>
+          <h2 className="text-3xl font-bold text-text-primary">ስለ እናት</h2>
           <p className="mt-2 text-sm text-text-secondary">
             A safe space for mothers during the postpartum journey
           </p>

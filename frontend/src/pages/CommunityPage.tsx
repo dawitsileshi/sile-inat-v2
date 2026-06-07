@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { MessageCircle, Plus, X, ArrowLeft, Loader2, Send } from 'lucide-react'
+import { Plus, X, ArrowLeft, Loader2, Send } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useDispatch, useSelector } from 'react-redux'
 import {
@@ -16,7 +16,7 @@ import {
 import { getAnonymousClientId } from '@/lib/clientId'
 import type { AppDispatch, RootState } from '@/store/store'
 
-const POST_CATEGORIES = FORUM_CATEGORIES.filter((c) => c !== 'All Topics')
+const POST_CATEGORIES = FORUM_CATEGORIES.filter((c) => c !== 'All')
 
 function formatDate(iso: string) {
   try {
@@ -200,7 +200,7 @@ export function CommunityPage() {
                   : 'bg-cream-dark text-text-secondary hover:bg-cream-dark/80'
               )}
             >
-              {cat}
+              {cat === 'All' ? 'All Topics' : cat}
             </button>
           ))}
         </div>
@@ -211,29 +211,7 @@ export function CommunityPage() {
             <p>Loading posts…</p>
           </div>
         ) : posts.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="rounded-2xl border-2 border-dashed border-gray-200 bg-white px-6 py-20 text-center"
-          >
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full text-text-secondary">
-              <MessageCircle className="h-8 w-8" />
-            </div>
-            <h2 className="text-lg font-bold text-text-primary">No posts yet</h2>
-            <p className="mt-1 text-sm text-text-secondary">
-              {activeCategory === 'All Topics'
-                ? 'Be the first to start a conversation'
-                : `No posts in ${activeCategory} yet`}
-            </p>
-            <button
-              type="button"
-              onClick={() => setShowNewPost(true)}
-              className="mt-5 inline-flex items-center gap-2 rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
-            >
-              Create a post
-            </button>
-          </motion.div>
+          <EmptyForum activeCategory={activeCategory} onCreate={() => setShowNewPost(true)} />
         ) : (
           <div className="grid gap-4">
             {posts.map((post) => (
@@ -347,5 +325,63 @@ export function CommunityPage() {
         )}
       </AnimatePresence>
     </div>
+  )
+}
+
+const WHISPERS = [
+  { text: 'I love my baby. I miss who I was. Both are true.', when: '3 days postpartum' },
+  { text: "Cried in the shower again. He didn't notice. Maybe that's okay.", when: '2 weeks postpartum' },
+  { text: "It's 3am and I'm Googling whether this is normal. I hope it is.", when: '6 days postpartum' },
+  { text: "I haven't told anyone how scared I am. I'm telling you.", when: '11 days postpartum' },
+]
+
+function EmptyForum({ activeCategory, onCreate }: { activeCategory: string; onCreate: () => void }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.1 }}
+      className="rounded-2xl bg-white px-6 py-12 card-shadow-sm"
+    >
+      <div className="mx-auto max-w-xl text-center">
+        <h2 className="text-xl font-bold text-text-primary">
+          {activeCategory === 'All' ? "You're the first one here right now." : `Nothing in ${activeCategory} yet.`}
+        </h2>
+        <p className="mt-2 text-sm text-text-secondary">
+          But you're not the first to feel what you're feeling. Recent whispers from other mothers:
+        </p>
+      </div>
+
+      <div className="mx-auto mt-8 max-w-xl space-y-3">
+        {WHISPERS.map((w, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 + i * 0.08 }}
+            className="flex gap-3 rounded-xl border border-gray-100 bg-cream/50 px-4 py-3"
+          >
+            <span className="text-2xl leading-none text-brand/40">"</span>
+            <div className="flex-1">
+              <p className="text-sm leading-relaxed text-text-primary">{w.text}</p>
+              <p className="mt-1 text-xs italic text-text-muted">— Anonymous, {w.when}</p>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      <div className="mx-auto mt-8 max-w-xl text-center">
+        <p className="text-sm text-text-secondary">
+          Your turn, when you're ready.
+        </p>
+        <button
+          type="button"
+          onClick={onCreate}
+          className="mt-4 inline-flex items-center gap-2 rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
+        >
+          Write something
+        </button>
+      </div>
+    </motion.div>
   )
 }
