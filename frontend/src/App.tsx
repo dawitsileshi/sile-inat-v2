@@ -8,6 +8,8 @@ import { AIAssistantPage } from '@/pages/AIAssistantPage'
 import { CirclesPage } from '@/pages/CirclesPage'
 import { ComfortPage } from '@/pages/ComfortPage'
 import { CounselorsPage } from '@/pages/CounselorsPage'
+import { FindHelpPage } from '@/pages/FindHelpPage'
+import { JournalPage } from '@/pages/JournalPage'
 import { DashboardPage } from '@/pages/DashboardPage'
 
 export default function App() {
@@ -20,9 +22,11 @@ export default function App() {
           <Route path="/circles" element={<CirclesPage />} />
           <Route path="/comfort" element={<ComfortPage />} />
           <Route path="/counselors" element={<CounselorsPage />} />
+          <Route path="/find-help" element={<FindHelpPage />} />
           <Route path="/community" element={<CommunityPage />} />
           <Route path="/events" element={<EventsPage />} />
           <Route path="/check-in" element={<CheckInPage />} />
+          <Route path="/journal" element={<JournalPage />} />
           <Route path="/ai-assistant" element={<AIAssistantPage />} />
         </Route>
       </Routes>

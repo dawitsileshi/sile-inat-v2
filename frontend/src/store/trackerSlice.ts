@@ -47,6 +47,7 @@ export interface DailyLog {
   hrv_delta: number | null;
   feels_supported: 'yes' | 'somewhat' | 'no' | null;
   notes: string | null;
+  response_message: string | null;
   predicted_stress_index: number | null;
   created_at: string;
 }

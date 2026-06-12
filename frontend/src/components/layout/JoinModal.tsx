@@ -74,8 +74,10 @@ export function JoinModal({ open, onClose }: JoinModalProps) {
       if (!token) throw new Error('Server did not return a session token.')
       localStorage.setItem(TOKEN_KEY, token)
       if (user) localStorage.setItem(USER_KEY, JSON.stringify(user))
+      // Tell any in-page listeners (Navbar, etc) so they update without a reload.
+      window.dispatchEvent(new Event('auth:changed'))
       handleClose()
-      // Soft reload so any page reading auth state picks it up.
+      // Soft reload so any page reading auth state at mount picks it up too.
       window.location.reload()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong.')

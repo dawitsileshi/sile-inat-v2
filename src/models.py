@@ -248,6 +248,13 @@ class DailyLog(db.Model):
         comment="Free-text 'anything on your mind?' field from the check-in",
     )
 
+    response_message: Mapped[Optional[str]] = mapped_column(
+        Text,
+        nullable=True,
+        comment="Prose response shown after submit — mood layer + optional stage layer. "
+                "Stored at submit time so the journal can replay the exact text she saw.",
+    )
+
     # ── Model Output ──────────────────────────────────────────────────────────
     predicted_stress_index: Mapped[Optional[float]] = mapped_column(
         Float,
@@ -283,6 +290,7 @@ class DailyLog(db.Model):
             "hrv_delta": self.hrv_delta,
             "feels_supported": self.feels_supported,
             "notes": self.notes,
+            "response_message": self.response_message,
             "predicted_stress_index": self.predicted_stress_index,
             "created_at": self.created_at.isoformat(),
         }

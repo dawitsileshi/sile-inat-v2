@@ -1,6 +1,6 @@
 import {
-  Home, MessageSquare, Users,
-  Smile, Sparkles, Leaf, type LucideIcon,
+  Home, MessageSquare, Calendar, Users,
+  Smile, Sparkles, Leaf, BookOpen, type LucideIcon,
 } from 'lucide-react'
 
 export interface NavLink {
@@ -51,11 +51,29 @@ export const navLinks: NavLink[] = [
     iconBg: 'bg-brand-light',
   },
   {
+    to: '/events',
+    label: 'Events',
+    icon: Calendar,
+    description: 'Talks, circles, and RSVPs',
+    preview: 'RSVP to virtual and in-person sessions led by Ethiopian clinicians and facilitators.',
+    color: 'text-brand',
+    iconBg: 'bg-brand-light',
+  },
+  {
     to: '/check-in',
     label: 'Check-In',
     icon: Smile,
     description: 'Daily wellness tracker',
     preview: 'Log your mood, energy, and sleep daily.',
+    color: 'text-brand',
+    iconBg: 'bg-brand-light',
+  },
+  {
+    to: '/journal',
+    label: 'Journal',
+    icon: BookOpen,
+    description: 'Look back at your check-ins',
+    preview: 'A private journal of every check-in, with what you said and what was said back to you.',
     color: 'text-brand',
     iconBg: 'bg-brand-light',
   },

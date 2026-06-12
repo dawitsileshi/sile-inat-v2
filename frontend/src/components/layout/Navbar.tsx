@@ -1,25 +1,86 @@
-import { useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, Heart, LogIn } from 'lucide-react'
+import { Menu, X, Heart, LogIn, LogOut } from 'lucide-react'
 import { navLinks, isNavActive } from '@/data/navigation'
 import { cn } from '@/lib/utils'
 import { JoinModal } from '@/components/layout/JoinModal'
 
+interface StoredAuthUser {
+  user_id?: number
+  email?: string
+  baby_status?: string | null
+  baby_birth_date?: string | null
+}
+
+function readAuth(): { token: string; user: StoredAuthUser } | null {
+  if (typeof localStorage === 'undefined') return null
+  const token = localStorage.getItem('auth_token')
+  if (!token) return null
+  let user: StoredAuthUser = {}
+  try {
+    const raw = localStorage.getItem('auth_user')
+    if (raw) user = JSON.parse(raw)
+  } catch {
+    /* ignore — token alone is enough for the chip */
+  }
+  return { token, user }
+}
+
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [joinOpen, setJoinOpen] = useState(false)
+  const [auth, setAuth] = useState<ReturnType<typeof readAuth>>(() => readAuth())
+  const [accountOpen, setAccountOpen] = useState(false)
   const location = useLocation()
+  const navigate = useNavigate()
+  const accountWrapperRef = useRef<HTMLDivElement>(null)
+
+  // Cross-tab + cross-window sign-in/out sync.
+  useEffect(() => {
+    function refresh() { setAuth(readAuth()) }
+    window.addEventListener('storage', refresh)
+    window.addEventListener('auth:changed', refresh as EventListener)
+    return () => {
+      window.removeEventListener('storage', refresh)
+      window.removeEventListener('auth:changed', refresh as EventListener)
+    }
+  }, [])
+
+  // Click outside to close the account menu.
+  useEffect(() => {
+    if (!accountOpen) return
+    function onClick(e: MouseEvent) {
+      if (!accountWrapperRef.current?.contains(e.target as Node)) {
+        setAccountOpen(false)
+      }
+    }
+    window.addEventListener('mousedown', onClick)
+    return () => window.removeEventListener('mousedown', onClick)
+  }, [accountOpen])
+
+  function handleSignOut() {
+    localStorage.removeItem('auth_token')
+    localStorage.removeItem('auth_user')
+    window.dispatchEvent(new Event('auth:changed'))
+    setAccountOpen(false)
+    setAuth(null)
+    navigate('/')
+  }
+
+  const initial = auth?.user.email?.trim().charAt(0).toUpperCase() || '•'
 
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-black/[0.04] bg-cream/90 backdrop-blur-md">
         <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <Link to="/" className="flex items-center gap-2.5">
+          <Link to="/" className="flex flex-none items-center gap-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand">
               <Heart className="h-4 w-4 fill-white text-white" />
             </div>
-            <span className="text-lg font-bold text-text-primary">ስለ እናት</span>
+            <span className="whitespace-nowrap text-lg font-bold text-text-primary">
+              ስለ እናት
+            </span>
           </Link>
 
           <div className="hidden items-center gap-1 lg:flex">
@@ -31,7 +92,7 @@ export function Navbar() {
                   key={link.to}
                   to={link.to}
                   className={cn(
-                    'relative flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors',
+                    'relative flex items-center gap-2 whitespace-nowrap rounded-full px-3 py-2 text-sm font-medium transition-colors',
                     active ? 'text-brand' : 'text-text-secondary hover:text-text-primary'
                   )}
                 >
@@ -50,13 +111,67 @@ export function Navbar() {
           </div>
 
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => setJoinOpen(true)}
-              className="hidden items-center gap-2 rounded-full bg-brand px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-brand-dark sm:flex"
-            >
-              <LogIn className="h-4 w-4" />
-              Join
-            </button>
+            {auth ? (
+              <div ref={accountWrapperRef} className="relative hidden sm:block">
+                <button
+                  type="button"
+                  onClick={() => setAccountOpen((v) => !v)}
+                  className="inline-flex items-center gap-2 rounded-full bg-white px-2 py-1.5 text-sm font-medium text-text-primary ring-1 ring-black/[0.05] transition-shadow hover:shadow-sm"
+                  aria-haspopup="menu"
+                  aria-expanded={accountOpen}
+                >
+                  <span
+                    className="flex h-7 w-7 items-center justify-center rounded-full bg-brand text-xs font-semibold text-white"
+                    aria-hidden
+                  >
+                    {initial}
+                  </span>
+                  <span className="hidden max-w-[140px] truncate text-text-secondary xl:inline">
+                    {auth.user.email ?? 'You'}
+                  </span>
+                </button>
+
+                <AnimatePresence>
+                  {accountOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -4 }}
+                      transition={{ duration: 0.12 }}
+                      role="menu"
+                      className="absolute right-0 mt-2 w-56 overflow-hidden rounded-2xl bg-white py-2 shadow-lg ring-1 ring-black/[0.06]"
+                    >
+                      <div className="px-4 py-3">
+                        <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">
+                          Signed in as
+                        </p>
+                        <p className="mt-0.5 truncate text-sm text-text-primary">
+                          {auth.user.email ?? 'You'}
+                        </p>
+                      </div>
+                      <div className="h-px bg-black/[0.05]" />
+                      <button
+                        type="button"
+                        onClick={handleSignOut}
+                        className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-text-primary hover:bg-cream-dark"
+                        role="menuitem"
+                      >
+                        <LogOut className="h-4 w-4 text-text-secondary" />
+                        Sign out
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ) : (
+              <button
+                onClick={() => setJoinOpen(true)}
+                className="hidden items-center gap-2 rounded-full bg-brand px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-brand-dark sm:flex"
+              >
+                <LogIn className="h-4 w-4" />
+                Join
+              </button>
+            )}
 
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
@@ -96,16 +211,45 @@ export function Navbar() {
                     </Link>
                   )
                 })}
-                <button
-                  onClick={() => {
-                    setMobileOpen(false)
-                    setJoinOpen(true)
-                  }}
-                  className="mt-2 flex w-full items-center justify-center gap-2 rounded-full bg-brand px-5 py-3 text-sm font-medium text-white"
-                >
-                  <LogIn className="h-4 w-4" />
-                  Join
-                </button>
+
+                {auth ? (
+                  <>
+                    <div className="mt-2 flex items-center gap-3 rounded-xl bg-white px-4 py-3">
+                      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand text-sm font-semibold text-white">
+                        {initial}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">
+                          Signed in
+                        </p>
+                        <p className="truncate text-sm text-text-primary">
+                          {auth.user.email ?? 'You'}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setMobileOpen(false)
+                        handleSignOut()
+                      }}
+                      className="mt-2 flex w-full items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-5 py-3 text-sm font-medium text-text-primary"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Sign out
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setMobileOpen(false)
+                      setJoinOpen(true)
+                    }}
+                    className="mt-2 flex w-full items-center justify-center gap-2 rounded-full bg-brand px-5 py-3 text-sm font-medium text-white"
+                  >
+                    <LogIn className="h-4 w-4" />
+                    Join
+                  </button>
+                )}
               </div>
             </motion.div>
           )}

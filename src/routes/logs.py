@@ -9,6 +9,7 @@ from sqlalchemy.exc import IntegrityError
 from src.extensions import db
 from src.models import DailyLog
 from src.services.auth import login_required
+from src.services.checkin_response import build_response_message
 from src.services.ml_service import get_ml_service
 
 logs_bp = Blueprint("logs", __name__, url_prefix="/api/logs")
@@ -156,6 +157,11 @@ def create_log():
         except Exception as exc:
             current_app.logger.warning("ML inference skipped: %s", exc)
 
+    # Build the warm response message at submit time and freeze it onto the
+    # row. Storing rather than regenerating means the journal replays the
+    # exact wording she saw — even if we soften the templates later.
+    response_message = build_response_message(g.current_user, data["mood_score"])
+
     # ── Persist Log ───────────────────────────────────────────────────────────
     log_entry = DailyLog(
         user_id                 = g.current_user.id,
@@ -168,6 +174,7 @@ def create_log():
         hrv_delta               = data["hrv_delta"],
         feels_supported         = data["feels_supported"],
         notes                   = data["notes"],
+        response_message        = response_message,
         predicted_stress_index  = prediction,
     )
 

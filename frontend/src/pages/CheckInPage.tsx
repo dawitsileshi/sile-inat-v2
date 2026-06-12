@@ -6,6 +6,7 @@ import {
   SmilePlus, ArrowRight,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { VoiceMemo } from '@/components/VoiceMemo'
 import { useDispatch, useSelector } from 'react-redux'
 import {
   submitDailyLog, ensureAuth, fetchLogs, getStoredUser,
@@ -149,6 +150,7 @@ export function CheckInPage() {
     supported: SupportValue | ''
     notes: string
     weeksPostpartum: number | null
+    proseMessage: string | null
   }>(null)
 
   useEffect(() => {
@@ -185,6 +187,7 @@ export function CheckInPage() {
           user?.baby_status === 'born'
             ? weeksPostpartum(user.baby_birth_date)
             : null,
+        proseMessage: result.payload.log.response_message ?? null,
       })
       // Refresh history so the new entry shows up below.
       dispatch(fetchLogs())
@@ -234,6 +237,42 @@ export function CheckInPage() {
             onSubmit={handleSubmit}
             className="rounded-2xl bg-white p-8 card-shadow"
           >
+            <section className="mb-10">
+              <div className="mb-5 text-center">
+                <h2 className="text-2xl font-bold text-text-primary">
+                  Anything on your mind?
+                </h2>
+                <p className="mt-1.5 text-sm leading-relaxed text-text-secondary">
+                  Start here, however you can. Speak it, type it, or skip it —
+                  the rest is optional.
+                </p>
+              </div>
+
+              <VoiceMemo onTranscript={setNotes} baseText={notes} />
+
+              <div className="mt-5">
+                <p className="mb-1.5 text-center text-xs uppercase tracking-wider text-text-muted">
+                  Or write it
+                </p>
+                <textarea
+                  id="notes"
+                  rows={3}
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="You don't have to write anything."
+                  className="w-full resize-none rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:border-brand focus:outline-none"
+                />
+              </div>
+            </section>
+
+            <div className="mb-8 flex items-center gap-3">
+              <div className="h-px flex-1 bg-gray-200" />
+              <span className="text-xs font-medium uppercase tracking-wide text-text-muted">
+                A few quick things
+              </span>
+              <div className="h-px flex-1 bg-gray-200" />
+            </div>
+
             <div className="mb-8">
               <div className="mb-4 flex items-center justify-between">
                 <label className="text-base font-semibold text-text-primary">
@@ -370,21 +409,6 @@ export function CheckInPage() {
               </div>
             </div>
 
-            <div className="mb-8">
-              <label htmlFor="notes" className="mb-2 block text-base font-semibold text-text-primary">
-                Anything on your mind?{' '}
-                <span className="font-normal text-text-muted">(optional)</span>
-              </label>
-              <textarea
-                id="notes"
-                rows={3}
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="You don't have to write anything."
-                className="w-full resize-none rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:border-brand focus:outline-none"
-              />
-            </div>
-
             {error && status === 'failed' && (
               <p className="mb-4 text-center text-sm text-text-secondary">{error}</p>
             )}
@@ -416,14 +440,23 @@ function ResponseCard({
     supported: SupportValue | ''
     notes: string
     weeksPostpartum: number | null
+    proseMessage: string | null
   }
   storedUserKnown: boolean
   onReset: () => void
 }) {
+  // Prefer the prose generated and stored on the backend so the journal can
+  // replay the same wording. Fall back to local templates if the server
+  // didn't supply one (offline / older row).
   const displayScore = MOOD_TO_DISPLAY[response.mood]
-  const moodMessage = MOOD_MESSAGES[displayScore]
-  const stage =
+  const fallbackMood = MOOD_MESSAGES[displayScore]
+  const fallbackStage =
     response.weeksPostpartum !== null ? stageMessage(response.weeksPostpartum) : null
+  const proseLines = response.proseMessage
+    ? response.proseMessage.split(/\n{2,}/)
+    : fallbackStage
+      ? [fallbackMood, fallbackStage]
+      : [fallbackMood]
   const crisis = containsCrisisLanguage(response.notes)
 
   return (
@@ -432,11 +465,13 @@ function ResponseCard({
       animate={{ opacity: 1, y: 0 }}
       className="rounded-2xl bg-white p-8 card-shadow"
     >
-      <p className="text-lg leading-relaxed text-text-primary">{moodMessage}</p>
+      <p className="text-lg leading-relaxed text-text-primary">{proseLines[0]}</p>
 
-      {stage && (
-        <p className="mt-4 text-base leading-relaxed text-text-secondary">{stage}</p>
-      )}
+      {proseLines.slice(1).map((line, i) => (
+        <p key={i} className="mt-4 text-base leading-relaxed text-text-secondary">
+          {line}
+        </p>
+      ))}
 
       {response.supported === 'no' && (
         <div className="mt-6 rounded-xl bg-cream/60 p-5">

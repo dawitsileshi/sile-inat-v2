@@ -145,8 +145,9 @@ def create_circle_post(circle_id: int):
     """
     POST /api/circles/<id>/posts
     Body: { content }
-    Content max 280 characters. Posting does not require joining first —
-    we don't gate visibility on membership at this stage.
+    Content max 280 characters. The caller MUST already be a member of
+    this circle — posting without joining is rejected with 403 so the
+    circle stays a small, intentional space.
     """
     client_id, err = _require_client_id()
     if err:
@@ -155,6 +156,15 @@ def create_circle_post(circle_id: int):
     circle = db.session.get(Circle, circle_id)
     if not circle:
         return jsonify({"error": "Circle not found."}), 404
+
+    is_member = db.session.query(CircleMembership.id).filter_by(
+        circle_id=circle_id, client_id=client_id
+    ).first() is not None
+    if not is_member:
+        return jsonify({
+            "error": "Join this circle before posting.",
+            "circle_id": circle_id,
+        }), 403
 
     payload = request.get_json(silent=True) or {}
     content = (payload.get("content") or "").strip()

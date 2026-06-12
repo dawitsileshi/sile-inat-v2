@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Check, Loader2, Users, Video, MapPin, X, ChevronLeft, Send } from 'lucide-react'
+import { Check, Loader2, Users, Video, MapPin, X, ChevronLeft, Send, Radio } from 'lucide-react'
 import { API_URL, anonymousHeaders, parseResponse } from '@/lib/api'
 import { cn } from '@/lib/utils'
 
@@ -361,15 +361,45 @@ function CircleDetailPanel({
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
 
+  // Initial load + 5-second polling so two users in the same circle see each
+  // other's posts without refreshing. Merge incoming posts into existing
+  // state so the optimistic post the user just made doesn't blink.
   useEffect(() => {
     let cancelled = false
-    setError(null)
-    fetch(`${API_URL}/circles/${circleId}`, { headers: anonymousHeaders() })
-      .then((r) => parseResponse<CircleDetail>(r))
-      .then((data) => !cancelled && setDetail(data))
-      .catch((e) => !cancelled && setError(e instanceof Error ? e.message : 'Failed to load circle.'))
+    let timer: ReturnType<typeof setTimeout> | null = null
+
+    async function pull(isInitial: boolean) {
+      try {
+        if (isInitial) setError(null)
+        const resp = await fetch(`${API_URL}/circles/${circleId}`, {
+          headers: anonymousHeaders(),
+        })
+        const data = await parseResponse<CircleDetail>(resp)
+        if (cancelled) return
+        setDetail((prev) => {
+          if (!prev) return data
+          // Merge: keep order from server (newest first), preserve `is_mine`
+          // on anything we already had in case the server view differs.
+          const localById = new Map(prev.posts.map((p) => [p.id, p]))
+          const merged = data.posts.map(
+            (p) => ({ ...p, is_mine: localById.get(p.id)?.is_mine ?? p.is_mine })
+          )
+          return { ...data, posts: merged }
+        })
+      } catch (e) {
+        if (cancelled || !isInitial) return
+        setError(e instanceof Error ? e.message : 'Failed to load circle.')
+      } finally {
+        if (!cancelled) {
+          timer = setTimeout(() => pull(false), 5000)
+        }
+      }
+    }
+
+    pull(true)
     return () => {
       cancelled = true
+      if (timer) clearTimeout(timer)
     }
   }, [circleId])
 
@@ -433,14 +463,17 @@ function CircleDetailPanel({
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="ml-auto rounded-full p-1.5 text-text-secondary hover:bg-cream-dark"
-            aria-label="Close"
-          >
-            <X className="h-5 w-5" />
-          </button>
+          <div className="ml-auto flex items-center gap-3">
+            <LiveDot />
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-full p-1.5 text-text-secondary hover:bg-cream-dark"
+              aria-label="Close"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
         </div>
 
         {/* Body */}
@@ -527,39 +560,68 @@ function CircleDetailPanel({
           )}
         </div>
 
-        {/* Composer */}
-        <form
-          onSubmit={handlePost}
-          className="border-t border-black/[0.04] bg-white px-5 py-4"
-        >
-          <textarea
-            value={draft}
-            onChange={(e) => setDraft(e.target.value.slice(0, 280))}
-            placeholder="Write something. Anonymously."
-            rows={3}
-            className="w-full resize-none rounded-lg border border-black/[0.06] bg-cream px-3 py-2 text-sm leading-relaxed text-text-primary placeholder:text-text-muted focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/15"
-          />
-          <div className="mt-2 flex items-center justify-between">
-            <span
-              className={cn(
-                'text-xs',
-                remaining < 20 ? 'text-red-500' : 'text-text-muted'
-              )}
-            >
-              {remaining}
-            </span>
+        {/* Composer — only for members. Non-members see a quiet join prompt. */}
+        {isJoined ? (
+          <form
+            onSubmit={handlePost}
+            className="border-t border-black/[0.04] bg-white px-5 py-4"
+          >
+            <textarea
+              value={draft}
+              onChange={(e) => setDraft(e.target.value.slice(0, 280))}
+              placeholder="Write something. Anonymously."
+              rows={3}
+              className="w-full resize-none rounded-lg border border-black/[0.06] bg-cream px-3 py-2 text-sm leading-relaxed text-text-primary placeholder:text-text-muted focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/15"
+            />
+            <div className="mt-2 flex items-center justify-between">
+              <span
+                className={cn(
+                  'text-xs',
+                  remaining < 20 ? 'text-text-secondary' : 'text-text-muted'
+                )}
+              >
+                {remaining}
+              </span>
+              <button
+                type="submit"
+                disabled={posting || !draft.trim()}
+                className="inline-flex items-center gap-1.5 rounded-full bg-brand px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {posting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+                Post anonymously
+              </button>
+            </div>
+          </form>
+        ) : (
+          <div className="border-t border-black/[0.04] bg-white px-5 py-5 text-center">
+            <p className="text-sm text-text-secondary">
+              Join this circle to write here. It’s anonymous.
+            </p>
             <button
-              type="submit"
-              disabled={posting || !draft.trim()}
-              className="inline-flex items-center gap-1.5 rounded-full bg-brand px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-50"
+              type="button"
+              onClick={onJoin}
+              className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-brand px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-dark"
             >
-              {posting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
-              Post anonymously
+              Join this circle
             </button>
           </div>
-        </form>
+        )}
       </motion.aside>
     </div>
+  )
+}
+
+// ─── Live indicator ───────────────────────────────────────────────────────────
+function LiveDot() {
+  return (
+    <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-text-secondary">
+      <span className="relative flex h-2 w-2">
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand opacity-70" />
+        <span className="relative inline-flex h-2 w-2 rounded-full bg-brand" />
+      </span>
+      Live
+      <Radio className="h-3 w-3 text-text-muted" aria-hidden />
+    </span>
   )
 }
 
