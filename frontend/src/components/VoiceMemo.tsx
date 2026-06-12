@@ -219,14 +219,74 @@ function IdleState({
         </LangPill>
       </div>
 
-      {error && (
-        <p className="mt-4 inline-flex items-center gap-1.5 text-xs text-text-secondary">
-          <AlertTriangle className="h-3 w-3" />
-          {copy.errorRetry}
-        </p>
+      {error && error !== "aborted" && (
+        <ErrorHint
+          code={error}
+          lang={lang}
+          onTryEnglish={() => onLang("en-US")}
+        />
       )}
     </div>
   );
+}
+
+function ErrorHint({
+  code, lang, onTryEnglish,
+}: {
+  code: string
+  lang: Lang
+  onTryEnglish: () => void
+}) {
+  const en: Record<string, string> = {
+    "not-allowed":
+      "Microphone access is blocked. Click the 🔒 lock icon next to the URL and allow microphone.",
+    "permission-denied":
+      "Microphone access is blocked. Click the 🔒 lock icon next to the URL and allow microphone.",
+    "language-not-supported":
+      "This browser doesn’t support Amharic voice. Try English, or open the site in Chrome.",
+    "no-speech": "I didn’t hear anything. Tap the mic and speak after the prompt.",
+    "audio-capture": "No microphone found on this device.",
+    "network": "Voice transcription needs an internet connection.",
+    "service-not-allowed":
+      "The browser blocked the voice service. Try reloading, or use Chrome.",
+  }
+  const am: Record<string, string> = {
+    "not-allowed":
+      "ማይክሮፎኑን መድረስ አልተፈቀደም። ከURL ቀጥሎ ያለውን 🔒 ምልክት ተጫነና ፍቀጂ።",
+    "permission-denied":
+      "ማይክሮፎኑን መድረስ አልተፈቀደም። ከURL ቀጥሎ ያለውን 🔒 ምልክት ተጫነና ፍቀጂ።",
+    "language-not-supported":
+      "ይህ ብራውዘር አማርኛን አይደግፍም። English ሞክሪ ወይም Chrome ተጠቀሚ።",
+    "no-speech": "ምንም ድምፅ አልሰማሁም። ማይክሮፎኑን ተጫነና ተናገሪ።",
+    "audio-capture": "በዚህ መሣሪያ ላይ ማይክሮፎን አልተገኘም።",
+    "network": "ለድምፅ ቀረጻ የኢንተርኔት ግንኙነት ያስፈልጋል።",
+    "service-not-allowed":
+      "ብራውዘር የድምፅ አገልግሎቱን ዘጋ። እንደገና ጫን ወይም Chrome ሞክሪ።",
+  }
+  const dict = lang === "am-ET" ? am : en
+  const fallbackPrefix =
+    lang === "am-ET" ? "መስማት አልቻልኩም" : "Couldn’t hear that"
+  const text = dict[code] ?? `${fallbackPrefix} (${code}).`
+
+  const showTryEnglish = lang === "am-ET" && code === "language-not-supported"
+
+  return (
+    <div className="mt-5 rounded-xl bg-cream/70 px-4 py-3 text-left">
+      <p className="flex items-start gap-2 text-xs leading-relaxed text-text-secondary">
+        <AlertTriangle className="mt-0.5 h-3.5 w-3.5 flex-none text-text-muted" />
+        <span>{text}</span>
+      </p>
+      {showTryEnglish && (
+        <button
+          type="button"
+          onClick={onTryEnglish}
+          className="mt-2 inline-flex items-center gap-1 rounded-full bg-brand px-3 py-1 text-xs font-semibold text-white hover:bg-brand-dark"
+        >
+          Switch to English
+        </button>
+      )}
+    </div>
+  )
 }
 
 // ─── Listening ────────────────────────────────────────────────────────────────
