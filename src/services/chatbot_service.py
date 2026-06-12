@@ -104,6 +104,10 @@ def _call_openai_compatible(
         headers={
             "Content-Type": "application/json",
             "Authorization": f"Bearer {api_key}",
+            # urllib's default "Python-urllib/3.x" UA is blocked by
+            # Cloudflare in front of Groq (error 1010). Send a real one.
+            "User-Agent": "sile-inat/1.0 (+https://github.com/dawitsileshi/sile-inat-v2)",
+            "Accept": "application/json",
         },
         method="POST",
     )
