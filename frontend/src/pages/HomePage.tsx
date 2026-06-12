@@ -1,37 +1,48 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { MessageCircle, Users, Wind } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Whispers } from '@/components/home/Whispers'
 
 interface PathCard {
   to: string
-  title: string
-  subtitle: string
+  titleKey: string
+  subtitleKey: string
+  fallbackTitle: string
+  fallbackSubtitle: string
   Icon: typeof MessageCircle
 }
 
 const PATHS: PathCard[] = [
   {
     to: '/ai-assistant',
-    title: 'Talk to someone',
-    subtitle: 'Ask anything. No judgment. Anonymous.',
+    titleKey: 'home.paths.talk.title',
+    subtitleKey: 'home.paths.talk.subtitle',
+    fallbackTitle: 'Talk to someone',
+    fallbackSubtitle: 'Ask anything. No judgment. Anonymous.',
     Icon: MessageCircle,
   },
   {
     to: '/circles',
-    title: 'Find mothers like me',
-    subtitle: 'Small groups of women in the same moment.',
+    titleKey: 'home.paths.circles.title',
+    subtitleKey: 'home.paths.circles.subtitle',
+    fallbackTitle: 'Find mothers like me',
+    fallbackSubtitle: 'Small groups of women in the same moment.',
     Icon: Users,
   },
   {
     to: '/comfort',
-    title: 'A quiet moment',
-    subtitle: 'Breathing, music, and words that ground.',
+    titleKey: 'home.paths.comfort.title',
+    subtitleKey: 'home.paths.comfort.subtitle',
+    fallbackTitle: 'A quiet moment',
+    fallbackSubtitle: 'Breathing, music, and words that ground.',
     Icon: Wind,
   },
 ]
 
 export function HomePage() {
+  const { t } = useTranslation()
+
   return (
     <>
       {/* Section 1 — Whispers (above the hero) */}
@@ -46,7 +57,7 @@ export function HomePage() {
             transition={{ duration: 0.7, ease: 'easeOut' }}
             className="text-4xl sm:text-5xl font-extrabold leading-[1.1] tracking-tight text-text-primary"
           >
-            For the things you'd only Google at 3am.
+            {t('home.hero.headline', "For the things you'd only Google at 3am.")}
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 12 }}
@@ -54,7 +65,10 @@ export function HomePage() {
             transition={{ duration: 0.7, delay: 0.15, ease: 'easeOut' }}
             className="mx-auto mt-5 max-w-lg text-base sm:text-lg leading-relaxed text-text-secondary"
           >
-            A quiet, anonymous place for new mothers. Ask what you can't ask anyone else.
+            {t(
+              'home.hero.subheadline',
+              "A quiet, anonymous place for new mothers. Ask what you can't ask anyone else.",
+            )}
           </motion.p>
         </div>
       </section>
@@ -69,7 +83,7 @@ export function HomePage() {
             transition={{ duration: 0.6 }}
             className="text-center text-xl sm:text-2xl font-semibold text-text-primary"
           >
-            What do you need right now?
+            {t('home.paths.prompt', 'What do you need right now?')}
           </motion.h2>
 
           <div className="mt-10 grid gap-4 sm:grid-cols-3">
@@ -89,10 +103,10 @@ export function HomePage() {
                     <p.Icon className="h-5 w-5" strokeWidth={1.75} />
                   </div>
                   <h3 className="mt-5 text-lg font-semibold text-text-primary">
-                    {p.title}
+                    {t(p.titleKey, p.fallbackTitle)}
                   </h3>
                   <p className="mt-2 text-sm leading-relaxed text-text-secondary">
-                    {p.subtitle}
+                    {t(p.subtitleKey, p.fallbackSubtitle)}
                   </p>
                 </Link>
               </motion.div>
@@ -110,8 +124,10 @@ export function HomePage() {
           transition={{ duration: 1.0 }}
           className="mx-auto max-w-xl text-center text-sm leading-relaxed text-text-muted"
         >
-          1 in 3 Ethiopian mothers experience postpartum depression. Most never talk about it.
-          You found this place.
+          {t(
+            'home.stat',
+            '1 in 3 Ethiopian mothers experience postpartum depression. Most never talk about it. You found this place.',
+          )}
         </motion.p>
       </section>
     </>

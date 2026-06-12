@@ -1,0 +1,48 @@
+{
+  "nav": {
+    "home": "Home",
+    "circles": "Circles",
+    "forum": "Community",
+    "comfort": "Comfort",
+    "events": "Events",
+    "checkIn": "Check-In",
+    "journal": "Journal",
+    "aiAssistant": "AI Assistant",
+    "findHelp": "Find Help"
+  },
+  "common": {
+    "join": "Join",
+    "signOut": "Sign out",
+    "signedInAs": "Signed in as",
+    "signedIn": "Signed in",
+    "you": "You",
+    "language": "Language",
+    "english": "English",
+    "amharic": "አማርኛ"
+  },
+  "home": {
+    "hero": {
+      "headline": "For the things you'd only Google at 3am.",
+      "subheadline": "A quiet, anonymous place for new mothers. Ask what you can't ask anyone else."
+    },
+    "paths": {
+      "prompt": "What do you need right now?",
+      "talk": {
+        "title": "Talk to someone",
+        "subtitle": "Ask anything. No judgment. Anonymous."
+      },
+      "circles": {
+        "title": "Find mothers like me",
+        "subtitle": "Small groups of women in the same moment."
+      },
+      "comfort": {
+        "title": "A quiet moment",
+        "subtitle": "Breathing, music, and words that ground."
+      }
+    },
+    "stat": "1 in 3 Ethiopian mothers experience postpartum depression. Most never talk about it. You found this place."
+  },
+  "crisis": {
+    "button": "Get help now"
+  }
+}

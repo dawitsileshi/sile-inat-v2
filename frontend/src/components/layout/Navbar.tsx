@@ -2,9 +2,11 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X, Heart, LogIn, LogOut } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { navLinks, isNavActive } from '@/data/navigation'
 import { cn } from '@/lib/utils'
 import { JoinModal } from '@/components/layout/JoinModal'
+import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher'
 
 interface StoredAuthUser {
   user_id?: number
@@ -35,6 +37,7 @@ export function Navbar() {
   const location = useLocation()
   const navigate = useNavigate()
   const accountWrapperRef = useRef<HTMLDivElement>(null)
+  const { t } = useTranslation()
 
   // Cross-tab + cross-window sign-in/out sync.
   useEffect(() => {
@@ -104,13 +107,16 @@ export function Navbar() {
                     />
                   )}
                   <Icon className="relative h-4 w-4" />
-                  <span className="relative">{link.label}</span>
+                  <span className="relative">{t(link.labelKey, link.label)}</span>
                 </Link>
               )
             })}
           </div>
 
           <div className="flex items-center gap-3">
+            <div className="hidden lg:block">
+              <LanguageSwitcher />
+            </div>
             {auth ? (
               <div ref={accountWrapperRef} className="relative hidden sm:block">
                 <button
@@ -169,7 +175,7 @@ export function Navbar() {
                 className="hidden items-center gap-2 rounded-full bg-brand px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-brand-dark sm:flex"
               >
                 <LogIn className="h-4 w-4" />
-                Join
+                {t('common.join', 'Join')}
               </button>
             )}
 
@@ -207,10 +213,14 @@ export function Navbar() {
                       )}
                     >
                       <Icon className="h-4 w-4" />
-                      {link.label}
+                      {t(link.labelKey, link.label)}
                     </Link>
                   )
                 })}
+
+                <div className="mt-3 px-1">
+                  <LanguageSwitcher wide />
+                </div>
 
                 {auth ? (
                   <>
@@ -247,7 +257,7 @@ export function Navbar() {
                     className="mt-2 flex w-full items-center justify-center gap-2 rounded-full bg-brand px-5 py-3 text-sm font-medium text-white"
                   >
                     <LogIn className="h-4 w-4" />
-                    Join
+                    {t('common.join', 'Join')}
                   </button>
                 )}
               </div>

@@ -4,6 +4,7 @@ import {
   LifeBuoy, ArrowLeft, ArrowRight, Phone, MapPin,
   Users, Sparkles, Stethoscope, HeartHandshake,
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Modal } from '@/components/ui/Modal'
 import { cn } from '@/lib/utils'
 
@@ -17,6 +18,7 @@ export function CrisisButton() {
   const [open, setOpen] = useState(false)
   const [lane, setLane] = useState<Lane>('hub')
   const navigate = useNavigate()
+  const { t } = useTranslation()
 
   useEffect(() => {
     function onCrisisOpen() {
@@ -70,12 +72,12 @@ export function CrisisButton() {
           <button
             type="button"
             onClick={() => { setLane('hub'); setOpen(true) }}
-            aria-label="Get help now"
+            aria-label={t('crisis.button', 'Get help now')}
             className="relative inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium text-white shadow-lg transition-transform hover:scale-[1.03]"
             style={{ backgroundColor: '#C0392B' }}
           >
             <LifeBuoy className="h-4 w-4" />
-            Get help now
+            {t('crisis.button', 'Get help now')}
           </button>
         </div>
       </div>

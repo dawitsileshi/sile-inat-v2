@@ -6,6 +6,8 @@ import {
 export interface NavLink {
   to: string
   label: string
+  /** i18n key for the label. Falls back to `label` if missing. */
+  labelKey: string
   icon: LucideIcon
   description: string
   preview: string
@@ -17,6 +19,7 @@ export const navLinks: NavLink[] = [
   {
     to: '/',
     label: 'Home',
+    labelKey: 'nav.home',
     icon: Home,
     description: 'Your safe space',
     preview: 'Landing page introducing ስለ እናት.',
@@ -26,6 +29,7 @@ export const navLinks: NavLink[] = [
   {
     to: '/circles',
     label: 'Circles',
+    labelKey: 'nav.circles',
     icon: Users,
     description: 'Small groups, same moment',
     preview: 'Themed mother circles by phase and topic.',
@@ -35,6 +39,7 @@ export const navLinks: NavLink[] = [
   {
     to: '/community',
     label: 'Forum',
+    labelKey: 'nav.forum',
     icon: MessageSquare,
     description: 'Anonymous community',
     preview: 'Ask questions and share experiences anonymously.',
@@ -44,6 +49,7 @@ export const navLinks: NavLink[] = [
   {
     to: '/comfort',
     label: 'Comfort',
+    labelKey: 'nav.comfort',
     icon: Leaf,
     description: 'A quiet moment',
     preview: 'Breathing, music, and words that ground.',
@@ -53,6 +59,7 @@ export const navLinks: NavLink[] = [
   {
     to: '/events',
     label: 'Events',
+    labelKey: 'nav.events',
     icon: Calendar,
     description: 'Talks, circles, and RSVPs',
     preview: 'RSVP to virtual and in-person sessions led by Ethiopian clinicians and facilitators.',
@@ -62,6 +69,7 @@ export const navLinks: NavLink[] = [
   {
     to: '/check-in',
     label: 'Check-In',
+    labelKey: 'nav.checkIn',
     icon: Smile,
     description: 'Daily wellness tracker',
     preview: 'Log your mood, energy, and sleep daily.',
@@ -71,6 +79,7 @@ export const navLinks: NavLink[] = [
   {
     to: '/journal',
     label: 'Journal',
+    labelKey: 'nav.journal',
     icon: BookOpen,
     description: 'Look back at your check-ins',
     preview: 'A private journal of every check-in, with what you said and what was said back to you.',
@@ -80,6 +89,7 @@ export const navLinks: NavLink[] = [
   {
     to: '/ai-assistant',
     label: 'AI Assistant',
+    labelKey: 'nav.aiAssistant',
     icon: Sparkles,
     description: 'Your postpartum guide',
     preview: 'Chat for evidence-based postpartum guidance.',

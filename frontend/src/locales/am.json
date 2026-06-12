@@ -1,0 +1,51 @@
+{
+  "_meta": {
+    "instructions": "Replace every value (the right side of each colon) with the Amharic translation. Keys (the left side) MUST stay identical to en.json — they are the lookup ID, not displayed text. Add new keys to en.json first; this file mirrors its shape. Where a value is left in English, it will still show as English until you translate it."
+  },
+  "nav": {
+    "home": "መነሻ",
+    "circles": "ክበቦች",
+    "forum": "ማህበረሰብ",
+    "comfort": "እረፍት",
+    "events": "ዝግጅቶች",
+    "checkIn": "የቀኑ ሁኔታ",
+    "journal": "ማስታወሻ",
+    "aiAssistant": "የ AI ጓደኛ",
+    "findHelp": "እርዳታ ፈልጊ"
+  },
+  "common": {
+    "join": "ግቢ",
+    "signOut": "ውጪ",
+    "signedInAs": "የገባሽው",
+    "signedIn": "ገብተሻል",
+    "you": "አንቺ",
+    "language": "ቋንቋ",
+    "english": "English",
+    "amharic": "አማርኛ"
+  },
+  "home": {
+    "hero": {
+      "headline": "ሌሊት ላይ ብቻሽን የምትፈልጊውን ነገር።",
+      "subheadline": "ለአዲስ እናቶች የተዘጋጀ ጸጥ ያለ፣ ስምሽ የማይታወቅበት ቦታ። ለማንም ማለት የማትችዪውን እዚህ ጠይቂ።"
+    },
+    "paths": {
+      "prompt": "አሁን ምን ያስፈልግሻል?",
+      "talk": {
+        "title": "ለአንድ ሰው ተናገሪ",
+        "subtitle": "ማንኛውንም ጠይቂ። ምንም ፍርድ የለም። ስምሽ አይታወቅም።"
+      },
+      "circles": {
+        "title": "የሚመስሉሽን እናቶች አግኚ",
+        "subtitle": "በተመሳሳይ ጊዜ ውስጥ ያሉ ሴቶች ትንሽ ቡድኖች።"
+      },
+      "comfort": {
+        "title": "ጸጥ ያለች ጊዜ",
+        "subtitle": "መተንፈስ፣ ሙዚቃ፣ እና የሚያስቀምጡ ቃላት።"
+      }
+    },
+    "stat": "ከሦስት ኢትዮጵያውያን እናቶች አንዷ ከወሊድ በኋላ የመንፈስ ጭንቀት ያጋጥማታል። አብዛኞቹ ስለዚህ አይናገሩም። አንቺ ይህን ቦታ አግኝተሻል።"
+  },
+  "crisis": {
+    "button": "አሁን እርዳታ ፈልጊ"
+  }
+}
