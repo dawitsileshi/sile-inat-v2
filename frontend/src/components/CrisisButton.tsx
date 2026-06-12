@@ -39,16 +39,46 @@ export function CrisisButton() {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => { setLane('hub'); setOpen(true) }}
-        aria-label="Get help now"
-        className="fixed bottom-4 right-4 z-30 inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium text-white shadow-lg transition-transform hover:scale-[1.03] sm:bottom-6 sm:right-6"
-        style={{ backgroundColor: '#C0392B' }}
-      >
-        <LifeBuoy className="h-4 w-4" />
-        Get help now
-      </button>
+      {/* Continuous radar-style pulse around the Get-help button. Three
+          rings staggered on a slow 2.4s cycle so the signal reads as
+          steady emission rather than an alarm flash. */}
+      <style>{`
+        @keyframes sile-signal-pulse {
+          0%   { transform: scale(1);    opacity: 0.55; }
+          80%  { transform: scale(2.1);  opacity: 0;    }
+          100% { transform: scale(2.1);  opacity: 0;    }
+        }
+        .sile-signal-ring {
+          position: absolute;
+          inset: 0;
+          border-radius: 9999px;
+          background-color: #C0392B;
+          animation: sile-signal-pulse 2.4s cubic-bezier(0.22, 0.61, 0.36, 1) infinite;
+          pointer-events: none;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .sile-signal-ring { animation: none; opacity: 0; }
+        }
+      `}</style>
+
+      <div className="fixed bottom-4 right-4 z-30 sm:bottom-6 sm:right-6">
+        <div className="relative inline-flex">
+          <span className="sile-signal-ring" style={{ animationDelay: '0s' }} aria-hidden />
+          <span className="sile-signal-ring" style={{ animationDelay: '0.8s' }} aria-hidden />
+          <span className="sile-signal-ring" style={{ animationDelay: '1.6s' }} aria-hidden />
+
+          <button
+            type="button"
+            onClick={() => { setLane('hub'); setOpen(true) }}
+            aria-label="Get help now"
+            className="relative inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium text-white shadow-lg transition-transform hover:scale-[1.03]"
+            style={{ backgroundColor: '#C0392B' }}
+          >
+            <LifeBuoy className="h-4 w-4" />
+            Get help now
+          </button>
+        </div>
+      </div>
 
       <Modal isOpen={open} onClose={handleClose} size="md">
         <div className="px-8 pb-8 pt-10">
