@@ -2,11 +2,39 @@
 src/routes/forum.py — Anonymous Community Forum Blueprint
 """
 
+from typing import Iterable, Optional
+
 from flask import Blueprint, jsonify, request
+from sqlalchemy import func
 
 from src.extensions import db
 from src.models import ForumPost, ForumReply, ForumReaction
 from src.services.anonymous import get_client_id_from_request
+
+
+def _reaction_lookup(post_ids: Iterable[int], viewer_client_id: Optional[str]):
+    """Return (counts_by_post_id, set_of_post_ids_viewer_reacted_to)."""
+    ids = list(post_ids)
+    if not ids:
+        return {}, set()
+    counts = dict(
+        db.session.query(ForumReaction.post_id, func.count(ForumReaction.id))
+        .filter(ForumReaction.post_id.in_(ids))
+        .group_by(ForumReaction.post_id)
+        .all()
+    )
+    reacted: set[int] = set()
+    if viewer_client_id:
+        reacted = {
+            pid
+            for (pid,) in db.session.query(ForumReaction.post_id)
+            .filter(
+                ForumReaction.post_id.in_(ids),
+                ForumReaction.client_id == viewer_client_id,
+            )
+            .all()
+        }
+    return counts, reacted
 
 forum_bp = Blueprint("forum", __name__, url_prefix="/api/forum")
 
@@ -44,9 +72,17 @@ def list_posts():
         query = query.filter(ForumPost.category == category)
 
     posts = query.limit(100).all()
+    counts, reacted = _reaction_lookup([p.id for p in posts], viewer_id)
 
     return jsonify({
-        "posts": [p.to_dict(viewer_client_id=viewer_id) for p in posts],
+        "posts": [
+            p.to_dict(
+                viewer_client_id=viewer_id,
+                reaction_count=counts.get(p.id, 0),
+                reacted=p.id in reacted,
+            )
+            for p in posts
+        ],
         "count": len(posts),
         "category": category,
     }), 200
@@ -85,7 +121,13 @@ def create_post():
     db.session.add(post)
     db.session.commit()
 
-    return jsonify({"post": post.to_dict(viewer_client_id=client_id)}), 201
+    return jsonify({
+        "post": post.to_dict(
+            viewer_client_id=client_id,
+            reaction_count=0,
+            reacted=False,
+        )
+    }), 201
 
 
 @forum_bp.route("/posts/<int:post_id>", methods=["GET"])
@@ -99,8 +141,14 @@ def get_post(post_id: int):
     if not post:
         return jsonify({"error": "Post not found."}), 404
 
+    counts, reacted = _reaction_lookup([post.id], viewer_id)
     return jsonify({
-        "post": post.to_dict(viewer_client_id=viewer_id, include_replies=True),
+        "post": post.to_dict(
+            viewer_client_id=viewer_id,
+            include_replies=True,
+            reaction_count=counts.get(post.id, 0),
+            reacted=post.id in reacted,
+        ),
     }), 200
 
 
@@ -131,9 +179,15 @@ def create_reply(post_id: int):
     db.session.add(reply)
     db.session.commit()
 
+    counts, reacted = _reaction_lookup([post.id], client_id)
     return jsonify({
         "reply": reply.to_dict(viewer_client_id=client_id),
-        "post": post.to_dict(viewer_client_id=client_id, include_replies=True),
+        "post": post.to_dict(
+            viewer_client_id=client_id,
+            include_replies=True,
+            reaction_count=counts.get(post.id, 0),
+            reacted=post.id in reacted,
+        ),
     }), 201
 
 

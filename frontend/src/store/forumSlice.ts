@@ -31,6 +31,8 @@ export interface ForumPost {
   content: string;
   created_at: string;
   reply_count: number;
+  reaction_count: number;
+  reacted: boolean;
   is_mine: boolean;
   author_label: string;
   replies?: ForumReply[];
@@ -116,6 +118,32 @@ export const createReply = createAsyncThunk(
   }
 );
 
+export const reactToPost = createAsyncThunk(
+  'forum/reactToPost',
+  async (postId: number, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${API_URL}/forum/posts/${postId}/react`, {
+        method: 'POST',
+        headers: anonymousHeaders(),
+      });
+      const data = await parseResponse<{ post_id: number; count: number; reacted: boolean }>(response);
+      return data;
+    } catch (err) {
+      return rejectWithValue(err instanceof Error ? err.message : 'Failed to react');
+    }
+  }
+);
+
+function applyReaction(
+  post: ForumPost | null,
+  postId: number,
+  reacted: boolean,
+  count: number,
+): ForumPost | null {
+  if (!post || post.id !== postId) return post;
+  return { ...post, reacted, reaction_count: count };
+}
+
 const forumSlice = createSlice({
   name: 'forum',
   initialState: {
@@ -135,6 +163,17 @@ const forumSlice = createSlice({
     },
     clearForumError(state) {
       state.error = null;
+    },
+    optimisticToggleReaction(state, action: { payload: number }) {
+      const postId = action.payload;
+      const update = (p: ForumPost) => {
+        const nextReacted = !p.reacted;
+        p.reacted = nextReacted;
+        p.reaction_count = Math.max(0, p.reaction_count + (nextReacted ? 1 : -1));
+      };
+      const idx = state.posts.findIndex((p) => p.id === postId);
+      if (idx >= 0) update(state.posts[idx]);
+      if (state.selectedPost && state.selectedPost.id === postId) update(state.selectedPost);
     },
   },
   extraReducers: (builder) => {
@@ -191,9 +230,46 @@ const forumSlice = createSlice({
       .addCase(createReply.rejected, (state, action) => {
         state.submitStatus = 'failed';
         state.error = (action.payload as string) ?? 'Failed to post reply';
+      })
+      .addCase(reactToPost.fulfilled, (state, action) => {
+        const { post_id, count, reacted } = action.payload;
+        const idx = state.posts.findIndex((p) => p.id === post_id);
+        if (idx >= 0) {
+          state.posts[idx] = { ...state.posts[idx], reaction_count: count, reacted };
+        }
+        state.selectedPost = applyReaction(state.selectedPost, post_id, reacted, count);
+      })
+      .addCase(reactToPost.rejected, (state, action) => {
+        // Revert the optimistic toggle. The payload meta carries the postId.
+        const postId = action.meta.arg;
+        const idx = state.posts.findIndex((p) => p.id === postId);
+        if (idx >= 0) {
+          const p = state.posts[idx];
+          const reverted = !p.reacted;
+          state.posts[idx] = {
+            ...p,
+            reacted: reverted,
+            reaction_count: Math.max(0, p.reaction_count + (reverted ? 1 : -1)),
+          };
+        }
+        if (state.selectedPost && state.selectedPost.id === postId) {
+          const p = state.selectedPost;
+          const reverted = !p.reacted;
+          state.selectedPost = {
+            ...p,
+            reacted: reverted,
+            reaction_count: Math.max(0, p.reaction_count + (reverted ? 1 : -1)),
+          };
+        }
+        state.error = (action.payload as string) ?? 'Failed to react';
       });
   },
 });
 
-export const { setActiveCategory, clearSelectedPost, clearForumError } = forumSlice.actions;
+export const {
+  setActiveCategory,
+  clearSelectedPost,
+  clearForumError,
+  optimisticToggleReaction,
+} = forumSlice.actions;
 export default forumSlice.reducer;

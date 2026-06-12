@@ -38,6 +38,8 @@ def register():
     email = payload.get("email", "").strip().lower()
     password = payload.get("password", "")
     raw_due = payload.get("due_date")
+    raw_baby_status = payload.get("baby_status")
+    raw_baby_birth = payload.get("baby_birth_date")
 
     # Validation
     if not email:
@@ -54,13 +56,34 @@ def register():
         except ValueError:
             return jsonify({"error": "due_date must be in YYYY-MM-DD format."}), 400
 
+    baby_status = None
+    if raw_baby_status is not None:
+        baby_status = str(raw_baby_status).strip().lower()
+        if baby_status not in {"pregnant", "born", "skip"}:
+            return jsonify({"error": "baby_status must be one of: pregnant, born, skip."}), 400
+
+    baby_birth_date = None
+    if raw_baby_birth:
+        try:
+            baby_birth_date = datetime.strptime(raw_baby_birth, "%Y-%m-%d").date()
+        except ValueError:
+            return jsonify({"error": "baby_birth_date must be in YYYY-MM-DD format."}), 400
+    # Only meaningful when baby is already born
+    if baby_status != "born":
+        baby_birth_date = None
+
     # Check if user already exists
     existing_user = db.session.query(User).filter_by(email=email).first()
     if existing_user:
         return jsonify({"error": "Email already registered."}), 409
 
     # Create user
-    user = User(email=email, due_date=due_date)
+    user = User(
+        email=email,
+        due_date=due_date,
+        baby_status=baby_status,
+        baby_birth_date=baby_birth_date,
+    )
     user.set_password(password)
 
     try:

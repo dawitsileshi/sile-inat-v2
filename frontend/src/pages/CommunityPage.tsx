@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, X, ArrowLeft, Loader2, Send } from 'lucide-react'
+import { Plus, X, ArrowLeft, Loader2, Send, HandHeart } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useDispatch, useSelector } from 'react-redux'
 import {
@@ -9,17 +9,76 @@ import {
   fetchPostDetail,
   createPost,
   createReply,
+  reactToPost,
+  optimisticToggleReaction,
   setActiveCategory,
   clearSelectedPost,
   type ForumCategory,
+  type ForumPost,
 } from '@/store/forumSlice'
 import { getAnonymousClientId } from '@/lib/clientId'
 import type { AppDispatch, RootState } from '@/store/store'
 
 const POST_CATEGORIES = FORUM_CATEGORIES.filter((c) => c !== 'All')
 
+function reactionLabel(count: number, reacted: boolean): string {
+  if (count === 0) return reacted ? "You've been here" : "I've been there"
+  if (reacted) {
+    if (count === 1) return "You've been here"
+    return `You and ${count - 1} ${count - 1 === 1 ? 'other mother has' : 'other mothers have'} been here`
+  }
+  return `${count} ${count === 1 ? 'mother has' : 'mothers have'} been here`
+}
+
+function IveBeenThereButton({
+  post,
+  onToggle,
+  size = 'sm',
+}: {
+  post: ForumPost
+  onToggle: () => void
+  size?: 'sm' | 'md'
+}) {
+  const padding = size === 'md' ? 'px-4 py-2 text-sm' : 'px-3 py-1.5 text-xs'
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation()
+        onToggle()
+      }}
+      aria-pressed={post.reacted}
+      className={cn(
+        'inline-flex items-center gap-2 rounded-full border font-medium transition-colors',
+        padding,
+        post.reacted
+          ? 'border-brand bg-brand-light text-brand'
+          : 'border-gray-200 bg-white text-text-secondary hover:border-brand/40 hover:text-brand'
+      )}
+    >
+      <HandHeart
+        className={cn(
+          size === 'md' ? 'h-4 w-4' : 'h-3.5 w-3.5',
+          post.reacted ? 'fill-brand/20' : ''
+        )}
+      />
+      <span>{reactionLabel(post.reaction_count, post.reacted)}</span>
+    </button>
+  )
+}
+
 function formatDate(iso: string) {
   try {
+    const then = new Date(iso).getTime()
+    if (Number.isNaN(then)) return iso
+    const diffSec = Math.max(0, Math.floor((Date.now() - then) / 1000))
+    if (diffSec < 60) return 'just now'
+    const diffMin = Math.floor(diffSec / 60)
+    if (diffMin < 60) return `${diffMin} min ago`
+    const diffHr = Math.floor(diffMin / 60)
+    if (diffHr < 24) return `${diffHr} ${diffHr === 1 ? 'hour' : 'hours'} ago`
+    const diffDay = Math.floor(diffHr / 24)
+    if (diffDay < 7) return `${diffDay} ${diffDay === 1 ? 'day' : 'days'} ago`
     return new Date(iso).toLocaleDateString(undefined, {
       month: 'short',
       day: 'numeric',
@@ -59,6 +118,11 @@ export function CommunityPage() {
 
   function openThread(postId: number) {
     dispatch(fetchPostDetail(postId))
+  }
+
+  function handleToggleReaction(postId: number) {
+    dispatch(optimisticToggleReaction(postId))
+    dispatch(reactToPost(postId))
   }
 
   async function handleCreatePost(e: React.FormEvent) {
@@ -114,6 +178,13 @@ export function CommunityPage() {
             <p className="mt-4 whitespace-pre-wrap text-sm leading-relaxed text-text-secondary">
               {selectedPost.content}
             </p>
+            <div className="mt-5">
+              <IveBeenThereButton
+                post={selectedPost}
+                size="md"
+                onToggle={() => handleToggleReaction(selectedPost.id)}
+              />
+            </div>
           </motion.article>
 
           <h2 className="mt-8 mb-4 text-lg font-bold text-text-primary">
@@ -232,9 +303,15 @@ export function CommunityPage() {
                 </div>
                 <h3 className="text-lg font-bold text-text-primary">{post.title}</h3>
                 <p className="mt-2 line-clamp-2 text-sm text-text-secondary">{post.content}</p>
-                <p className="mt-3 text-xs font-medium text-text-muted">
-                  {post.reply_count} {post.reply_count === 1 ? 'reply' : 'replies'}
-                </p>
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+                  <p className="text-xs font-medium text-text-muted">
+                    {post.reply_count} {post.reply_count === 1 ? 'reply' : 'replies'}
+                  </p>
+                  <IveBeenThereButton
+                    post={post}
+                    onToggle={() => handleToggleReaction(post.id)}
+                  />
+                </div>
               </motion.button>
             ))}
           </div>

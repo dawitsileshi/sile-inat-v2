@@ -66,6 +66,22 @@ def _validate_log_payload(payload: dict) -> tuple[dict | None, str | None]:
         except (TypeError, ValueError):
             errors.append("'hrv_delta' must be a number or null.")
 
+    # Optional support indicator
+    feels_supported = None
+    raw_support = payload.get("feels_supported")
+    if raw_support is not None:
+        val = str(raw_support).strip().lower()
+        if val not in {"yes", "somewhat", "no"}:
+            errors.append("'feels_supported' must be one of: yes, somewhat, no.")
+        else:
+            feels_supported = val
+
+    # Optional free-text notes — no length cap from API side; trimmed
+    notes = None
+    raw_notes = payload.get("notes")
+    if raw_notes is not None:
+        notes = str(raw_notes).strip() or None
+
     # Optional log_date — defaults to today
     log_date = date.today()
     if "log_date" in payload and payload["log_date"]:
@@ -84,6 +100,8 @@ def _validate_log_payload(payload: dict) -> tuple[dict | None, str | None]:
         "symptom_score":    symptom_score,
         "mood_score":       mood_score,
         "hrv_delta":        hrv_delta,
+        "feels_supported":  feels_supported,
+        "notes":            notes,
         "log_date":         log_date,
     }, None
 
@@ -148,6 +166,8 @@ def create_log():
         symptom_score           = data["symptom_score"],
         mood_score              = data["mood_score"],
         hrv_delta               = data["hrv_delta"],
+        feels_supported         = data["feels_supported"],
+        notes                   = data["notes"],
         predicted_stress_index  = prediction,
     )
 

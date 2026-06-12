@@ -58,6 +58,19 @@ class User(db.Model):
         comment="Estimated due date (EDD) for gestational week computation"
     )
 
+    # Postpartum stage — drives personalized check-in response
+    baby_status: Mapped[Optional[str]] = mapped_column(
+        String(20),
+        nullable=True,
+        comment="'pregnant' | 'born' | 'skip'",
+    )
+
+    baby_birth_date: Mapped[Optional[date]] = mapped_column(
+        Date,
+        nullable=True,
+        comment="Date the baby was born (only when baby_status == 'born')",
+    )
+
     # Bidirectional relationship — cascade deletes orphan logs
     logs: Mapped[list["DailyLog"]] = relationship(
         "DailyLog",
@@ -90,6 +103,8 @@ class User(db.Model):
             "email": self.email,
             "created_at": self.created_at.isoformat(),
             "due_date": self.due_date.isoformat() if self.due_date else None,
+            "baby_status": self.baby_status,
+            "baby_birth_date": self.baby_birth_date.isoformat() if self.baby_birth_date else None,
         }
 
 
@@ -220,6 +235,19 @@ class DailyLog(db.Model):
         comment="Heart Rate Variability deviation from personal baseline (ms)"
     )
 
+    # Round-2 check-in additions
+    feels_supported: Mapped[Optional[str]] = mapped_column(
+        String(20),
+        nullable=True,
+        comment="'yes' | 'somewhat' | 'no' — drives support-options layer in response",
+    )
+
+    notes: Mapped[Optional[str]] = mapped_column(
+        Text,
+        nullable=True,
+        comment="Free-text 'anything on your mind?' field from the check-in",
+    )
+
     # ── Model Output ──────────────────────────────────────────────────────────
     predicted_stress_index: Mapped[Optional[float]] = mapped_column(
         Float,
@@ -253,6 +281,8 @@ class DailyLog(db.Model):
             "symptom_score": self.symptom_score,
             "mood_score": self.mood_score,
             "hrv_delta": self.hrv_delta,
+            "feels_supported": self.feels_supported,
+            "notes": self.notes,
             "predicted_stress_index": self.predicted_stress_index,
             "created_at": self.created_at.isoformat(),
         }
@@ -296,7 +326,14 @@ class ForumPost(db.Model):
         order_by="ForumReply.created_at.asc()",
     )
 
-    def to_dict(self, *, viewer_client_id: Optional[str] = None, include_replies: bool = False) -> dict:
+    def to_dict(
+        self,
+        *,
+        viewer_client_id: Optional[str] = None,
+        include_replies: bool = False,
+        reaction_count: int = 0,
+        reacted: bool = False,
+    ) -> dict:
         data = {
             "id": self.id,
             "category": self.category,
@@ -304,6 +341,8 @@ class ForumPost(db.Model):
             "content": self.content,
             "created_at": self.created_at.isoformat() + "Z",
             "reply_count": len(self.replies),
+            "reaction_count": reaction_count,
+            "reacted": reacted,
             "is_mine": viewer_client_id is not None and self.client_id == viewer_client_id,
             "author_label": "You" if viewer_client_id and self.client_id == viewer_client_id else "Anonymous",
         }

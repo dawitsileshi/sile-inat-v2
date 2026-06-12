@@ -69,10 +69,11 @@ def create_app(config=None) -> Flask:
         # Auto-seed the 8 mother circles on first boot — idempotent.
         # Keeps Render deploys self-sufficient without a manual seed step.
         try:
-            from scripts.seed_db import seed_circles
+            from scripts.seed_db import seed_circles, seed_forum
             seed_circles()
+            seed_forum()
         except Exception as exc:
-            log.warning("Circle auto-seed skipped: %s", exc)
+            log.warning("Seed auto-run skipped: %s", exc)
 
     # ── ML Service ────────────────────────────────────────────────────────────
     from src.services.ml_service import create_ml_service

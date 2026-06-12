@@ -2,6 +2,7 @@ import { Outlet } from 'react-router-dom'
 import { Navbar } from './Navbar'
 import { Footer } from './Footer'
 import { PageTransition } from './PageTransition'
+import { CrisisButton } from '@/components/CrisisButton'
 
 export function Layout() {
   return (
@@ -13,6 +14,7 @@ export function Layout() {
         </PageTransition>
       </main>
       <Footer />
+      <CrisisButton />
     </div>
   )
 }

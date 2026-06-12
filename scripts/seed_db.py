@@ -15,7 +15,8 @@ from __future__ import annotations
 import argparse
 import random
 import sys
-from datetime import date, timedelta
+import uuid
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
 # Make src importable when running from project root
@@ -24,7 +25,10 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from app import create_app
 from config import DevelopmentConfig
 from src.extensions import db
-from src.models import User, DailyLog, Circle
+from src.models import (
+    User, DailyLog, Circle,
+    ForumPost, ForumReply, ForumReaction,
+)
 from src.services.ml_service import get_ml_service
 
 SEED_EMAIL = "seed-user@maternalwellness.com"
@@ -124,6 +128,166 @@ SEED_CIRCLES = [
 ]
 
 
+# ─── Forum Seed Content ───────────────────────────────────────────────────────
+# Realistic-looking forum activity so the demo doesn't open on an empty state.
+# Posts are anchored relative to "now" so timestamps stay fresh on every reseed.
+SEED_FORUM_POSTS = [
+    {
+        "category": "Mental Health",
+        "title": "Crying for no reason at night",
+        "content": (
+            "I cried for almost an hour last night for no reason. The baby "
+            "was asleep, everything was fine, and I just couldn't stop. "
+            "Is this normal?"
+        ),
+        "hours_ago": 8,
+        "reactions": 23,
+        "replies": [
+            (
+                "Yes. So normal. Mine started around week 2 and lasted on and "
+                "off for almost two months. It gets lighter.",
+                5,
+            ),
+            (
+                "I thought I was the only one. Thank you for writing this.",
+                3,
+            ),
+        ],
+    },
+    {
+        "category": "Mental Health",
+        "title": "Mother-in-law says I'm being dramatic",
+        "content": (
+            "My mother-in-law keeps saying I should be grateful and stop "
+            "being 'dramatic.' I don't even know what I'm feeling, just "
+            "that it's a lot."
+        ),
+        "hours_ago": 26,
+        "reactions": 31,
+        "replies": [
+            (
+                "Gratitude and exhaustion can both be true at the same time. "
+                "Don't let anyone tell you it's one or the other.",
+                14,
+            ),
+        ],
+    },
+    {
+        "category": "Parenting",
+        "title": "Three months in and still not bonded",
+        "content": (
+            "Three months in and I still don't feel bonded with my baby the "
+            "way I thought I would. I take care of her, I love her, but "
+            "something feels missing."
+        ),
+        "hours_ago": 48,
+        "reactions": 18,
+        "replies": [
+            (
+                "This was me too. It came, slowly, around month 4 for me. "
+                "Be patient with yourself — you're already doing the hard part.",
+                20,
+            ),
+            (
+                "Reading this made me feel less alone tonight. Thank you.",
+                10,
+            ),
+        ],
+    },
+    {
+        "category": "Mental Health",
+        "title": "I feel like I've disappeared",
+        "content": (
+            "Does anyone else feel like they've completely disappeared? "
+            "I used to have hobbies, friends, a whole life. Now I'm just "
+            "'mom.'"
+        ),
+        "hours_ago": 70,
+        "reactions": 27,
+        "replies": [
+            (
+                "She's still in there. It just takes a while to find pockets "
+                "of time for her again. Even 10 minutes counts.",
+                12,
+            ),
+        ],
+    },
+    {
+        "category": "Recovery",
+        "title": "6 days postpartum and overwhelmed",
+        "content": (
+            "First time posting here. 6 days postpartum and everything "
+            "feels so overwhelming. Just needed somewhere to say that."
+        ),
+        "hours_ago": 4,
+        "reactions": 15,
+        "replies": [
+            (
+                "Six days is so early. Be gentle with yourself. We're glad "
+                "you're here.",
+                2,
+            ),
+        ],
+    },
+]
+
+
+def seed_forum() -> None:
+    """Idempotent — skips any post whose title already exists."""
+    existing_titles = {row[0] for row in db.session.query(ForumPost.title).all()}
+    now = datetime.utcnow()
+    added_posts = 0
+    added_replies = 0
+    added_reactions = 0
+
+    for spec in SEED_FORUM_POSTS:
+        if spec["title"] in existing_titles:
+            continue
+
+        post_created = now - timedelta(hours=spec["hours_ago"])
+        post = ForumPost(
+            client_id=str(uuid.uuid4()),
+            category=spec["category"],
+            title=spec["title"],
+            content=spec["content"],
+            created_at=post_created,
+        )
+        db.session.add(post)
+        db.session.flush()  # populate post.id
+        added_posts += 1
+
+        for reply_text, hours_after in spec["replies"]:
+            db.session.add(
+                ForumReply(
+                    post_id=post.id,
+                    client_id=str(uuid.uuid4()),
+                    content=reply_text,
+                    created_at=post_created + timedelta(hours=hours_after),
+                )
+            )
+            added_replies += 1
+
+        # One ForumReaction row per reaction — each with a distinct anonymous UUID.
+        for _ in range(spec["reactions"]):
+            db.session.add(
+                ForumReaction(
+                    post_id=post.id,
+                    client_id=str(uuid.uuid4()),
+                    created_at=post_created + timedelta(minutes=random.randint(5, 600)),
+                )
+            )
+            added_reactions += 1
+
+    if added_posts:
+        db.session.commit()
+        print(
+            f"[seed] Seeded {added_posts} forum posts, "
+            f"{added_replies} replies, {added_reactions} reactions."
+        )
+    else:
+        print("[seed] Forum content already seeded - skipping.")
+
+
 def seed_circles() -> None:
     """Idempotent — only inserts a circle if no row with the same name exists."""
     existing_names = {row[0] for row in db.session.query(Circle.name).all()}
@@ -144,8 +308,9 @@ def seed(email: str = SEED_EMAIL, password: str = SEED_PASSWORD, n_days: int = N
     app = create_app(DevelopmentConfig)
 
     with app.app_context():
-        # Mother circles first — independent of user.
+        # Mother circles and forum content first — independent of user.
         seed_circles()
+        seed_forum()
 
         # Create or retrieve user
         user = db.session.query(User).filter_by(email=email).first()

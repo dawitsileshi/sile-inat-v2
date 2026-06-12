@@ -2,6 +2,26 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
 const API_URL = '/api';
 const TOKEN_KEY = 'auth_token';
+const USER_KEY = 'auth_user';
+
+export type BabyStatus = 'pregnant' | 'born' | 'skip';
+
+export interface StoredUser {
+  user_id: number;
+  email: string;
+  baby_status: BabyStatus | null;
+  baby_birth_date: string | null;
+}
+
+export function getStoredUser(): StoredUser | null {
+  const raw = localStorage.getItem(USER_KEY);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as StoredUser;
+  } catch {
+    return null;
+  }
+}
 
 export interface DailyLogPayload {
   gestational_week: number;
@@ -10,6 +30,8 @@ export interface DailyLogPayload {
   symptom_score: number;
   mood_score: number;
   hrv_delta?: number | null;
+  feels_supported?: 'yes' | 'somewhat' | 'no' | null;
+  notes?: string | null;
   log_date?: string;
 }
 
@@ -23,6 +45,8 @@ export interface DailyLog {
   symptom_score: number;
   mood_score: number;
   hrv_delta: number | null;
+  feels_supported: 'yes' | 'somewhat' | 'no' | null;
+  notes: string | null;
   predicted_stress_index: number | null;
   created_at: string;
 }
@@ -43,6 +67,10 @@ function getStoredToken(): string | null {
 
 function storeToken(token: string): void {
   localStorage.setItem(TOKEN_KEY, token);
+}
+
+function storeUser(user: StoredUser | undefined | null): void {
+  if (user) localStorage.setItem(USER_KEY, JSON.stringify(user));
 }
 
 async function parseResponse<T>(response: Response): Promise<T> {
@@ -75,8 +103,9 @@ async function getOrCreateToken(getState: () => unknown): Promise<string> {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
   });
-  const data = await parseResponse<{ token: string }>(response);
+  const data = await parseResponse<{ token: string; user?: StoredUser }>(response);
   storeToken(data.token);
+  storeUser(data.user);
   return data.token;
 }
 
