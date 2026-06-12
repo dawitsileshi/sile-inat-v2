@@ -184,7 +184,7 @@ def create_log():
     except IntegrityError:
         db.session.rollback()
         return jsonify({
-            "error": f"A log for user on {data['log_date']} already exists."
+            "error": "Could not save this check-in. Please try again."
         }), 409
 
     response = {
@@ -223,10 +223,12 @@ def get_history():
     except ValueError:
         return jsonify({"error": "limit and offset must be integers."}), 400
 
+    # Sort by log_date then created_at so multiple check-ins on the same
+    # day come back in the order they were submitted.
     logs = (
         db.session.query(DailyLog)
         .filter(DailyLog.user_id == g.current_user.id)
-        .order_by(DailyLog.log_date.asc())
+        .order_by(DailyLog.log_date.asc(), DailyLog.created_at.asc())
         .limit(limit)
         .offset(offset)
         .all()

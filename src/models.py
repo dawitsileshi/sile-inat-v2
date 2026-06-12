@@ -167,9 +167,11 @@ class DailyLog(db.Model):
     """
     __tablename__ = "daily_logs"
     __table_args__ = (
-        # Prevent duplicate entries for the same user on the same date
-        UniqueConstraint("user_id", "log_date", name="uq_user_date"),
-        # Data integrity constraints matching input validation rules
+        # Multiple check-ins per (user, date) are intentionally allowed —
+        # a postpartum day can swing wildly between 3am and noon, and forcing
+        # one row per day flattens that into a single snapshot. The old
+        # uq_user_date unique constraint was dropped via
+        # scripts/migrate_drop_daily_log_unique.py.
         CheckConstraint("gestational_week BETWEEN 1 AND 42", name="ck_gestational_week"),
         CheckConstraint("sleep_hours BETWEEN 0 AND 24",       name="ck_sleep_hours"),
         CheckConstraint("water_liters BETWEEN 0 AND 10",      name="ck_water_liters"),
