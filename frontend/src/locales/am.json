@@ -16,11 +16,17 @@
   },
   "reflection": {
     "eyebrow": "ወደ ኋላ መለስ",
-    "headline": "ይህ ሳምንት እንዴት ተሰማሽ",
-    "quotesHeading": "በዚህ ሳምንት ያጻፍሽው",
-    "patternsHeading": "የዚህ ሳምንት ምልክቶች",
+    "headlineWeek": "ይህ ሳምንት እንዴት ተሰማሽ",
+    "headlineMonth": "ይህ ወር እንዴት ተሰማሽ",
+    "toggleWeek": "ሳምንት",
+    "toggleMonth": "ወር",
+    "quotesHeadingWeek": "በዚህ ሳምንት የጻፍሽው",
+    "quotesHeadingMonth": "በዚህ ወር የጻፍሽው",
+    "patternsHeadingWeek": "የዚህ ሳምንት ምልክቶች",
+    "patternsHeadingMonth": "የዚህ ወር ምልክቶች",
     "openInJournal": "በማስታወሻ ክፈቺ",
-    "seeJournal": "ሙሉውን ማስታወሻ ይመልከቱ",
+    "seeJournal": "ሙሉውን ማስታወሻ ተመልከች",
+    "signInPrompt": "ማስታወሻሽን ለማየት ግቢ።",
     "footer": "ይህ ገጽ የራስሽን የቀኑ ሁኔታ ማስታወሻ ይመልሳል። እዚህ ምንም ምርመራ የለም።"
   },
   "common": {

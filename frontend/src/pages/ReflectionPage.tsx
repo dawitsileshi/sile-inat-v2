@@ -20,8 +20,9 @@ interface Callout {
 }
 
 interface Reflection {
-  week_start: string
-  week_end: string
+  period: 'week' | 'month'
+  range_start: string
+  range_end: string
   check_in_count: number
   summary: string
   quotes: Quote[]
@@ -29,8 +30,11 @@ interface Reflection {
   callout: Callout | null
 }
 
+type Period = 'week' | 'month'
+
 export function ReflectionPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const [period, setPeriod] = useState<Period>('week')
   const [data, setData] = useState<Reflection | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [expanded, setExpanded] = useState<Record<number, boolean>>({})
@@ -38,33 +42,28 @@ export function ReflectionPage() {
   useEffect(() => {
     const token = localStorage.getItem('auth_token')
     if (!token) {
-      setError('Sign in to see your weekly reflection.')
+      setError(t('reflection.signInPrompt', 'Sign in to see your weekly reflection.'))
       return
     }
     let cancelled = false
-    fetch(`${API_URL}/reflection/weekly`, {
+    setData(null)
+    setError(null)
+    const lang = i18n.language?.split('-')[0] || 'en'
+    fetch(`${API_URL}/reflection/${period}?lang=${encodeURIComponent(lang)}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((r) => parseResponse<Reflection>(r))
       .then((d) => !cancelled && setData(d))
-      .catch((e) => !cancelled && setError(e instanceof Error ? e.message : 'Could not load this week.'))
+      .catch((e) => !cancelled && setError(e instanceof Error ? e.message : 'Could not load.'))
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [period, i18n.language, t])
 
   if (error) {
     return (
       <div className="mx-auto max-w-2xl px-6 py-20 text-center">
         <p className="text-sm text-text-secondary">{error}</p>
-      </div>
-    )
-  }
-
-  if (!data) {
-    return (
-      <div className="mx-auto flex max-w-2xl items-center justify-center px-6 py-24 text-text-muted">
-        <Loader2 className="h-5 w-5 animate-spin" />
       </div>
     )
   }
@@ -78,129 +77,164 @@ export function ReflectionPage() {
             {t('reflection.eyebrow', 'A look back')}
           </p>
           <h1 className="mt-2 text-3xl sm:text-4xl font-bold tracking-tight text-text-primary">
-            {t('reflection.headline', 'How this week has felt')}
+            {period === 'week'
+              ? t('reflection.headlineWeek', 'How this week has felt')
+              : t('reflection.headlineMonth', 'How this month has felt')}
           </h1>
-          <p className="mt-3 text-sm text-text-secondary">
-            {formatWeekRange(data.week_start, data.week_end)}
-          </p>
+          {data && (
+            <p className="mt-3 text-sm text-text-secondary">
+              {formatRange(data.range_start, data.range_end, i18n.language)}
+            </p>
+          )}
         </header>
 
-        {/* Summary paragraph */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="mt-10 rounded-2xl bg-cream-card px-6 py-8 sm:px-8 sm:py-10"
-          style={{ backgroundColor: '#FAF7F2' }}
-        >
-          <p className="font-serif text-lg leading-relaxed text-text-primary sm:text-xl">
-            {data.summary}
-          </p>
-        </motion.div>
+        {/* Period toggle */}
+        <div className="mt-6 inline-flex rounded-full bg-cream-dark/60 p-1">
+          <ToggleButton
+            active={period === 'week'}
+            onClick={() => setPeriod('week')}
+          >
+            {t('reflection.toggleWeek', 'Week')}
+          </ToggleButton>
+          <ToggleButton
+            active={period === 'month'}
+            onClick={() => setPeriod('month')}
+          >
+            {t('reflection.toggleMonth', 'Month')}
+          </ToggleButton>
+        </div>
 
-        {/* Section 1 — quotes */}
-        {data.quotes.length > 0 && (
-          <section className="mt-12">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
-              {t('reflection.quotesHeading', 'What you wrote this week')}
-            </h2>
-            <ul className="mt-4 space-y-3">
-              {data.quotes.map((q) => (
-                <li
-                  key={q.log_id}
-                  className="rounded-xl bg-white p-4 ring-1 ring-black/[0.04]"
-                >
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setExpanded((m) => ({ ...m, [q.log_id]: !m[q.log_id] }))
-                    }
-                    className="w-full text-left"
-                    aria-expanded={!!expanded[q.log_id]}
-                  >
-                    <p className="text-xs text-text-muted">{q.weekday_label}</p>
-                    <p className="mt-1 text-sm leading-relaxed text-text-primary">
-                      &ldquo;{q.snippet}&rdquo;
-                    </p>
-                    {!q.is_full && (
-                      <span className="mt-2 inline-flex items-center gap-1 text-xs text-text-muted">
-                        <ChevronDown
-                          className={cn(
-                            'h-3.5 w-3.5 transition-transform',
-                            expanded[q.log_id] && 'rotate-180'
-                          )}
-                        />
-                        {t('reflection.openInJournal', 'Open in journal')}
-                      </span>
-                    )}
-                  </button>
-                </li>
-              ))}
-            </ul>
-            <Link
-              to="/journal"
-              className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-brand hover:underline"
-            >
-              {t('reflection.seeJournal', 'See full journal')}
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-          </section>
-        )}
-
-        {/* Section 2 — patterns */}
-        {data.patterns.length > 0 && (
-          <section className="mt-12">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
-              {t('reflection.patternsHeading', 'Patterns this week')}
-            </h2>
-            <ul className="mt-4 space-y-3">
-              {data.patterns.map((p, i) => (
-                <motion.li
-                  key={i}
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: i * 0.08 }}
-                  className="font-serif italic leading-relaxed text-text-secondary"
-                >
-                  {p}
-                </motion.li>
-              ))}
-            </ul>
-          </section>
-        )}
-
-        {/* Section 3 — callout */}
-        <AnimatePresence>
-          {data.callout && (
-            <motion.section
-              initial={{ opacity: 0, y: 8 }}
+        {/* Body */}
+        {!data ? (
+          <div className="flex items-center justify-center py-24 text-text-muted">
+            <Loader2 className="h-5 w-5 animate-spin" />
+          </div>
+        ) : (
+          <>
+            {/* Summary paragraph */}
+            <motion.div
+              key={`summary-${period}`}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="mt-12 rounded-2xl bg-brand-light/40 px-6 py-6 ring-1 ring-brand/15"
+              transition={{ duration: 0.5 }}
+              className="mt-8 rounded-2xl px-6 py-8 sm:px-8 sm:py-10"
+              style={{ backgroundColor: '#FAF7F2' }}
             >
-              <p className="text-sm leading-relaxed text-text-primary">
-                {data.callout.prose}
+              <p className="font-serif text-lg leading-relaxed text-text-primary sm:text-xl">
+                {data.summary}
               </p>
-              {data.callout.action && (
+            </motion.div>
+
+            {/* Section 1 — quotes */}
+            {data.quotes.length > 0 && (
+              <section className="mt-12">
+                <h2 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                  {period === 'week'
+                    ? t('reflection.quotesHeadingWeek', 'What you wrote this week')
+                    : t('reflection.quotesHeadingMonth', 'What you wrote this month')}
+                </h2>
+                <ul className="mt-4 space-y-3">
+                  {data.quotes.map((q) => (
+                    <li
+                      key={q.log_id}
+                      className="rounded-xl bg-white p-4 ring-1 ring-black/[0.04]"
+                    >
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setExpanded((m) => ({ ...m, [q.log_id]: !m[q.log_id] }))
+                        }
+                        className="w-full text-left"
+                        aria-expanded={!!expanded[q.log_id]}
+                      >
+                        <p className="text-xs text-text-muted">{q.weekday_label}</p>
+                        <p className="mt-1 text-sm leading-relaxed text-text-primary">
+                          &ldquo;{q.snippet}&rdquo;
+                        </p>
+                        {!q.is_full && (
+                          <span className="mt-2 inline-flex items-center gap-1 text-xs text-text-muted">
+                            <ChevronDown
+                              className={cn(
+                                'h-3.5 w-3.5 transition-transform',
+                                expanded[q.log_id] && 'rotate-180'
+                              )}
+                            />
+                            {t('reflection.openInJournal', 'Open in journal')}
+                          </span>
+                        )}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
                 <Link
-                  to={data.callout.action.to}
-                  className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark"
+                  to="/journal"
+                  className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-brand hover:underline"
                 >
-                  {data.callout.action.label}
+                  {t('reflection.seeJournal', 'See full journal')}
                   <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
-              )}
-            </motion.section>
-          )}
-        </AnimatePresence>
+              </section>
+            )}
 
-        {/* Quiet footer */}
-        <p className="mt-16 text-center text-xs text-text-muted">
-          {t(
-            'reflection.footer',
-            'This page reads back your own check-ins. Nothing here is a diagnosis.',
-          )}
-        </p>
+            {/* Section 2 — patterns */}
+            {data.patterns.length > 0 && (
+              <section className="mt-12">
+                <h2 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                  {period === 'week'
+                    ? t('reflection.patternsHeadingWeek', 'Patterns this week')
+                    : t('reflection.patternsHeadingMonth', 'Patterns this month')}
+                </h2>
+                <ul className="mt-4 space-y-3">
+                  {data.patterns.map((p, i) => (
+                    <motion.li
+                      key={`${period}-${i}`}
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4, delay: i * 0.08 }}
+                      className="font-serif italic leading-relaxed text-text-secondary"
+                    >
+                      {p}
+                    </motion.li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {/* Section 3 — callout */}
+            <AnimatePresence>
+              {data.callout && (
+                <motion.section
+                  key={`callout-${period}`}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  className="mt-12 rounded-2xl bg-brand-light/40 px-6 py-6 ring-1 ring-brand/15"
+                >
+                  <p className="text-sm leading-relaxed text-text-primary">
+                    {data.callout.prose}
+                  </p>
+                  {data.callout.action && (
+                    <Link
+                      to={data.callout.action.to}
+                      className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark"
+                    >
+                      {data.callout.action.label}
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </Link>
+                  )}
+                </motion.section>
+              )}
+            </AnimatePresence>
+
+            {/* Quiet footer */}
+            <p className="mt-16 text-center text-xs text-text-muted">
+              {t(
+                'reflection.footer',
+                'This page reads back your own check-ins. Nothing here is a diagnosis.',
+              )}
+            </p>
+          </>
+        )}
       </div>
     </div>
   )
@@ -208,11 +242,35 @@ export function ReflectionPage() {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function formatWeekRange(startIso: string, endIso: string): string {
-  // "Mon, Jun 8 – Sun, Jun 14" — kept short so it lives on one line on mobile.
+function ToggleButton({
+  active, onClick, children,
+}: {
+  active: boolean
+  onClick: () => void
+  children: React.ReactNode
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={cn(
+        'rounded-full px-4 py-1.5 text-sm font-medium transition-colors',
+        active
+          ? 'bg-white text-text-primary shadow-sm'
+          : 'text-text-secondary hover:text-text-primary',
+      )}
+    >
+      {children}
+    </button>
+  )
+}
+
+function formatRange(startIso: string, endIso: string, lang: string): string {
+  const locale = lang.startsWith('am') ? 'am-ET' : undefined
   const start = new Date(startIso)
   const end = new Date(endIso)
   const fmt = (d: Date) =>
-    d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+    d.toLocaleDateString(locale, { month: 'short', day: 'numeric' })
   return `${fmt(start)} — ${fmt(end)}`
 }
