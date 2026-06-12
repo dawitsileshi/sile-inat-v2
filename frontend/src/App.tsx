@@ -5,6 +5,7 @@ import { CommunityPage } from '@/pages/CommunityPage'
 import { EventsPage } from '@/pages/EventsPage'
 import { CheckInPage } from '@/pages/CheckInPage'
 import { AIAssistantPage } from '@/pages/AIAssistantPage'
+import { CirclesPage } from '@/pages/CirclesPage'
 import { DashboardPage } from '@/pages/DashboardPage'
 
 export default function App() {
@@ -14,6 +15,7 @@ export default function App() {
         <Route element={<Layout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/circles" element={<CirclesPage />} />
           <Route path="/community" element={<CommunityPage />} />
           <Route path="/events" element={<EventsPage />} />
           <Route path="/check-in" element={<CheckInPage />} />

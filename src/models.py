@@ -11,7 +11,7 @@ from datetime import datetime, date
 from typing import Optional
 
 from sqlalchemy import (
-    String, Integer, Float, Date, Text,
+    String, Integer, Float, Date, Text, Boolean,
     DateTime, ForeignKey, UniqueConstraint, CheckConstraint
 )
 from sqlalchemy.orm import relationship, Mapped, mapped_column
@@ -353,3 +353,185 @@ class ForumReply(db.Model):
             "is_mine": viewer_client_id is not None and self.client_id == viewer_client_id,
             "author_label": "You" if viewer_client_id and self.client_id == viewer_client_id else "Anonymous",
         }
+
+
+# ─── Forum Reaction Model ─────────────────────────────────────────────────────
+class ForumReaction(db.Model):
+    """
+    Anonymous "I've been there" reaction on a forum post.
+
+    One reaction per (post_id, client_id) — enforced by unique constraint.
+    Toggling: insert if absent, delete if present.
+    """
+    __tablename__ = "forum_reactions"
+    __table_args__ = (
+        UniqueConstraint("post_id", "client_id", name="uq_forum_reaction"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+
+    post_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("forum_posts.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+
+    client_id: Mapped[str] = mapped_column(
+        String(36),
+        nullable=False,
+        index=True,
+        comment="Anonymous UUID of the reacting client",
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=datetime.utcnow,
+        nullable=False,
+    )
+
+
+# ─── Mother Circle Model ──────────────────────────────────────────────────────
+class Circle(db.Model):
+    """
+    A small, themed group for mothers in a shared moment.
+
+    Topic-anchored, not person-anchored. Capacity-limited so the host
+    can actually know who's in the room.
+    """
+    __tablename__ = "circles"
+    __table_args__ = (
+        CheckConstraint("capacity > 0", name="ck_circle_capacity_positive"),
+        CheckConstraint("member_count >= 0", name="ck_circle_member_count_nonneg"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+
+    name: Mapped[str] = mapped_column(String(120), nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=False)
+
+    phase_tag: Mapped[Optional[str]] = mapped_column(
+        String(60),
+        nullable=True,
+        index=True,
+        comment="Phase-of-life filter — e.g. 'Weeks 1–6', 'All phases'",
+    )
+
+    is_virtual: Mapped[bool] = mapped_column(
+        Boolean,
+        default=True,
+        nullable=False,
+        comment="True for Telegram/video circles; False for in-person",
+    )
+
+    capacity: Mapped[int] = mapped_column(Integer, default=12, nullable=False)
+    member_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=datetime.utcnow,
+        nullable=False,
+    )
+
+    posts: Mapped[list["CirclePost"]] = relationship(
+        "CirclePost",
+        back_populates="circle",
+        cascade="all, delete-orphan",
+        lazy="select",
+        order_by="CirclePost.created_at.desc()",
+    )
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "name": self.name,
+            "description": self.description,
+            "phase_tag": self.phase_tag,
+            "is_virtual": self.is_virtual,
+            "capacity": self.capacity,
+            "member_count": self.member_count,
+            "created_at": self.created_at.isoformat() + "Z",
+        }
+
+
+# ─── Circle Post Model ────────────────────────────────────────────────────────
+class CirclePost(db.Model):
+    """An anonymous post inside a mother circle."""
+    __tablename__ = "circle_posts"
+    __table_args__ = (
+        CheckConstraint("length(content) <= 280", name="ck_circle_post_length"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+
+    circle_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("circles.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+
+    client_id: Mapped[str] = mapped_column(
+        String(36),
+        nullable=False,
+        index=True,
+        comment="Anonymous UUID of the author",
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=datetime.utcnow,
+        nullable=False,
+        index=True,
+    )
+
+    circle: Mapped["Circle"] = relationship("Circle", back_populates="posts")
+
+    def to_dict(self, *, viewer_client_id: Optional[str] = None) -> dict:
+        return {
+            "id": self.id,
+            "circle_id": self.circle_id,
+            "content": self.content,
+            "created_at": self.created_at.isoformat() + "Z",
+            "is_mine": viewer_client_id is not None and self.client_id == viewer_client_id,
+            "author_label": "You" if viewer_client_id and self.client_id == viewer_client_id else "Anonymous",
+        }
+
+
+# ─── Circle Membership Model ──────────────────────────────────────────────────
+class CircleMembership(db.Model):
+    """
+    Tracks which anonymous clients have joined which circles.
+
+    Exists so `/join` is idempotent per UUID and the membership state
+    survives the client clearing localStorage. The unique constraint
+    is the correctness guarantee — we catch IntegrityError on insert
+    to keep the join endpoint safely idempotent.
+    """
+    __tablename__ = "circle_memberships"
+    __table_args__ = (
+        UniqueConstraint("circle_id", "client_id", name="uq_circle_membership"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+
+    circle_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("circles.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+
+    client_id: Mapped[str] = mapped_column(
+        String(36),
+        nullable=False,
+        index=True,
+    )
+
+    joined_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=datetime.utcnow,
+        nullable=False,
+    )

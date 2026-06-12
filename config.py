@@ -27,14 +27,25 @@ class BaseConfig:
     TESTING: bool = False
 
     # ── Database ──────────────────────────────────────────────────────────────
-    SQLALCHEMY_DATABASE_URI: str = os.getenv(
+    _raw_db_url = os.getenv(
         "DATABASE_URL",
         f"sqlite:///{INSTANCE_DIR / 'maternal_wellness.db'}"
     )
+    # Render's Postgres URLs use the deprecated postgres:// scheme.
+    # SQLAlchemy 2.x requires postgresql://, so normalize at load time.
+    if _raw_db_url.startswith("postgres://"):
+        _raw_db_url = _raw_db_url.replace("postgres://", "postgresql://", 1)
+    SQLALCHEMY_DATABASE_URI: str = _raw_db_url
+
     # Disable event system overhead (not needed for this app)
     SQLALCHEMY_TRACK_MODIFICATIONS: bool = False
     # Echo SQL queries only in debug mode
     SQLALCHEMY_ECHO: bool = False
+    # Postgres connection hygiene — keeps pooled connections alive on Render
+    SQLALCHEMY_ENGINE_OPTIONS: dict = {
+        "pool_pre_ping": True,
+        "pool_recycle": 280,  # under Render's 300s timeout
+    }
 
     # ── ML Artifacts ─────────────────────────────────────────────────────────
     # Set ML_INFERENCE_ENABLED=false to skip model loading (logs still work)

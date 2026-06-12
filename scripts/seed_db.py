@@ -24,7 +24,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from app import create_app
 from config import DevelopmentConfig
 from src.extensions import db
-from src.models import User, DailyLog
+from src.models import User, DailyLog, Circle
 from src.services.ml_service import get_ml_service
 
 SEED_EMAIL = "seed-user@maternalwellness.com"
@@ -32,10 +32,121 @@ SEED_PASSWORD = "password123"
 N_DAYS    = 60   # simulate 60 days of logs
 
 
+# ─── Mother Circles ────────────────────────────────────────────────────────────
+SEED_CIRCLES = [
+    {
+        "name": "The First Fog",
+        "description": (
+            "For mothers in the earliest days. When everything is new and "
+            "nothing feels certain."
+        ),
+        "phase_tag": "Weeks 1–6",
+        "is_virtual": True,
+        "capacity": 12,
+        "member_count": 7,
+    },
+    {
+        "name": "Still Breathing",
+        "description": (
+            "You've made it past the first month. Some days are harder than "
+            "others. You're not alone in that."
+        ),
+        "phase_tag": "Weeks 6–12",
+        "is_virtual": True,
+        "capacity": 12,
+        "member_count": 11,
+    },
+    {
+        "name": "The Long Middle",
+        "description": (
+            "The world expects you to be fine by now. You don't have to "
+            "pretend here."
+        ),
+        "phase_tag": "Months 3–6",
+        "is_virtual": True,
+        "capacity": 12,
+        "member_count": 9,
+    },
+    {
+        "name": "Solo Mothers · Addis",
+        "description": (
+            "For mothers carrying it without a partner. No judgment. Just "
+            "women who understand."
+        ),
+        "phase_tag": "All phases",
+        "is_virtual": False,
+        "capacity": 12,
+        "member_count": 5,
+    },
+    {
+        "name": "Pregnancy After Loss",
+        "description": (
+            "For mothers who have known grief before this baby, or between "
+            "babies. A quiet, careful space."
+        ),
+        "phase_tag": "All phases",
+        "is_virtual": True,
+        "capacity": 12,
+        "member_count": 4,
+    },
+    {
+        "name": "My Family Doesn't Understand",
+        "description": (
+            "When the people around you mean well but say the wrong things."
+        ),
+        "phase_tag": "All phases",
+        "is_virtual": True,
+        "capacity": 12,
+        "member_count": 8,
+    },
+    {
+        "name": "Returning to Work",
+        "description": (
+            "For mothers navigating the guilt, the pressure, and the "
+            "impossible math of going back."
+        ),
+        "phase_tag": "Months 3–12",
+        "is_virtual": True,
+        "capacity": 12,
+        "member_count": 6,
+    },
+    {
+        "name": "Fathers & Partners",
+        "description": (
+            "For the men and partners trying to understand what she's going "
+            "through. Come to listen, not to fix."
+        ),
+        "phase_tag": "All phases",
+        "is_virtual": True,
+        "capacity": 12,
+        "member_count": 3,
+    },
+]
+
+
+def seed_circles() -> None:
+    """Idempotent — only inserts a circle if no row with the same name exists."""
+    existing_names = {row[0] for row in db.session.query(Circle.name).all()}
+    added = 0
+    for spec in SEED_CIRCLES:
+        if spec["name"] in existing_names:
+            continue
+        db.session.add(Circle(**spec))
+        added += 1
+    if added:
+        db.session.commit()
+        print(f"[seed] Seeded {added} mother circles.")
+    else:
+        print("[seed] Mother circles already seeded - skipping.")
+
+
 def seed(email: str = SEED_EMAIL, password: str = SEED_PASSWORD, n_days: int = N_DAYS) -> None:
     app = create_app(DevelopmentConfig)
 
     with app.app_context():
+        # Mother circles first — independent of user.
+        seed_circles()
+
         # Create or retrieve user
         user = db.session.query(User).filter_by(email=email).first()
         if not user:

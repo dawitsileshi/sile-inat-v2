@@ -36,7 +36,9 @@ def chat():
         api_key=current_app.config.get("LLM_API_KEY"),
         provider=current_app.config.get("LLM_PROVIDER", "groq"),
         model=current_app.config.get("LLM_MODEL"),
-        timeout=current_app.config.get("LLM_TIMEOUT", 30),
+        # Keep under gunicorn's 30s default worker timeout so a slow LLM
+        # surfaces a clean JSON error instead of an empty proxy response.
+        timeout=current_app.config.get("LLM_TIMEOUT", 22),
     )
 
     return jsonify({

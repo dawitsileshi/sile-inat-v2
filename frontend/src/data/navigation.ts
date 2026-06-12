@@ -1,5 +1,5 @@
 import {
-  Home, MessageSquare, Calendar,
+  Home, MessageSquare, Calendar, Users,
   Smile, Sparkles, type LucideIcon,
 } from 'lucide-react'
 
@@ -20,6 +20,15 @@ export const navLinks: NavLink[] = [
     icon: Home,
     description: 'Your safe space',
     preview: 'Landing page introducing ስለ እናት.',
+    color: 'text-brand',
+    iconBg: 'bg-brand-light',
+  },
+  {
+    to: '/circles',
+    label: 'Circles',
+    icon: Users,
+    description: 'Small groups, same moment',
+    preview: 'Themed mother circles by phase and topic.',
     color: 'text-brand',
     iconBg: 'bg-brand-light',
   },

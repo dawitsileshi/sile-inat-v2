@@ -5,7 +5,7 @@ src/routes/forum.py — Anonymous Community Forum Blueprint
 from flask import Blueprint, jsonify, request
 
 from src.extensions import db
-from src.models import ForumPost, ForumReply
+from src.models import ForumPost, ForumReply, ForumReaction
 from src.services.anonymous import get_client_id_from_request
 
 forum_bp = Blueprint("forum", __name__, url_prefix="/api/forum")
@@ -135,3 +135,44 @@ def create_reply(post_id: int):
         "reply": reply.to_dict(viewer_client_id=client_id),
         "post": post.to_dict(viewer_client_id=client_id, include_replies=True),
     }), 201
+
+
+@forum_bp.route("/posts/<int:post_id>/react", methods=["POST"])
+def toggle_reaction(post_id: int):
+    """
+    POST /api/forum/posts/<id>/react
+    Toggles the "I've been there" reaction for the calling client.
+
+    Header: X-Anonymous-Client-Id: <uuid-v4>
+    Response: { "count": <total>, "reacted": <bool>, "post_id": <id> }
+    """
+    client_id, err = _require_client_id()
+    if err:
+        return err
+
+    post = db.session.get(ForumPost, post_id)
+    if not post:
+        return jsonify({"error": "Post not found."}), 404
+
+    existing = (
+        db.session.query(ForumReaction)
+        .filter_by(post_id=post_id, client_id=client_id)
+        .first()
+    )
+
+    if existing:
+        db.session.delete(existing)
+        reacted = False
+    else:
+        db.session.add(ForumReaction(post_id=post_id, client_id=client_id))
+        reacted = True
+
+    db.session.commit()
+
+    count = db.session.query(ForumReaction).filter_by(post_id=post_id).count()
+
+    return jsonify({
+        "post_id": post_id,
+        "count": count,
+        "reacted": reacted,
+    }), 200

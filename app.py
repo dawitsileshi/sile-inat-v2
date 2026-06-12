@@ -50,9 +50,21 @@ def create_app(config=None) -> Flask:
     with app.app_context():
         # Models MUST be imported before db.create_all() so Flask-SQLAlchemy's
         # metadata registry includes all tables.
-        from src.models import User, UserSession, DailyLog, ForumPost, ForumReply  # noqa: F401
+        from src.models import (  # noqa: F401
+            User, UserSession, DailyLog,
+            ForumPost, ForumReply, ForumReaction,
+            Circle, CirclePost, CircleMembership,
+        )
         db.create_all()
         log.info("Database initialised at: %s", app.config["SQLALCHEMY_DATABASE_URI"])
+
+        # Auto-seed the 8 mother circles on first boot — idempotent.
+        # Keeps Render deploys self-sufficient without a manual seed step.
+        try:
+            from scripts.seed_db import seed_circles
+            seed_circles()
+        except Exception as exc:
+            log.warning("Circle auto-seed skipped: %s", exc)
 
     # ── ML Service ────────────────────────────────────────────────────────────
     from src.services.ml_service import create_ml_service
@@ -74,12 +86,14 @@ def create_app(config=None) -> Flask:
     from src.routes.ml_metrics import ml_bp
     from src.routes.forum      import forum_bp
     from src.routes.chatbot    import chatbot_bp
+    from src.routes.circles    import circles_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(logs_bp)
     app.register_blueprint(ml_bp)
     app.register_blueprint(forum_bp)
     app.register_blueprint(chatbot_bp)
+    app.register_blueprint(circles_bp)
 
     # ── Root Health Check ─────────────────────────────────────────────────────
     @app.route("/health", methods=["GET"])
