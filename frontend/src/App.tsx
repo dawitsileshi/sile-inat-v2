@@ -9,6 +9,7 @@ import { CirclesPage } from '@/pages/CirclesPage'
 import { ComfortPage } from '@/pages/ComfortPage'
 import { CounselorsPage } from '@/pages/CounselorsPage'
 import { FindHelpPage } from '@/pages/FindHelpPage'
+import { HostWithUsPage } from '@/pages/HostWithUsPage'
 import { JournalPage } from '@/pages/JournalPage'
 import { DashboardPage } from '@/pages/DashboardPage'
 
@@ -22,6 +23,7 @@ export default function App() {
           <Route path="/circles" element={<CirclesPage />} />
           <Route path="/comfort" element={<ComfortPage />} />
           <Route path="/counselors" element={<CounselorsPage />} />
+          <Route path="/host-with-us" element={<HostWithUsPage />} />
           <Route path="/find-help" element={<FindHelpPage />} />
           <Route path="/community" element={<CommunityPage />} />
           <Route path="/events" element={<EventsPage />} />
