@@ -40,12 +40,12 @@ export function CrisisButton() {
   return (
     <>
       {/* Continuous radar-style pulse around the Get-help button. Three
-          rings staggered on a slow 2.4s cycle so the signal reads as
+          rings staggered on a slow 4.2s cycle so the signal reads as
           steady emission rather than an alarm flash. */}
       <style>{`
         @keyframes sile-signal-pulse {
           0%   { transform: scale(1);    opacity: 0.55; }
-          80%  { transform: scale(2.1);  opacity: 0;    }
+          70%  { transform: scale(2.1);  opacity: 0;    }
           100% { transform: scale(2.1);  opacity: 0;    }
         }
         .sile-signal-ring {
@@ -53,7 +53,7 @@ export function CrisisButton() {
           inset: 0;
           border-radius: 9999px;
           background-color: #C0392B;
-          animation: sile-signal-pulse 2.4s cubic-bezier(0.22, 0.61, 0.36, 1) infinite;
+          animation: sile-signal-pulse 4.2s cubic-bezier(0.22, 0.61, 0.36, 1) infinite;
           pointer-events: none;
         }
         @media (prefers-reduced-motion: reduce) {
@@ -64,8 +64,8 @@ export function CrisisButton() {
       <div className="fixed bottom-4 right-4 z-30 sm:bottom-6 sm:right-6">
         <div className="relative inline-flex">
           <span className="sile-signal-ring" style={{ animationDelay: '0s' }} aria-hidden />
-          <span className="sile-signal-ring" style={{ animationDelay: '0.8s' }} aria-hidden />
-          <span className="sile-signal-ring" style={{ animationDelay: '1.6s' }} aria-hidden />
+          <span className="sile-signal-ring" style={{ animationDelay: '1.4s' }} aria-hidden />
+          <span className="sile-signal-ring" style={{ animationDelay: '2.8s' }} aria-hidden />
 
           <button
             type="button"
