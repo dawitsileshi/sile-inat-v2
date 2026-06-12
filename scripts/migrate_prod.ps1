@@ -1,4 +1,4 @@
-# scripts/migrate_prod.ps1 — Guided production migration runner.
+# scripts/migrate_prod.ps1 -- Guided production migration runner.
 #
 # Wraps scripts/migrate_drop_daily_log_unique.py so you don't have to
 # remember the env-var dance. Prompts for the External Database URL
@@ -31,12 +31,12 @@ if (-not (Test-Path $migrateScript)) {
 }
 
 Write-Host ""
-Write-Host "=== ስለ እናት — production migration ===" -ForegroundColor Cyan
+Write-Host "=== sile inat -- production migration ===" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "Migration: drop daily_logs.uq_user_date so multiple check-ins"
 Write-Host "per day are allowed."
 Write-Host ""
-Write-Host "Non-destructive — no rows are touched. Idempotent, so re-running"
+Write-Host "Non-destructive -- no rows are touched. Idempotent, so re-running"
 Write-Host "after a successful run is a clean no-op."
 Write-Host ""
 
@@ -61,7 +61,7 @@ if (-not ($databaseUrl.StartsWith('postgres://') -or $databaseUrl.StartsWith('po
     exit 1
 }
 
-# Show the host portion only — never echo the password.
+# Show the host portion only -- never echo the password.
 try {
     $uri = [System.Uri]$databaseUrl
     $hostShown = "$($uri.Host):$($uri.Port)$($uri.AbsolutePath)"

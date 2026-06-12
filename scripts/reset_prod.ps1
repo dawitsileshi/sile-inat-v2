@@ -1,4 +1,4 @@
-# scripts/reset_prod.ps1 — Guided production schema reset.
+# scripts/reset_prod.ps1 -- Guided production schema reset.
 #
 # Prompts for the External Database URL from Render, shows what it's about
 # to drop, asks for an explicit "yes", then runs scripts/reset_db.py.
@@ -27,7 +27,7 @@ if (-not (Test-Path $resetScript)) {
 }
 
 Write-Host ""
-Write-Host "=== ስለ እናት — production database reset ===" -ForegroundColor Cyan
+Write-Host "=== sile inat -- production database reset ===" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "This will DROP every table on the database you point it at,"
 Write-Host "then recreate empty tables matching the current models. The"
@@ -57,7 +57,7 @@ if (-not ($databaseUrl.StartsWith('postgres://') -or $databaseUrl.StartsWith('po
     exit 1
 }
 
-# Show the host portion only — never echo the password.
+# Show the host portion only -- never echo the password.
 try {
     $uri = [System.Uri]$databaseUrl
     $hostShown = "$($uri.Host):$($uri.Port)$($uri.AbsolutePath)"
