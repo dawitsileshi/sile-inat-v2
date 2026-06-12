@@ -12,6 +12,7 @@ import { FindHelpPage } from '@/pages/FindHelpPage'
 import { HostWithUsPage } from '@/pages/HostWithUsPage'
 import { JournalPage } from '@/pages/JournalPage'
 import { DashboardPage } from '@/pages/DashboardPage'
+import { ReflectionPage } from '@/pages/ReflectionPage'
 
 export default function App() {
   return (
@@ -29,6 +30,7 @@ export default function App() {
           <Route path="/events" element={<EventsPage />} />
           <Route path="/check-in" element={<CheckInPage />} />
           <Route path="/journal" element={<JournalPage />} />
+          <Route path="/reflection" element={<ReflectionPage />} />
           <Route path="/ai-assistant" element={<AIAssistantPage />} />
         </Route>
       </Routes>

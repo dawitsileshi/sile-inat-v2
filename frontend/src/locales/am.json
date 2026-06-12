@@ -10,8 +10,18 @@
     "events": "ዝግጅቶች",
     "checkIn": "የቀኑ ሁኔታ",
     "journal": "ማስታወሻ",
+    "reflection": "ማስታረስ",
     "aiAssistant": "የ AI ጓደኛ",
     "findHelp": "እርዳታ ፈልጊ"
+  },
+  "reflection": {
+    "eyebrow": "ወደ ኋላ መለስ",
+    "headline": "ይህ ሳምንት እንዴት ተሰማሽ",
+    "quotesHeading": "በዚህ ሳምንት ያጻፍሽው",
+    "patternsHeading": "የዚህ ሳምንት ምልክቶች",
+    "openInJournal": "በማስታወሻ ክፈቺ",
+    "seeJournal": "ሙሉውን ማስታወሻ ይመልከቱ",
+    "footer": "ይህ ገጽ የራስሽን የቀኑ ሁኔታ ማስታወሻ ይመልሳል። እዚህ ምንም ምርመራ የለም።"
   },
   "common": {
     "join": "ግቢ",

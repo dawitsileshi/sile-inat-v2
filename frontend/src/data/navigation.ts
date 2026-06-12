@@ -1,6 +1,6 @@
 import {
   Home, MessageSquare, Calendar, Users,
-  Smile, Sparkles, Leaf, BookOpen, type LucideIcon,
+  Smile, Sparkles, Leaf, BookOpen, LineChart, type LucideIcon,
 } from 'lucide-react'
 
 export interface NavLink {
@@ -83,6 +83,16 @@ export const navLinks: NavLink[] = [
     icon: BookOpen,
     description: 'Look back at your check-ins',
     preview: 'A private journal of every check-in, with what you said and what was said back to you.',
+    color: 'text-brand',
+    iconBg: 'bg-brand-light',
+  },
+  {
+    to: '/reflection',
+    label: 'Reflection',
+    labelKey: 'nav.reflection',
+    icon: LineChart,
+    description: 'How this week has felt',
+    preview: 'A quiet weekly look back at your check-ins.',
     color: 'text-brand',
     iconBg: 'bg-brand-light',
   },

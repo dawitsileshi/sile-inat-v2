@@ -7,8 +7,18 @@
     "events": "Events",
     "checkIn": "Check-In",
     "journal": "Journal",
+    "reflection": "Reflection",
     "aiAssistant": "AI Assistant",
     "findHelp": "Find Help"
+  },
+  "reflection": {
+    "eyebrow": "A look back",
+    "headline": "How this week has felt",
+    "quotesHeading": "What you wrote this week",
+    "patternsHeading": "Patterns this week",
+    "openInJournal": "Open in journal",
+    "seeJournal": "See full journal",
+    "footer": "This page reads back your own check-ins. Nothing here is a diagnosis."
   },
   "common": {
     "join": "Join",

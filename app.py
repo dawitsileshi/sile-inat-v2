@@ -96,6 +96,7 @@ def create_app(config=None) -> Flask:
     from src.routes.forum      import forum_bp
     from src.routes.chatbot    import chatbot_bp
     from src.routes.circles    import circles_bp
+    from src.routes.reflection import reflection_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(logs_bp)
@@ -103,6 +104,7 @@ def create_app(config=None) -> Flask:
     app.register_blueprint(forum_bp)
     app.register_blueprint(chatbot_bp)
     app.register_blueprint(circles_bp)
+    app.register_blueprint(reflection_bp)
 
     # ── Root Health Check ─────────────────────────────────────────────────────
     @app.route("/health", methods=["GET"])
