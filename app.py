@@ -6,6 +6,14 @@ from pathlib import Path
 from flask import Flask, jsonify
 from flask_cors import CORS
 
+# Load .env before importing config so LLM_API_KEY, DATABASE_URL, etc.
+# are visible to os.getenv() at config-class evaluation time.
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # production (Render) supplies env vars directly
+
 from config import get_config
 from src.extensions import db
 

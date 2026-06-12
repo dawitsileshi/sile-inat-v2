@@ -39,6 +39,7 @@ def chat():
         # Keep under gunicorn's 30s default worker timeout so a slow LLM
         # surfaces a clean JSON error instead of an empty proxy response.
         timeout=current_app.config.get("LLM_TIMEOUT", 22),
+        debug=bool(current_app.debug),
     )
 
     return jsonify({

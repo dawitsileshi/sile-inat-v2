@@ -114,6 +114,20 @@ def _call_openai_compatible(
     return data["choices"][0]["message"]["content"].strip()
 
 
+def _extract_llm_error_detail(body: str) -> Optional[str]:
+    """Pull the human-readable message out of a Groq/OpenAI-style error body."""
+    try:
+        parsed = json.loads(body)
+    except Exception:
+        return None
+    err = parsed.get("error")
+    if isinstance(err, dict):
+        return err.get("message") or err.get("code")
+    if isinstance(err, str):
+        return err
+    return None
+
+
 def get_chat_response(
     user_message: str,
     history: Optional[list] = None,
@@ -122,6 +136,7 @@ def get_chat_response(
     provider: str = "groq",
     model: Optional[str] = None,
     timeout: int = 30,
+    debug: bool = False,
 ) -> str:
     """
     Returns an empathetic assistant reply. Uses Groq (default), OpenAI, or a
@@ -129,6 +144,8 @@ def get_chat_response(
     """
     if not api_key:
         log.warning("LLM_API_KEY not configured — returning fallback response.")
+        if debug:
+            return "[debug] LLM_API_KEY is not set. Add it to .env or your Render env vars."
         return FALLBACK_RESPONSE
 
     messages = _build_messages(user_message, history)
@@ -154,11 +171,19 @@ def get_chat_response(
         )
     except urllib.error.HTTPError as exc:
         body = exc.read().decode("utf-8", errors="replace")
-        log.error("LLM API HTTP error %s: %s", exc.code, body)
+        log.error("LLM API HTTP error %s (model=%s): %s", exc.code, model, body)
+        # In debug builds, surface the actual upstream error so we can fix it
+        # without tailing server logs. Never in production — users shouldn't see
+        # provider internals.
+        if debug:
+            detail = _extract_llm_error_detail(body) or body[:300]
+            return f"[debug] LLM API {exc.code} (model={model}): {detail}"
         return (
             "I'm having trouble reaching the words right now. Try again in a moment. "
             "If you need someone tonight, the mental health support line in Ethiopia is 920."
         )
     except Exception as exc:
-        log.error("LLM API error: %s", exc)
+        log.error("LLM API error (model=%s): %s", model, exc, exc_info=True)
+        if debug:
+            return f"[debug] LLM call failed (model={model}): {exc}"
         return FALLBACK_RESPONSE
