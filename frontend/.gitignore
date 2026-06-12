@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# Real env files — only .env.example is tracked.
+.env
+.env.local
+.env.*.local
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
