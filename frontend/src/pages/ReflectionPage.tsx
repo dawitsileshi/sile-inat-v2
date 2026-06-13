@@ -49,7 +49,9 @@ export function ReflectionPage() {
     setData(null)
     setError(null)
     const lang = i18n.language?.split('-')[0] || 'en'
-    fetch(`${API_URL}/reflection/${period}?lang=${encodeURIComponent(lang)}`, {
+    // Backend routes are /weekly and /monthly, not /week and /month.
+    const endpoint = period === 'week' ? 'weekly' : 'monthly'
+    fetch(`${API_URL}/reflection/${endpoint}?lang=${encodeURIComponent(lang)}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((r) => parseResponse<Reflection>(r))
