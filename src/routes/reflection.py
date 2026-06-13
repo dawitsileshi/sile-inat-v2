@@ -76,33 +76,70 @@ def _parse_month_param(raw: str | None) -> tuple[date, date] | None:
         return None
 
 
+# Hard cap on a custom range so the prose generator doesn't try to summarise
+# half a year as "this month". 93 days = three months worth, generous but
+# still meaningfully monthly-shaped.
+_MAX_RANGE_DAYS = 93
+
+
+def _parse_range_params(raw_start: str | None, raw_end: str | None) -> tuple[date, date] | None:
+    """
+    Accepts ISO 'YYYY-MM-DD' for both bounds. Returns (start, end) or None
+    when either is missing/invalid. Inverted ranges and ranges longer than
+    `_MAX_RANGE_DAYS` are rejected as None so the caller falls back to the
+    rolling default rather than rendering a misshapen page.
+    """
+    if not raw_start or not raw_end:
+        return None
+    try:
+        start = date.fromisoformat(raw_start)
+        end = date.fromisoformat(raw_end)
+    except ValueError:
+        return None
+    if end < start:
+        return None
+    if (end - start).days + 1 > _MAX_RANGE_DAYS:
+        return None
+    return start, end
+
+
 @reflection_bp.route("/monthly", methods=["GET"])
 @login_required
 def monthly():
     """
-    GET /api/reflection/monthly?lang=en|am&month=YYYY-MM
+    GET /api/reflection/monthly?lang=en|am[&month=YYYY-MM | &start=YYYY-MM-DD&end=YYYY-MM-DD]
 
-    Returns a reflection over a calendar month. When `month` is given,
-    uses the first..last day of that calendar month. Otherwise defaults
-    to a rolling 28-day window ending today (the original behaviour).
+    Returns a reflection over a date range. Selection rules, in order:
+
+      1. `start` AND `end` together  -> use that exact range (max 93 days).
+      2. `month=YYYY-MM`             -> use the first..last day of that month.
+      3. neither                     -> rolling 28-day window ending today.
 
     Calendar months vary in length, but for the UI the "natural" month
     grouping is what the user expects when they navigate to a past month.
+    `start`/`end` is the escape hatch for custom date ranges (e.g. the
+    week the in-laws stayed, the first month back at work).
     """
     lang = _coerce_lang(request.args.get("lang"))
     today = date.today()
 
-    parsed = _parse_month_param(request.args.get("month"))
-    if parsed:
-        range_start, range_end = parsed
-        # `today` is what the reflection treats as "now" for the summary;
-        # use the month-end so prose about "by the end of the month" reads
-        # correctly when looking at a past month.
-        reflection_today = min(range_end, today)
+    parsed_range = _parse_range_params(
+        request.args.get("start"), request.args.get("end")
+    )
+    parsed_month = None if parsed_range else _parse_month_param(request.args.get("month"))
+
+    if parsed_range:
+        range_start, range_end = parsed_range
+    elif parsed_month:
+        range_start, range_end = parsed_month
     else:
         range_start = today - timedelta(days=27)
         range_end = today
-        reflection_today = today
+
+    # `today` is what the reflection treats as "now" for the summary;
+    # use the range-end so prose about "by the end of the month" reads
+    # correctly when looking at a past range.
+    reflection_today = min(range_end, today) if (parsed_range or parsed_month) else today
 
     logs = _fetch_logs(range_start, range_end)
     reflection = build_reflection(
@@ -110,7 +147,7 @@ def monthly():
         today=reflection_today,
         lang=lang,
         period="month",
-        range_start=range_start if parsed else None,
-        range_end=range_end if parsed else None,
+        range_start=range_start if (parsed_range or parsed_month) else None,
+        range_end=range_end if (parsed_range or parsed_month) else None,
     )
     return jsonify(reflection.to_dict()), 200

@@ -33,18 +33,32 @@ interface Reflection {
 }
 
 type Period = 'week' | 'month'
+type MonthMode = 'month' | 'range'
 
 export function ReflectionPage() {
   const { t, i18n } = useTranslation()
   const isSignedIn = useIsAuthenticated()
   const [period, setPeriod] = useState<Period>('week')
-  // When `period === 'month'`, this controls which calendar month the
+  // When period === 'month', monthMode picks how the user wants to scope
+  // the look-back. 'month' = MonthNavigator (by-name stepper); 'range' =
+  // explicit start/end dates.
+  const [monthMode, setMonthMode] = useState<MonthMode>('month')
+  // When monthMode === 'month', this controls which calendar month the
   // backend is asked to summarise. Null means "current rolling 28 days"
   // (the default). Format: 'YYYY-MM'.
   const [monthCursor, setMonthCursor] = useState<string | null>(null)
+  // When monthMode === 'range', these are the explicit bounds. Both must
+  // be present + valid for the fetch to use them.
+  const [rangeStart, setRangeStart] = useState<string>('')
+  const [rangeEnd, setRangeEnd] = useState<string>('')
   const [data, setData] = useState<Reflection | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [expanded, setExpanded] = useState<Record<number, boolean>>({})
+
+  // A user-supplied range only goes to the backend once both dates are set
+  // and start <= end. Otherwise we fall back to the by-month default.
+  const validRange =
+    monthMode === 'range' && rangeStart && rangeEnd && rangeStart <= rangeEnd
 
   useEffect(() => {
     if (!isSignedIn) return
@@ -56,7 +70,14 @@ export function ReflectionPage() {
     // Backend routes are /weekly and /monthly, not /week and /month.
     const endpoint = period === 'week' ? 'weekly' : 'monthly'
     const params = new URLSearchParams({ lang })
-    if (period === 'month' && monthCursor) params.set('month', monthCursor)
+    if (period === 'month') {
+      if (validRange) {
+        params.set('start', rangeStart)
+        params.set('end', rangeEnd)
+      } else if (monthMode === 'month' && monthCursor) {
+        params.set('month', monthCursor)
+      }
+    }
     fetch(`${API_URL}/reflection/${endpoint}?${params.toString()}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -66,7 +87,7 @@ export function ReflectionPage() {
     return () => {
       cancelled = true
     }
-  }, [period, monthCursor, i18n.language, isSignedIn])
+  }, [period, monthMode, monthCursor, rangeStart, rangeEnd, validRange, i18n.language, isSignedIn])
 
   if (!isSignedIn) {
     return (
@@ -126,12 +147,43 @@ export function ReflectionPage() {
           </div>
 
           {period === 'month' && (
-            <MonthNavigator
-              cursor={monthCursor}
-              onChange={setMonthCursor}
-              locale={i18n.language}
-              currentLabel={t('reflection.currentMonth', 'Current month')}
-            />
+            <>
+              {/* Sub-mode: by month vs custom range */}
+              <div className="inline-flex rounded-full bg-cream-dark/60 p-1">
+                <ToggleButton
+                  active={monthMode === 'month'}
+                  onClick={() => setMonthMode('month')}
+                >
+                  {t('reflection.modeMonth', 'By month')}
+                </ToggleButton>
+                <ToggleButton
+                  active={monthMode === 'range'}
+                  onClick={() => setMonthMode('range')}
+                >
+                  {t('reflection.modeRange', 'Custom range')}
+                </ToggleButton>
+              </div>
+
+              {monthMode === 'month' ? (
+                <MonthNavigator
+                  cursor={monthCursor}
+                  onChange={setMonthCursor}
+                  locale={i18n.language}
+                  currentLabel={t('reflection.currentMonth', 'Current month')}
+                />
+              ) : (
+                <RangePicker
+                  start={rangeStart}
+                  end={rangeEnd}
+                  onChange={(s, e) => {
+                    setRangeStart(s)
+                    setRangeEnd(e)
+                  }}
+                  fromLabel={t('reflection.rangeFrom', 'From')}
+                  toLabel={t('reflection.rangeTo', 'To')}
+                />
+              )}
+            </>
           )}
         </div>
 
@@ -332,6 +384,54 @@ function MonthNavigator({
       >
         <ChevronRight className="h-4 w-4" />
       </button>
+    </div>
+  )
+}
+
+// ─── Range Picker ─────────────────────────────────────────────────────────────
+//
+// Two date inputs side by side. The "end" input's `min` follows the "start"
+// value so the user can't pick an inverted range in the UI; the backend also
+// rejects inverted/over-long ranges as a defence in depth.
+
+function RangePicker({
+  start, end, onChange, fromLabel, toLabel,
+}: {
+  start: string
+  end: string
+  onChange: (start: string, end: string) => void
+  fromLabel: string
+  toLabel: string
+}) {
+  const today = new Date().toISOString().slice(0, 10)
+  const inputCls =
+    'rounded-md border border-black/[0.08] bg-white px-2.5 py-1.5 text-sm text-text-primary focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/15'
+  return (
+    <div className="inline-flex flex-wrap items-center gap-2 rounded-full bg-cream-dark/60 px-2 py-1">
+      <label className="inline-flex items-center gap-1.5 text-xs text-text-secondary">
+        <span className="font-medium">{fromLabel}</span>
+        <input
+          type="date"
+          value={start}
+          max={end || today}
+          onChange={(e) => onChange(e.target.value, end)}
+          className={inputCls}
+          aria-label={fromLabel}
+        />
+      </label>
+      <span className="text-text-muted">—</span>
+      <label className="inline-flex items-center gap-1.5 text-xs text-text-secondary">
+        <span className="font-medium">{toLabel}</span>
+        <input
+          type="date"
+          value={end}
+          min={start || undefined}
+          max={today}
+          onChange={(e) => onChange(start, e.target.value)}
+          className={inputCls}
+          aria-label={toLabel}
+        />
+      </label>
     </div>
   )
 }

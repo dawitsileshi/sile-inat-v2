@@ -181,7 +181,7 @@ function IdleState({
 }) {
   return (
     <div className="relative">
-      {/* Big mic with halo */}
+      {/* Big mic with halo + floating "more languages coming" badge */}
       <div className="relative mx-auto mb-6 flex h-24 w-24 items-center justify-center">
         <div className="absolute inset-0 animate-pulse rounded-full bg-brand/10" />
         <div className="absolute inset-2 rounded-full bg-brand/20" />
@@ -193,6 +193,17 @@ function IdleState({
         >
           <Mic className="h-7 w-7" />
         </button>
+
+        {/* Floating roadmap badge — wraps the top-right of the mic, naming
+            the languages whose speakers are most likely to look for them.
+            Visible enough that visitors don't think we forgot their language. */}
+        <span
+          className="absolute -right-12 -top-3 inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-white px-2.5 py-1 text-[10px] font-semibold text-brand shadow-sm ring-1 ring-brand/20 sm:-right-16"
+          aria-hidden
+        >
+          <Sparkles className="h-2.5 w-2.5" />
+          Afaan Oromoo · ትግርኛ soon
+        </span>
       </div>
 
       {/* Bilingual headline — secondary language under primary, when present */}
@@ -219,12 +230,8 @@ function IdleState({
         </LangPill>
       </div>
 
-      {/* Roadmap note — other Ethiopian languages aren't yet supported by the
-          browser's Web Speech API (Oromo / Tigrinya / Somali all return
-          language-not-supported). Tell visitors honestly. */}
-      <p className="mx-auto mt-3 max-w-xs text-[11px] leading-snug text-text-muted">
-        Afaan Oromoo, ትግርኛ and more languages coming soon.
-      </p>
+      {/* (Roadmap note moved to a floating badge around the mic above so it's
+          visible at first glance.) */}
 
       {error && error !== "aborted" && (
         <ErrorHint
