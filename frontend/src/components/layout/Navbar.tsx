@@ -6,7 +6,10 @@ import { useTranslation } from 'react-i18next'
 import { navLinks, isNavActive } from '@/data/navigation'
 import { cn } from '@/lib/utils'
 import { JoinModal } from '@/components/layout/JoinModal'
-import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher'
+// LanguageSwitcher is intentionally hidden for now. The i18n plumbing (locale
+// JSON, t() calls, language detector) stays wired so re-enabling is a single
+// import + two render sites in this file.
+// import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher'
 
 interface StoredAuthUser {
   user_id?: number
@@ -114,9 +117,6 @@ export function Navbar() {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="hidden lg:block">
-              <LanguageSwitcher />
-            </div>
             {auth ? (
               <div ref={accountWrapperRef} className="relative hidden sm:block">
                 <button
@@ -217,10 +217,6 @@ export function Navbar() {
                     </Link>
                   )
                 })}
-
-                <div className="mt-3 px-1">
-                  <LanguageSwitcher wide />
-                </div>
 
                 {auth ? (
                   <>
