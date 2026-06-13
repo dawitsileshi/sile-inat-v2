@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Phone, Navigation, Star, ChevronDown } from 'lucide-react'
+import { Phone, Navigation, Star, ChevronDown, LocateFixed } from 'lucide-react'
 import {
   GOOGLE_MAPS_API_KEY, SERVICE_TYPES, RADIUS_OPTIONS, ADDIS_CENTER,
   useGeolocation, searchTextNearby, haversineKm, formatDistance, embedMapSrc,
@@ -20,7 +20,7 @@ export function FindHelpPage() {
   const [serviceType, setServiceType] = useState(initialType)
   const [radiusKm, setRadiusKm] = useState<RadiusKm>(validInitialRadius)
 
-  const { coords, denied } = useGeolocation()
+  const { coords, denied, refresh: refreshLocation } = useGeolocation()
   const center = coords ?? ADDIS_CENTER
 
   const current = useMemo(
@@ -84,6 +84,28 @@ export function FindHelpPage() {
             onChange={(v) => setRadiusKm(Number(v) as RadiusKm)}
             options={RADIUS_OPTIONS.map((r) => ({ value: String(r), label: `Within ${r} km` }))}
           />
+        </div>
+
+        {/* Location status + manual refresh. Desktop browsers serve Wi-Fi
+            positioning which is frequently stale; this button is the user's
+            escape hatch when the map opens on yesterday's office instead of
+            today's home. */}
+        <div className="mt-3 flex items-center justify-between rounded-xl bg-cream/50 px-4 py-2.5 text-xs text-text-secondary">
+          <span className="inline-flex items-center gap-1.5">
+            <LocateFixed className="h-3.5 w-3.5" />
+            {denied
+              ? 'Location off — showing results centered on Addis Ababa.'
+              : coords
+                ? 'Using your current location.'
+                : 'Locating you…'}
+          </span>
+          <button
+            type="button"
+            onClick={refreshLocation}
+            className="rounded-full px-3 py-1 text-xs font-medium text-brand transition-colors hover:bg-brand-light/60"
+          >
+            Refresh location
+          </button>
         </div>
 
         {!GOOGLE_MAPS_API_KEY ? (

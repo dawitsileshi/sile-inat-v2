@@ -61,20 +61,32 @@ export type RadiusKm = (typeof RADIUS_OPTIONS)[number]
 export function useGeolocation() {
   const [coords, setCoords] = useState<Coords | null>(null)
   const [denied, setDenied] = useState(false)
+  const [refreshTick, setRefreshTick] = useState(0)
 
   useEffect(() => {
     if (typeof navigator === 'undefined' || !navigator.geolocation) {
       setDenied(true)
       return
     }
+    setDenied(false)
     navigator.geolocation.getCurrentPosition(
       (pos) => setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
       () => setDenied(true),
-      { timeout: 10_000, maximumAge: 300_000 }
+      // enableHighAccuracy: ask the OS for GPS/precise positioning rather
+      //   than Wi-Fi/IP triangulation. On laptops without GPS the browser
+      //   still uses Wi-Fi, but it forces a fresh lookup instead of cache.
+      // maximumAge: 0: never accept a cached position. Desktops in
+      //   particular were serving Wi-Fi locations from hours ago.
+      // timeout: bump to 15s to give high-accuracy a chance to resolve.
+      { enableHighAccuracy: true, timeout: 15_000, maximumAge: 0 }
     )
-  }, [])
+  }, [refreshTick])
 
-  return useMemo(() => ({ coords, denied }), [coords, denied])
+  // Callers can prompt a manual re-check (e.g. a "Use my current location"
+  // button on the map page) by invoking this.
+  const refresh = () => setRefreshTick((t) => t + 1)
+
+  return useMemo(() => ({ coords, denied, refresh }), [coords, denied])
 }
 
 export async function searchTextNearby(
