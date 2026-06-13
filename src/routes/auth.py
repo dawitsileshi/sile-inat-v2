@@ -2,13 +2,15 @@
 src/routes/auth.py — Authentication Blueprint
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, date, timedelta
 import re
+import secrets
+import uuid
 from flask import Blueprint, request, jsonify
 from sqlalchemy.exc import IntegrityError
 
 from src.extensions import db
-from src.models import User, UserSession
+from src.models import User, UserSession, DailyLog
 from src.services.auth import login_required
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/api/auth")
@@ -151,6 +153,100 @@ def login():
         "expires_at": expires_at.isoformat() + "Z",
         "user": user.to_dict()
     }), 200
+
+
+# ─── Demo accounts ────────────────────────────────────────────────────────────
+#
+# Each click of "Continue as demo user" in the JoinModal creates a brand-new
+# user named "demo-<8hex>@sile-inat.app" so every evaluator has their own
+# isolated data (Journal, Reflection, Dashboard) without seeing each other's
+# notes. Wipe the lot after the review round with:
+#
+#     DELETE FROM users WHERE email LIKE 'demo-%@sile-inat.app';
+#
+# Each demo user is pre-seeded with a small, varied week of check-ins so the
+# Reflection and Journal pages have meaningful content on first load.
+
+DEMO_EMAIL_DOMAIN = "sile-inat.app"
+
+
+def _seed_demo_check_ins(user: User) -> None:
+    """Insert a small, varied week of check-ins so Reflection has signal."""
+    today = date.today()
+    # (days_ago, hour_utc, mood_score (1=best, 5=worst), sleep, water, symptom, supported, note)
+    spec = [
+        (6, 22, 4, 5.5, 1.8, 3, "no",       "couldn't sleep, baby up again at 2"),
+        (5,  2, 5, 4.0, 1.5, 4, "no",       "2am, baby finally asleep, can't stop crying"),
+        (4, 23, 4, 5.0, 2.0, 3, "somewhat", "mother-in-law visited, helpful but tiring"),
+        (2, 11, 3, 6.5, 2.4, 2, "somewhat", "ok-ish today, walked outside for the first time in a week"),
+        (0, 15, 2, 7.0, 2.5, 2, "yes",      "husband home, we walked together, feels lighter today"),
+    ]
+    for days_ago, hour, mood, sleep, water, symptom, supported, note in spec:
+        log_date = today - timedelta(days=days_ago)
+        created_at = datetime.combine(log_date, datetime.min.time()).replace(hour=hour)
+        db.session.add(DailyLog(
+            user_id=user.id,
+            log_date=log_date,
+            created_at=created_at,
+            gestational_week=20,
+            sleep_hours=sleep,
+            water_liters=water,
+            symptom_score=symptom,
+            mood_score=mood,
+            feels_supported=supported,
+            notes=note,
+        ))
+
+
+@auth_bp.route("/demo", methods=["POST"])
+def demo():
+    """
+    POST /api/auth/demo
+    -------------------
+    Creates a fresh demo user with isolated data, a 30-day session, and a
+    small pre-seeded week of check-ins. Same response shape as /register.
+
+    No request body required. Each call mints a new account; the frontend
+    "Continue as demo user" button surfaces this without ever displaying
+    credentials to the visitor.
+    """
+    # Tiny 8-char suffix is plenty — collision odds at demo scale are nil,
+    # and a unique-email constraint catches the impossible.
+    suffix = uuid.uuid4().hex[:8]
+    email = f"demo-{suffix}@{DEMO_EMAIL_DOMAIN}"
+    password = secrets.token_urlsafe(24)
+
+    # Baby "born" three months ago so the postpartum-stage line in the
+    # check-in response lights up — a richer demo than "skip".
+    baby_birth_date = date.today() - timedelta(weeks=12)
+
+    user = User(
+        email=email,
+        baby_status="born",
+        baby_birth_date=baby_birth_date,
+    )
+    user.set_password(password)
+
+    try:
+        db.session.add(user)
+        db.session.flush()  # populate user.id for the seeded logs
+        _seed_demo_check_ins(user)
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        return jsonify({"error": "Could not create demo account, please try again."}), 500
+
+    token = UserSession.generate_token()
+    expires_at = datetime.utcnow() + timedelta(days=30)
+    db.session.add(UserSession(user_id=user.id, token=token, expires_at=expires_at))
+    db.session.commit()
+
+    return jsonify({
+        "message": "Demo session started.",
+        "token": token,
+        "expires_at": expires_at.isoformat() + "Z",
+        "user": user.to_dict(),
+    }), 201
 
 
 @auth_bp.route("/logout", methods=["POST"])

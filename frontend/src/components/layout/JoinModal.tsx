@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Heart, Shield, MessageCircle, Loader2 } from 'lucide-react'
+import { Heart, Shield, MessageCircle, Loader2, Sparkles } from 'lucide-react'
 import { Modal } from '@/components/ui/Modal'
 import { cn } from '@/lib/utils'
 
@@ -42,6 +42,36 @@ export function JoinModal({ open, onClose }: JoinModalProps) {
   function handleClose() {
     reset()
     onClose()
+  }
+
+  async function handleDemo() {
+    setError(null)
+    setSubmitting(true)
+    try {
+      const response = await fetch(`${API_URL}/auth/demo`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        throw new Error(
+          (data && typeof data.error === 'string' && data.error) ||
+            `Request failed (${response.status})`,
+        )
+      }
+      const token: string | undefined = data.token
+      const user: AuthUser | undefined = data.user
+      if (!token) throw new Error('Server did not return a session token.')
+      localStorage.setItem(TOKEN_KEY, token)
+      if (user) localStorage.setItem(USER_KEY, JSON.stringify(user))
+      window.dispatchEvent(new Event('auth:changed'))
+      handleClose()
+      window.location.reload()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not start a demo session.')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -99,7 +129,32 @@ export function JoinModal({ open, onClose }: JoinModalProps) {
           </p>
         </div>
 
-        <div className="mt-8 rounded-2xl border border-gray-200 bg-white p-6">
+        {/* Demo session — one-tap entry for evaluators. Creates a fresh
+            isolated account on the backend so reviewers never see each
+            other's data. The credentials are never displayed. */}
+        <div className="mt-6 rounded-2xl border border-brand/20 bg-brand-light/30 p-4">
+          <p className="text-sm font-semibold text-text-primary">
+            Just looking around?
+          </p>
+          <p className="mt-1 text-xs leading-relaxed text-text-secondary">
+            Try the app with a fresh demo account — no signup, your data stays separate from other visitors.
+          </p>
+          <button
+            type="button"
+            onClick={handleDemo}
+            disabled={submitting}
+            className="mt-3 inline-flex items-center gap-2 rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-dark disabled:opacity-60"
+          >
+            {submitting ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Sparkles className="h-4 w-4" />
+            )}
+            Continue as demo user
+          </button>
+        </div>
+
+        <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-6">
           <div className="mb-5 grid grid-cols-2 gap-1 rounded-full bg-cream-dark p-1">
             <button
               type="button"
