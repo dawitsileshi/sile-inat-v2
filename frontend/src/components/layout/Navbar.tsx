@@ -88,7 +88,7 @@ export function Navbar() {
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-black/[0.04] bg-cream/90 backdrop-blur-md">
-        <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+        <nav className="flex items-center justify-between px-6 py-4 sm:px-8 lg:px-12">
           <Link to="/" className="flex flex-none items-center gap-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand">
               <Heart className="h-4 w-4 fill-white text-white" />
