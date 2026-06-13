@@ -219,6 +219,13 @@ function IdleState({
         </LangPill>
       </div>
 
+      {/* Roadmap note — other Ethiopian languages aren't yet supported by the
+          browser's Web Speech API (Oromo / Tigrinya / Somali all return
+          language-not-supported). Tell visitors honestly. */}
+      <p className="mx-auto mt-3 max-w-xs text-[11px] leading-snug text-text-muted">
+        Afaan Oromoo, ትግርኛ and more languages coming soon.
+      </p>
+
       {error && error !== "aborted" && (
         <ErrorHint
           code={error}

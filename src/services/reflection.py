@@ -496,20 +496,28 @@ def build_reflection(
     today: Optional[date] = None,
     lang: Lang = "en",
     period: Period = "week",
+    range_start: Optional[date] = None,
+    range_end: Optional[date] = None,
 ) -> Reflection:
     """
-    Build a structured Reflection for the requested `period` ending at `today`.
+    Build a structured Reflection for the requested `period`.
 
-    week:  Monday-of-this-week through Sunday-of-this-week
-    month: rolling 28-day window ending at `today`
+    By default:
+      week:  Monday-of-this-week through Sunday-of-this-week
+      month: rolling 28-day window ending at `today`
+
+    Passing explicit `range_start` and `range_end` overrides the default
+    window — used by the monthly route when the caller asks for a specific
+    calendar month rather than the rolling default.
     """
     today = today or date.today()
-    if period == "week":
-        range_start = _start_of_week(today)
-        range_end = range_start + timedelta(days=6)
-    else:
-        range_start = _start_of_month_window(today, days=28)
-        range_end = today
+    if range_start is None or range_end is None:
+        if period == "week":
+            range_start = _start_of_week(today)
+            range_end = range_start + timedelta(days=6)
+        else:
+            range_start = _start_of_month_window(today, days=28)
+            range_end = today
 
     in_range = [l for l in logs if range_start <= l.log_date <= range_end]
     in_range.sort(key=lambda l: (l.log_date, l.created_at))

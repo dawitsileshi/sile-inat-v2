@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Loader2, ArrowRight, ChevronDown } from 'lucide-react'
+import { Loader2, ArrowRight, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { API_URL, parseResponse } from '@/lib/api'
 import { cn } from '@/lib/utils'
@@ -38,6 +38,10 @@ export function ReflectionPage() {
   const { t, i18n } = useTranslation()
   const isSignedIn = useIsAuthenticated()
   const [period, setPeriod] = useState<Period>('week')
+  // When `period === 'month'`, this controls which calendar month the
+  // backend is asked to summarise. Null means "current rolling 28 days"
+  // (the default). Format: 'YYYY-MM'.
+  const [monthCursor, setMonthCursor] = useState<string | null>(null)
   const [data, setData] = useState<Reflection | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [expanded, setExpanded] = useState<Record<number, boolean>>({})
@@ -51,7 +55,9 @@ export function ReflectionPage() {
     const lang = i18n.language?.split('-')[0] || 'en'
     // Backend routes are /weekly and /monthly, not /week and /month.
     const endpoint = period === 'week' ? 'weekly' : 'monthly'
-    fetch(`${API_URL}/reflection/${endpoint}?lang=${encodeURIComponent(lang)}`, {
+    const params = new URLSearchParams({ lang })
+    if (period === 'month' && monthCursor) params.set('month', monthCursor)
+    fetch(`${API_URL}/reflection/${endpoint}?${params.toString()}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((r) => parseResponse<Reflection>(r))
@@ -60,7 +66,7 @@ export function ReflectionPage() {
     return () => {
       cancelled = true
     }
-  }, [period, i18n.language, isSignedIn])
+  }, [period, monthCursor, i18n.language, isSignedIn])
 
   if (!isSignedIn) {
     return (
@@ -100,19 +106,33 @@ export function ReflectionPage() {
         </header>
 
         {/* Period toggle */}
-        <div className="mt-6 inline-flex rounded-full bg-cream-dark/60 p-1">
-          <ToggleButton
-            active={period === 'week'}
-            onClick={() => setPeriod('week')}
-          >
-            {t('reflection.toggleWeek', 'Week')}
-          </ToggleButton>
-          <ToggleButton
-            active={period === 'month'}
-            onClick={() => setPeriod('month')}
-          >
-            {t('reflection.toggleMonth', 'Month')}
-          </ToggleButton>
+        <div className="mt-6 flex flex-wrap items-center gap-3">
+          <div className="inline-flex rounded-full bg-cream-dark/60 p-1">
+            <ToggleButton
+              active={period === 'week'}
+              onClick={() => {
+                setPeriod('week')
+                setMonthCursor(null)
+              }}
+            >
+              {t('reflection.toggleWeek', 'Week')}
+            </ToggleButton>
+            <ToggleButton
+              active={period === 'month'}
+              onClick={() => setPeriod('month')}
+            >
+              {t('reflection.toggleMonth', 'Month')}
+            </ToggleButton>
+          </div>
+
+          {period === 'month' && (
+            <MonthNavigator
+              cursor={monthCursor}
+              onChange={setMonthCursor}
+              locale={i18n.language}
+              currentLabel={t('reflection.currentMonth', 'Current month')}
+            />
+          )}
         </div>
 
         {/* Body */}
@@ -252,6 +272,82 @@ export function ReflectionPage() {
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function MonthNavigator({
+  cursor, onChange, locale, currentLabel,
+}: {
+  cursor: string | null  // 'YYYY-MM' or null = current month
+  onChange: (next: string | null) => void
+  locale: string
+  currentLabel: string
+}) {
+  // The "effective" month we're showing. When cursor is null, treat as
+  // the current calendar month so the arrows always have a stable anchor.
+  const now = new Date()
+  const effective = cursor
+    ? parseMonthString(cursor)
+    : { year: now.getFullYear(), month: now.getMonth() + 1 }
+  const isCurrent = !cursor
+
+  function step(delta: number) {
+    let { year, month } = effective
+    month += delta
+    while (month > 12) { month -= 12; year += 1 }
+    while (month < 1)  { month += 12; year -= 1 }
+    const next = `${year}-${String(month).padStart(2, '0')}`
+    const thisMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+    onChange(next === thisMonth ? null : next)
+  }
+
+  // Don't let the visitor navigate into the future.
+  const atCurrentMonth =
+    effective.year === now.getFullYear() && effective.month === now.getMonth() + 1
+
+  const label = formatMonthLabel(effective.year, effective.month, locale)
+
+  return (
+    <div className="inline-flex items-center gap-1 rounded-full bg-cream-dark/60 p-1">
+      <button
+        type="button"
+        onClick={() => step(-1)}
+        aria-label="Previous month"
+        className="rounded-full p-1.5 text-text-secondary transition-colors hover:text-text-primary"
+      >
+        <ChevronLeft className="h-4 w-4" />
+      </button>
+      <span className="min-w-[7rem] text-center text-sm font-medium text-text-primary">
+        {label}
+        {isCurrent && (
+          <span className="ml-1 text-[10px] font-normal uppercase tracking-wider text-text-muted">
+            · {currentLabel}
+          </span>
+        )}
+      </span>
+      <button
+        type="button"
+        onClick={() => step(1)}
+        disabled={atCurrentMonth}
+        aria-label="Next month"
+        className="rounded-full p-1.5 text-text-secondary transition-colors hover:text-text-primary disabled:cursor-not-allowed disabled:opacity-30"
+      >
+        <ChevronRight className="h-4 w-4" />
+      </button>
+    </div>
+  )
+}
+
+function parseMonthString(s: string): { year: number; month: number } {
+  const [y, m] = s.split('-').map(Number)
+  return { year: y, month: m }
+}
+
+function formatMonthLabel(year: number, month: number, locale: string): string {
+  const loc = locale.startsWith('am') ? 'am-ET' : undefined
+  return new Date(year, month - 1, 1).toLocaleDateString(loc, {
+    month: 'long',
+    year: 'numeric',
+  })
+}
 
 function ToggleButton({
   active, onClick, children,
