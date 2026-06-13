@@ -3,6 +3,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchLogs, ensureAuth } from '@/store/trackerSlice';
 import { Loader2, AlertCircle } from 'lucide-react';
 import type { AppDispatch, RootState } from '@/store/store';
+import { useIsAuthenticated } from '@/lib/useIsAuthenticated';
+import { SignInPrompt } from '@/components/SignInPrompt';
 
 function wellbeingStatus(index: number): { color: string; text: string } {
   // Backend scale: 0–10, higher = healthier (lower risk)
@@ -37,14 +39,25 @@ export function DashboardPage() {
   const { logs, status, latestPrediction, predictionLabel, insights, error } = useSelector(
     (state: RootState) => state.tracker
   );
+  const isSignedIn = useIsAuthenticated();
 
   useEffect(() => {
+    if (!isSignedIn) return;
     dispatch(ensureAuth()).then((result) => {
       if (ensureAuth.fulfilled.match(result)) {
         dispatch(fetchLogs());
       }
     });
-  }, [dispatch]);
+  }, [dispatch, isSignedIn]);
+
+  if (!isSignedIn) {
+    return (
+      <SignInPrompt
+        title="Sign in to see your dashboard"
+        body="Your wellness trends are tied to your account. Sign in to view them."
+      />
+    );
+  }
 
   if (status === 'loading' || status === 'idle') {
     return (

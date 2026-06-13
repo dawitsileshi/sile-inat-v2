@@ -6,6 +6,8 @@ import {
   SmilePlus, ArrowRight,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useIsAuthenticated } from '@/lib/useIsAuthenticated'
+import { SignInPrompt } from '@/components/SignInPrompt'
 import { VoiceMemo } from '@/components/VoiceMemo'
 import { useDispatch, useSelector } from 'react-redux'
 import {
@@ -135,6 +137,7 @@ function formatLogDate(iso: string): string {
 export function CheckInPage() {
   const dispatch = useDispatch<AppDispatch>()
   const { status, error, logs } = useSelector((state: RootState) => state.tracker)
+  const isSignedIn = useIsAuthenticated()
 
   const [mood, setMood] = useState<MoodValue>('okay')
   const [energy, setEnergy] = useState(50)
@@ -202,6 +205,15 @@ export function CheckInPage() {
     setWater(2)
     setSupported('')
     setNotes('')
+  }
+
+  if (!isSignedIn) {
+    return (
+      <SignInPrompt
+        title="Sign in to check in"
+        body="Your check-ins are tied to your account so you can look back at them later in your journal."
+      />
+    )
   }
 
   return (

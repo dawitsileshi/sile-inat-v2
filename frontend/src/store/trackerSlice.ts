@@ -90,49 +90,25 @@ function authHeaders(token: string): HeadersInit {
   };
 }
 
-async function getOrCreateToken(getState: () => unknown): Promise<string> {
+// Sentinel value the pages can pattern-match on to decide whether to render
+// the "sign in to track your check-ins" prompt vs. a generic error message.
+export const NO_AUTH = 'no-auth';
+
+function requireToken(getState: () => unknown): string {
   const state = getState() as { tracker: TrackerState };
   const existing = state.tracker.authToken || getStoredToken();
-  if (existing) {
-    return existing;
-  }
-
-  const email = `user-${crypto.randomUUID().slice(0, 8)}@wellness.local`;
-  const password = crypto.randomUUID();
-  const response = await fetch(`${API_URL}/auth/register`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password }),
-  });
-  const data = await parseResponse<{ token: string; user?: StoredUser }>(response);
-  storeToken(data.token);
-  storeUser(data.user);
-  return data.token;
+  if (!existing) throw new Error(NO_AUTH);
+  return existing;
 }
 
 export const ensureAuth = createAsyncThunk<string, void, { rejectValue: string }>(
   'tracker/ensureAuth',
   async (_, { rejectWithValue }) => {
     const existing = getStoredToken();
-    if (existing) {
-      return existing;
-    }
-
-    const email = `user-${crypto.randomUUID().slice(0, 8)}@wellness.local`;
-    const password = crypto.randomUUID();
-
-    try {
-      const response = await fetch(`${API_URL}/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await parseResponse<{ token: string }>(response);
-      storeToken(data.token);
-      return data.token;
-    } catch (err) {
-      return rejectWithValue(err instanceof Error ? err.message : 'Registration failed');
-    }
+    if (existing) return existing;
+    // Pages should react to this rejection by prompting the JoinModal via
+    // the `auth:open` window event — never by silently creating an account.
+    return rejectWithValue(NO_AUTH);
   }
 );
 
@@ -143,7 +119,7 @@ export const submitDailyLog = createAsyncThunk(
   'tracker/submitDailyLog',
   async (logData: DailyLogPayload, { getState, rejectWithValue }) => {
     try {
-      const token = await getOrCreateToken(getState);
+      const token = requireToken(getState);
       const response = await fetch(`${API_URL}/logs`, {
         method: 'POST',
         headers: authHeaders(token),
@@ -165,7 +141,7 @@ export const fetchLogs = createAsyncThunk(
   'tracker/fetchLogs',
   async (_, { getState, rejectWithValue }) => {
     try {
-      const token = await getOrCreateToken(getState);
+      const token = requireToken(getState);
       const response = await fetch(`${API_URL}/logs/history`, {
         headers: authHeaders(token),
       });

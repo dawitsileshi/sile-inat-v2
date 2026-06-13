@@ -5,6 +5,8 @@ import { Loader2, ArrowRight, ChevronDown } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { API_URL, parseResponse } from '@/lib/api'
 import { cn } from '@/lib/utils'
+import { useIsAuthenticated } from '@/lib/useIsAuthenticated'
+import { SignInPrompt } from '@/components/SignInPrompt'
 
 interface Quote {
   log_id: number
@@ -34,17 +36,15 @@ type Period = 'week' | 'month'
 
 export function ReflectionPage() {
   const { t, i18n } = useTranslation()
+  const isSignedIn = useIsAuthenticated()
   const [period, setPeriod] = useState<Period>('week')
   const [data, setData] = useState<Reflection | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [expanded, setExpanded] = useState<Record<number, boolean>>({})
 
   useEffect(() => {
-    const token = localStorage.getItem('auth_token')
-    if (!token) {
-      setError(t('reflection.signInPrompt', 'Sign in to see your weekly reflection.'))
-      return
-    }
+    if (!isSignedIn) return
+    const token = localStorage.getItem('auth_token')!
     let cancelled = false
     setData(null)
     setError(null)
@@ -58,7 +58,16 @@ export function ReflectionPage() {
     return () => {
       cancelled = true
     }
-  }, [period, i18n.language, t])
+  }, [period, i18n.language, isSignedIn])
+
+  if (!isSignedIn) {
+    return (
+      <SignInPrompt
+        title="Sign in to see your reflection"
+        body="Your weekly look-back is built from your own check-ins. Sign in to see it."
+      />
+    )
+  }
 
   if (error) {
     return (

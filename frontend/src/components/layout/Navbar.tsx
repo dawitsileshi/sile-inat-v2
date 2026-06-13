@@ -53,6 +53,15 @@ export function Navbar() {
     }
   }, [])
 
+  // Pages that need auth (Check-In, Journal, Dashboard) fire `auth:open` when
+  // the visitor isn't signed in. Same pattern as the crisis modal — the host
+  // of the modal listens, the requester just dispatches.
+  useEffect(() => {
+    function onOpen() { setJoinOpen(true) }
+    window.addEventListener('auth:open', onOpen as EventListener)
+    return () => window.removeEventListener('auth:open', onOpen as EventListener)
+  }, [])
+
   // Click outside to close the account menu.
   useEffect(() => {
     if (!accountOpen) return

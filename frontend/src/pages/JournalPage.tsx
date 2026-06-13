@@ -6,6 +6,8 @@ import { useDispatch, useSelector } from 'react-redux'
 import { fetchLogs, ensureAuth, type DailyLog } from '@/store/trackerSlice'
 import type { AppDispatch, RootState } from '@/store/store'
 import { cn } from '@/lib/utils'
+import { useIsAuthenticated } from '@/lib/useIsAuthenticated'
+import { SignInPrompt } from '@/components/SignInPrompt'
 
 // Same mapping the check-in form uses, just keyed by API mood_score.
 // API: 1 = calm/best (Felt like myself), 5 = anxious/worst (Surviving).
@@ -46,14 +48,25 @@ function formatDateHeading(iso: string): string {
 export function JournalPage() {
   const dispatch = useDispatch<AppDispatch>()
   const { logs, status } = useSelector((state: RootState) => state.tracker)
+  const isSignedIn = useIsAuthenticated()
 
   useEffect(() => {
+    if (!isSignedIn) return
     dispatch(ensureAuth()).then((auth) => {
       if (ensureAuth.fulfilled.match(auth)) {
         dispatch(fetchLogs())
       }
     })
-  }, [dispatch])
+  }, [dispatch, isSignedIn])
+
+  if (!isSignedIn) {
+    return (
+      <SignInPrompt
+        title="Sign in to see your journal"
+        body="Your journal is a private record of every check-in. Sign in to read it back."
+      />
+    )
+  }
 
   // Newest first.
   const ordered = [...logs].sort((a, b) => b.log_date.localeCompare(a.log_date))
