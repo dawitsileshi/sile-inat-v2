@@ -67,7 +67,10 @@ html {
 
 body {
   font-family: var(--font-sans);
-  background-color: var(--color-cream);
+  /* Body is white now. The warm cream tokens (--color-cream,
+     --color-cream-dark) stay in the palette for specific places that
+     want a tinted accent — they no longer set the page background. */
+  background-color: #ffffff;
   color: var(--color-text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -137,10 +140,17 @@ input[type="range"].wellness-slider::-moz-range-thumb {
   color: inherit;
 }
 
+/* Card utilities — both now include a faint outline ring so white cards
+   sit visibly on the white body. Box-shadow stacking lets us add the
+   outline without breaking layout (no extra width from `border`). */
 .card-shadow {
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.07),
+    0 4px 24px rgba(0, 0, 0, 0.06);
 }
 
 .card-shadow-sm {
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.06),
+    0 2px 12px rgba(0, 0, 0, 0.04);
 }
