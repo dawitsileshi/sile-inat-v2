@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Heart, Shield, MessageCircle, Loader2, Sparkles } from 'lucide-react'
+import { Shield, MessageCircle, Loader2, Sparkles } from 'lucide-react'
 import { Modal } from '@/components/ui/Modal'
 import { cn } from '@/lib/utils'
 
@@ -120,9 +120,11 @@ export function JoinModal({ open, onClose }: JoinModalProps) {
     <Modal isOpen={open} onClose={handleClose} size="md">
       <div className="px-8 pb-8 pt-10">
         <div className="flex flex-col items-center text-center">
-          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-light">
-            <Heart className="h-7 w-7 text-brand" />
-          </div>
+          <img
+            src="/logo - Sile-Enat.svg"
+            alt="ስለ እናት"
+            className="mb-4 h-16 w-16"
+          />
           <h2 className="font-amharic text-3xl font-bold text-text-primary">ስለ እናት</h2>
           <p className="mt-2 text-sm text-text-secondary">
             A safe space for mothers during the postpartum journey
