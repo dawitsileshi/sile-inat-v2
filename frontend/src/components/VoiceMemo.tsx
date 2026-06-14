@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mic, Square, AlertTriangle, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -98,16 +98,29 @@ export function VoiceMemo({ onTranscript, baseText = "" }: VoiceMemoProps) {
     return () => clearInterval(id);
   }, [listening, copy.prompts.length]);
 
+  // Snapshot the text that was already in the textarea when the user hit
+  // record. The hook's `transcript` accumulates *everything she has said
+  // since recording started* — so we merge (snapshot + transcript) on every
+  // update. Using the live `baseText` prop here would compound: each new
+  // transcript event would re-append the previous transcript's contribution
+  // to itself, turning "today" into "today today today today...".
+  const baseSnapshotRef = useRef<string>("");
+
   useEffect(() => {
     if (!transcript) return;
-    const merged = baseText
-      ? `${baseText.trimEnd()} ${transcript}`.trim()
+    const base = baseSnapshotRef.current;
+    const merged = base
+      ? `${base.trimEnd()} ${transcript}`.trim()
       : transcript;
     onTranscript(merged);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [transcript]);
 
   function handleStart() {
+    // Capture whatever's currently in the textarea so this session's
+    // transcript appends to it cleanly — even if the user edits during the
+    // pause between sessions.
+    baseSnapshotRef.current = baseText;
     reset();
     start();
   }
