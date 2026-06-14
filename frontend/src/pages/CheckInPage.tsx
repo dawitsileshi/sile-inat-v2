@@ -138,6 +138,36 @@ export function CheckInPage() {
   const dispatch = useDispatch<AppDispatch>()
   const { status, error, logs } = useSelector((state: RootState) => state.tracker)
   const isSignedIn = useIsAuthenticated()
+  // Tracks how long the current submit has been pending so the button can
+  // show progressively honest copy ("Saving..." -> "Almost there..." ->
+  // "Still working — Render free tier sometimes naps") instead of feeling
+  // frozen during a ~60s cold-start.
+  const [savingSeconds, setSavingSeconds] = useState(0)
+
+  // Warm-up ping when the page mounts. On Render's free tier the API can
+  // take 30-60s to wake from idle; firing a cheap GET /health while she's
+  // still filling out the form means the server is already responsive by
+  // the time she taps Save. Best-effort — failure is silently ignored.
+  useEffect(() => {
+    fetch('/api/health', { cache: 'no-store' }).catch(() => {})
+  }, [])
+
+  // Drive the per-second counter only while a save is in flight.
+  useEffect(() => {
+    if (status !== 'loading') {
+      setSavingSeconds(0)
+      return
+    }
+    const id = setInterval(() => setSavingSeconds((s) => s + 1), 1000)
+    return () => clearInterval(id)
+  }, [status])
+
+  const savingLabel =
+    savingSeconds < 4
+      ? 'Saving…'
+      : savingSeconds < 12
+        ? 'Almost there…'
+        : 'Still working — first save after a quiet period can take a moment.'
 
   const [mood, setMood] = useState<MoodValue>('okay')
   const [energy, setEnergy] = useState(50)
@@ -431,7 +461,7 @@ export function CheckInPage() {
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark disabled:opacity-60"
             >
               <HeartIcon className="h-4 w-4" />
-              {status === 'loading' ? 'Saving…' : 'Save tonight'}
+              {status === 'loading' ? savingLabel : 'Save tonight'}
             </button>
           </motion.form>
         )}
