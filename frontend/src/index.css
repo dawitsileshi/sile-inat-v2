@@ -1,13 +1,24 @@
 @import "tailwindcss";
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   Type system
+   ─────────────────────────────────────────────────────────────────────────────
+   Plus Jakarta Sans: body, UI, controls (unchanged, what we already had).
+   Fraunces: editorial serif for headlines — H1 and H2 by default. The single
+   change that moves the brand from "clean app" to "quiet magazine."
+   Optical sizing is on so headlines render with display-grade letterforms.
+*/
 @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&display=swap");
 
 @theme {
   --font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-serif: "Fraunces", "Georgia", "Iowan Old Style", "Apple Garamond", serif;
 
   --color-cream: #f5f0e4;
   --color-cream-dark: #ebe5d6;
 
+  /* Legacy forest scale — kept so any non-brand uses keep working. */
   --color-forest-50: #ecfdf5;
   --color-forest-100: #d1fae5;
   --color-forest-200: #a7f3d0;
@@ -19,10 +30,26 @@
   --color-forest-800: #065f46;
   --color-forest-900: #064e3b;
 
-  --color-brand: #1a7a3d;
-  --color-brand-dark: #145e2f;
-  --color-brand-light: #e3efe5;
-  --color-brand-muted: #d4ebe0;
+  /*
+    ── Option C palette ────────────────────────────────────────────────────
+    Raspberry leads. Forest green moves to a supportive role (peer support,
+    "I've been there", positive states). Terracotta is the third warm accent,
+    used sparingly. Cream stays the base. Reads instantly as "by women, for
+    women" without leaning pink-baby-girl.
+  */
+  --color-brand: #9e1f53;          /* deep raspberry — primary identity */
+  --color-brand-dark: #7a1640;     /* deep wine — hover / pressed */
+  --color-brand-light: #f2d9e3;    /* soft blush — backgrounds, tints */
+  --color-brand-muted: #e8c9d4;    /* dustier blush — borders, hovers */
+
+  /* Forest green moves to supportive — confirmation, peer, positive cues. */
+  --color-support: #1a7a3d;
+  --color-support-dark: #145e2f;
+  --color-support-light: #dcedd8;
+
+  /* Warm earth — used sparingly for editorial accents (drop caps, dividers). */
+  --color-warm: #c97b5c;
+  --color-warm-light: #f0d9cd;
 
   --color-text-primary: #1a1f17;
   --color-text-secondary: #5c6878;
@@ -44,6 +71,27 @@ body {
   color: var(--color-text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Editorial headlines
+   ─────────────────────────────────────────────────────────────────────────────
+   H1 and H2 default to Fraunces. Any component that wants the old sans-serif
+   feel for a specific heading can opt out with `font-sans`. Tracking and
+   leading are tuned for serif headlines — slightly tighter than UI defaults.
+*/
+h1, h2 {
+  font-family: var(--font-serif);
+  letter-spacing: -0.01em;
+  font-feature-settings: "ss01", "ss02", "kern", "liga";
+}
+
+h1 {
+  line-height: 1.05;
+}
+
+h2 {
+  line-height: 1.15;
 }
 
 /* Custom range slider */
@@ -85,7 +133,7 @@ input[type="range"].wellness-slider::-moz-range-thumb {
 }
 
 ::selection {
-  background: rgba(13, 110, 79, 0.2);
+  background: rgba(158, 31, 83, 0.18);
   color: inherit;
 }
 
