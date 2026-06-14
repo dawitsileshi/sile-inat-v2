@@ -87,7 +87,7 @@ export function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 border-b border-black/[0.04] bg-cream/90 backdrop-blur-md">
+      <header className="sticky top-0 z-40 border-b border-black/[0.04] bg-white/90 backdrop-blur-md">
         <nav className="flex items-center justify-between px-6 py-4 sm:px-8 lg:px-12">
           <Link to="/" className="flex flex-none items-center gap-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand">
@@ -205,7 +205,7 @@ export function Navbar() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="overflow-hidden border-t border-black/[0.04] bg-cream lg:hidden"
+              className="overflow-hidden border-t border-black/[0.04] bg-white lg:hidden"
             >
               <div className="space-y-1 px-4 py-3">
                 {navLinks.map((link) => {

@@ -7,7 +7,7 @@ import { CrisisButton } from '@/components/CrisisButton'
 
 export function Layout() {
   return (
-    <div className="flex min-h-screen flex-col bg-cream text-text-primary">
+    <div className="flex min-h-screen flex-col bg-white text-text-primary">
       <Navbar />
       <DemoBanner />
       <main className="flex-1">

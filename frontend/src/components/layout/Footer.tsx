@@ -3,7 +3,7 @@ import { Heart } from 'lucide-react'
 
 export function Footer() {
   return (
-    <footer className="border-t border-black/[0.04] bg-cream">
+    <footer className="border-t border-black/[0.04] bg-white">
       {/* 3-col grid keeps the tagline truly centered no matter how the brand
           mark is sized. The right slot is invisible but reserves horizontal
           space so the centered tagline doesn't crowd the fixed Get-help button. */}
