@@ -49,7 +49,14 @@ export function Modal({ isOpen, onClose, children, className, size = 'lg' }: Mod
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 16 }}
             transition={{ duration: 0.25 }}
-            className={cn('relative z-10 w-full rounded-3xl bg-white card-shadow', sizeClasses[size], className)}
+            className={cn(
+              // Cap modal height so a long flow (Join tab with baby-status
+              // questions, etc.) scrolls internally rather than stretching
+              // the whole modal to fill the viewport.
+              'relative z-10 flex w-full max-h-[calc(100vh-2rem)] flex-col overflow-y-auto rounded-3xl bg-white card-shadow',
+              sizeClasses[size],
+              className,
+            )}
           >
             <button
               onClick={onClose}

@@ -18,7 +18,7 @@ const PATHS: PathCard[] = [
     to: '/ai-assistant',
     titleKey: 'home.paths.talk.title',
     subtitleKey: 'home.paths.talk.subtitle',
-    fallbackTitle: 'Talk to someone',
+    fallbackTitle: 'Talk to AI Companion',
     fallbackSubtitle: 'Ask anything. No judgment. Anonymous.',
     Icon: MessageCircle,
   },

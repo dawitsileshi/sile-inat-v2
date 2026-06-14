@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, Heart, LogIn, LogOut } from 'lucide-react'
+import { Menu, X, LogIn, LogOut } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { navLinks, isNavActive } from '@/data/navigation'
 import { cn } from '@/lib/utils'
@@ -90,10 +90,12 @@ export function Navbar() {
       <header className="sticky top-0 z-40 border-b border-black/[0.04] bg-white/90 backdrop-blur-md">
         <nav className="flex items-center justify-between px-6 py-4 sm:px-8 lg:px-12">
           <Link to="/" className="flex flex-none items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand">
-              <Heart className="h-4 w-4 fill-white text-white" />
-            </div>
-            <span className="whitespace-nowrap text-lg font-bold text-text-primary">
+            <img
+              src="/logo - Sile-Enat.svg"
+              alt="ስለ እናት"
+              className="h-9 w-9 flex-none"
+            />
+            <span className="whitespace-nowrap text-lg font-amharic font-bold text-text-primary">
               ስለ እናት
             </span>
           </Link>

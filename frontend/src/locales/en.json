@@ -2,7 +2,7 @@
   "nav": {
     "home": "Home",
     "circles": "Circles",
-    "forum": "Community",
+    "forum": "Forum",
     "comfort": "Comfort",
     "events": "Events",
     "checkIn": "Check-In",
@@ -49,7 +49,7 @@
     "paths": {
       "prompt": "What do you need right now?",
       "talk": {
-        "title": "Talk to someone",
+        "title": "Talk to AI Companion",
         "subtitle": "Ask anything. No judgment. Anonymous."
       },
       "circles": {

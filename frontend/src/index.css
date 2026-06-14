@@ -6,14 +6,27 @@
    Plus Jakarta Sans: body, UI, controls (unchanged, what we already had).
    Fraunces: editorial serif for headlines — H1 and H2 by default. The single
    change that moves the brand from "clean app" to "quiet magazine."
-   Optical sizing is on so headlines render with display-grade letterforms.
+   Nokia Pure Headline Bold: dedicated face for Amharic script. Drop the font
+   file at frontend/public/fonts/NokiaPureHeadline-Bold.woff2 (and optionally
+   .woff for older browsers). System fall-backs render until you do.
 */
 @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&display=swap");
 
+@font-face {
+  font-family: "Nokia Pure Headline";
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src:
+    url("/fonts/NokiaPureHeadline-Bold.woff2") format("woff2"),
+    url("/fonts/NokiaPureHeadline-Bold.woff") format("woff");
+}
+
 @theme {
   --font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
   --font-serif: "Fraunces", "Georgia", "Iowan Old Style", "Apple Garamond", serif;
+  --font-amharic: "Nokia Pure Headline", "Noto Sans Ethiopic", "Abyssinica SIL", system-ui, sans-serif;
 
   /* Legacy forest scale — kept so any non-brand uses keep working. */
   --color-forest-50: #ecfdf5;
