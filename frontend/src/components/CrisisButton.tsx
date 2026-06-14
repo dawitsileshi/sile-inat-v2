@@ -165,7 +165,7 @@ function LaneCard({
       ? 'bg-[#C0392B]/10 text-[#C0392B]'
       : accent === 'brand'
         ? 'bg-brand-light text-brand'
-        : 'bg-cream-dark text-text-secondary'
+        : 'bg-stone-100 text-text-secondary'
 
   return (
     <button
@@ -269,9 +269,9 @@ function SupportView({ onBack, onClose }: { onBack: () => void; onClose: () => v
           <ArrowRight className="mt-2 h-4 w-4 flex-none text-text-muted transition-colors group-hover:text-brand" />
         </Link>
 
-        <div className="rounded-2xl border border-gray-200 bg-cream/40 p-4">
+        <div className="rounded-2xl border border-gray-200 bg-stone-50 p-4">
           <div className="flex items-start gap-4">
-            <div className="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-cream-dark text-text-secondary">
+            <div className="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-stone-100 text-text-secondary">
               <Phone className="h-5 w-5" />
             </div>
             <div className="flex-1">

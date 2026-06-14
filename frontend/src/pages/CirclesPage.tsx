@@ -187,7 +187,7 @@ export function CirclesPage() {
                     'rounded-full px-4 py-1.5 text-sm font-medium transition-colors',
                     active
                       ? 'bg-brand text-white'
-                      : 'bg-cream-dark text-text-secondary hover:bg-cream-dark/80'
+                      : 'bg-stone-100 text-text-secondary hover:bg-stone-200'
                   )}
                 >
                   {phase}
@@ -448,7 +448,7 @@ function CircleDetailPanel({
         animate={{ x: 0 }}
         exit={{ x: '100%' }}
         transition={{ type: 'spring', stiffness: 260, damping: 32 }}
-        className="absolute inset-y-0 right-0 flex h-full w-full max-w-xl flex-col bg-cream shadow-2xl sm:rounded-l-2xl"
+        className="absolute inset-y-0 right-0 flex h-full w-full max-w-xl flex-col bg-white shadow-2xl sm:rounded-l-2xl"
         role="dialog"
         aria-modal="true"
         aria-labelledby={detail ? `circle-${circleId}-title` : undefined}
@@ -458,7 +458,7 @@ function CircleDetailPanel({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full p-1.5 text-text-secondary hover:bg-cream-dark sm:hidden"
+            className="rounded-full p-1.5 text-text-secondary hover:bg-stone-100 sm:hidden"
             aria-label="Back"
           >
             <ChevronLeft className="h-5 w-5" />
@@ -468,7 +468,7 @@ function CircleDetailPanel({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-full p-1.5 text-text-secondary hover:bg-cream-dark"
+              className="rounded-full p-1.5 text-text-secondary hover:bg-stone-100"
               aria-label="Close"
             >
               <X className="h-5 w-5" />
@@ -571,7 +571,7 @@ function CircleDetailPanel({
               onChange={(e) => setDraft(e.target.value.slice(0, 280))}
               placeholder="Write something. Anonymously."
               rows={3}
-              className="w-full resize-none rounded-lg border border-black/[0.06] bg-cream px-3 py-2 text-sm leading-relaxed text-text-primary placeholder:text-text-muted focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/15"
+              className="w-full resize-none rounded-lg border border-black/[0.06] bg-white px-3 py-2 text-sm leading-relaxed text-text-primary placeholder:text-text-muted focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/15"
             />
             <div className="mt-2 flex items-center justify-between">
               <span

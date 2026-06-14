@@ -21,7 +21,7 @@ const values = [
 
 export function HomeStats() {
   return (
-    <section className="border-y border-black/[0.04] bg-cream-dark/60 px-6 py-20">
+    <section className="border-y border-black/[0.04] bg-stone-100/80 px-6 py-20">
       <div className="mx-auto grid max-w-5xl gap-12 sm:grid-cols-3">
         {values.map((v, i) => (
           <motion.div

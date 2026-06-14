@@ -128,7 +128,7 @@ export function ReflectionPage() {
 
         {/* Period toggle */}
         <div className="mt-6 flex flex-wrap items-center gap-3">
-          <div className="inline-flex rounded-full bg-cream-dark/60 p-1">
+          <div className="inline-flex rounded-full bg-stone-100/80 p-1">
             <ToggleButton
               active={period === 'week'}
               onClick={() => {
@@ -149,7 +149,7 @@ export function ReflectionPage() {
           {period === 'month' && (
             <>
               {/* Sub-mode: by month vs custom range */}
-              <div className="inline-flex rounded-full bg-cream-dark/60 p-1">
+              <div className="inline-flex rounded-full bg-stone-100/80 p-1">
                 <ToggleButton
                   active={monthMode === 'month'}
                   onClick={() => setMonthMode('month')}
@@ -200,8 +200,7 @@ export function ReflectionPage() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="mt-8 rounded-2xl px-6 py-8 sm:px-8 sm:py-10"
-              style={{ backgroundColor: '#FAF7F2' }}
+              className="mt-8 rounded-2xl bg-stone-50 px-6 py-8 sm:px-8 sm:py-10 card-shadow-sm"
             >
               <p className="font-serif text-lg leading-relaxed text-text-primary sm:text-xl">
                 {data.summary}
@@ -358,7 +357,7 @@ function MonthNavigator({
   const label = formatMonthLabel(effective.year, effective.month, locale)
 
   return (
-    <div className="inline-flex items-center gap-1 rounded-full bg-cream-dark/60 p-1">
+    <div className="inline-flex items-center gap-1 rounded-full bg-stone-100/80 p-1">
       <button
         type="button"
         onClick={() => step(-1)}
@@ -407,7 +406,7 @@ function RangePicker({
   const inputCls =
     'rounded-md border border-black/[0.08] bg-white px-2.5 py-1.5 text-sm text-text-primary focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/15'
   return (
-    <div className="inline-flex flex-wrap items-center gap-2 rounded-full bg-cream-dark/60 px-2 py-1">
+    <div className="inline-flex flex-wrap items-center gap-2 rounded-full bg-stone-100/80 px-2 py-1">
       <label className="inline-flex items-center gap-1.5 text-xs text-text-secondary">
         <span className="font-medium">{fromLabel}</span>
         <input

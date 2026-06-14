@@ -158,6 +158,9 @@ export function VoiceMemo({ onTranscript, baseText = "" }: VoiceMemoProps) {
           promptIdx={promptIdx}
           interim={interim}
           onStop={stop}
+          error={error}
+          lang={lang}
+          onTryEnglish={() => setLang("en-US")}
         />
       )}
     </motion.div>
@@ -221,7 +224,7 @@ function IdleState({
       </p>
 
       {/* Language pills */}
-      <div className="mt-5 inline-flex rounded-full bg-cream-dark/50 p-1">
+      <div className="mt-5 inline-flex rounded-full bg-stone-100/70 p-1">
         <LangPill active={lang === "am-ET"} onClick={() => onLang("am-ET")}>
           አማርኛ
         </LangPill>
@@ -285,7 +288,7 @@ function ErrorHint({
   const showTryEnglish = lang === "am-ET" && code === "language-not-supported"
 
   return (
-    <div className="mt-5 rounded-xl bg-cream/70 px-4 py-3 text-left">
+    <div className="mt-5 rounded-xl bg-stone-50 px-4 py-3 text-left">
       <p className="flex items-start gap-2 text-xs leading-relaxed text-text-secondary">
         <AlertTriangle className="mt-0.5 h-3.5 w-3.5 flex-none text-text-muted" />
         <span>{text}</span>
@@ -310,11 +313,17 @@ function ListeningState({
   promptIdx,
   interim,
   onStop,
+  error,
+  lang,
+  onTryEnglish,
 }: {
   copy: PromptSet;
   promptIdx: number;
   interim: string;
   onStop: () => void;
+  error: string | null;
+  lang: Lang;
+  onTryEnglish: () => void;
 }) {
   return (
     <div className="relative">
@@ -357,9 +366,13 @@ function ListeningState({
       </div>
 
       {interim && (
-        <p className="mx-auto mt-2 max-w-md rounded-lg bg-cream/70 px-3 py-2 text-xs italic text-text-muted">
+        <p className="mx-auto mt-2 max-w-md rounded-lg bg-stone-50 px-3 py-2 text-xs italic text-text-muted">
           {interim}
         </p>
+      )}
+
+      {error && error !== "aborted" && (
+        <ErrorHint code={error} lang={lang} onTryEnglish={onTryEnglish} />
       )}
     </div>
   );

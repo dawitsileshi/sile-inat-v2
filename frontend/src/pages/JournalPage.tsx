@@ -148,14 +148,14 @@ function JournalCard({ log, index }: { log: DailyLog; index: number }) {
         <h2 className="text-base font-bold text-text-primary">
           {formatDateHeading(log.log_date)}
         </h2>
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-cream-dark px-3 py-1 text-xs font-medium text-text-secondary">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-text-secondary">
           <mood.Icon className={cn('h-3.5 w-3.5', mood.color)} />
           {mood.label}
         </span>
       </div>
 
       {log.notes ? (
-        <blockquote className="rounded-xl bg-cream/60 px-4 py-3 text-sm leading-relaxed text-text-primary">
+        <blockquote className="rounded-xl bg-stone-50 px-4 py-3 text-sm leading-relaxed text-text-primary">
           “{log.notes}”
         </blockquote>
       ) : (

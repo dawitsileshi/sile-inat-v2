@@ -7,7 +7,7 @@ import { Info } from 'lucide-react'
  * Lives at the top of every page so reviewers can't miss it.
  *
  * Voice: brand-light, "just so you know" -- not an alarm. Voice rules
- * forbid red in advisories; warm cream + brand green is the palette.
+ * forbid red in advisories; soft blush + brand raspberry is the palette.
  */
 
 function readEmail(): string | null {

@@ -56,7 +56,7 @@ const PATHS: PathCard[] = [
 //     experience, not her baby's wellbeing).
 //   - Portrait orientation, ~1200x1600px minimum.
 //   - Royalty-free from Pexels / Unsplash / iStock until commissioned.
-const HERO_IMAGE_SRC = '/hero/mother.jpg'
+const HERO_IMAGE_SRC = '/hero/hero.jpg'
 
 export function HomePage() {
   const { t } = useTranslation()

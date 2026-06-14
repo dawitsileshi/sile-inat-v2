@@ -15,9 +15,6 @@
   --font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
   --font-serif: "Fraunces", "Georgia", "Iowan Old Style", "Apple Garamond", serif;
 
-  --color-cream: #f5f0e4;
-  --color-cream-dark: #ebe5d6;
-
   /* Legacy forest scale — kept so any non-brand uses keep working. */
   --color-forest-50: #ecfdf5;
   --color-forest-100: #d1fae5;
@@ -34,7 +31,7 @@
     ── Option C palette ────────────────────────────────────────────────────
     Raspberry leads. Forest green moves to a supportive role (peer support,
     "I've been there", positive states). Terracotta is the third warm accent,
-    used sparingly. Cream stays the base. Reads instantly as "by women, for
+    used sparingly. White stays the base. Reads instantly as "by women, for
     women" without leaning pink-baby-girl.
   */
   --color-brand: #9e1f53;          /* deep raspberry — primary identity */
@@ -67,9 +64,6 @@ html {
 
 body {
   font-family: var(--font-sans);
-  /* Body is white now. The warm cream tokens (--color-cream,
-     --color-cream-dark) stay in the palette for specific places that
-     want a tinted accent — they no longer set the page background. */
   background-color: #ffffff;
   color: var(--color-text-primary);
   -webkit-font-smoothing: antialiased;

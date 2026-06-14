@@ -139,7 +139,7 @@ export function AIAssistantPage() {
         )}
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 border-t border-black/[0.04] bg-cream/95 backdrop-blur-md">
+      <div className="fixed inset-x-0 bottom-0 border-t border-black/[0.04] bg-white/95 backdrop-blur-md">
         <div className="mx-auto max-w-2xl px-6 py-4">
           {error && (
             <p className="mb-2 text-center text-xs text-text-secondary">{error}</p>
@@ -253,7 +253,7 @@ function ChatToolbar({
                     type="button"
                     onClick={() => onDeletePastChat(c.id)}
                     aria-label="Delete this chat"
-                    className="flex-none rounded-full p-1.5 text-text-muted hover:bg-cream-dark hover:text-text-primary"
+                    className="flex-none rounded-full p-1.5 text-text-muted hover:bg-stone-100 hover:text-text-primary"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>

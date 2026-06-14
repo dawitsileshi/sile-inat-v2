@@ -194,7 +194,7 @@ export function ComfortPage() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
-          className="rounded-2xl bg-[#FAF7F2] px-6 py-10 card-shadow-sm"
+          className="rounded-2xl bg-stone-50 px-6 py-10 card-shadow-sm"
         >
           <BreathingExercise />
         </motion.section>
@@ -236,7 +236,7 @@ export function ComfortPage() {
             {PASSAGES.map((p) => (
               <article
                 key={p.heading}
-                className="mx-auto max-w-[600px] rounded-2xl bg-[#FAF7F2] px-7 py-8 text-center card-shadow-sm"
+                className="mx-auto max-w-[600px] rounded-2xl bg-stone-50 px-7 py-8 text-center card-shadow-sm"
               >
                 <p className="text-sm italic text-text-muted">{p.heading}</p>
                 <p

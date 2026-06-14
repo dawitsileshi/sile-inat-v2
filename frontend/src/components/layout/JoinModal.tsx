@@ -155,7 +155,7 @@ export function JoinModal({ open, onClose }: JoinModalProps) {
         </div>
 
         <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-6">
-          <div className="mb-5 grid grid-cols-2 gap-1 rounded-full bg-cream-dark p-1">
+          <div className="mb-5 grid grid-cols-2 gap-1 rounded-full bg-stone-100 p-1">
             <button
               type="button"
               onClick={() => {
@@ -218,7 +218,7 @@ export function JoinModal({ open, onClose }: JoinModalProps) {
             </div>
 
             {tab === 'join' && (
-              <div className="rounded-xl border border-gray-100 bg-cream/40 p-4">
+              <div className="rounded-xl border border-gray-100 bg-stone-50 p-4">
                 <p className="text-sm font-medium text-text-primary">
                   Are you currently expecting, or do you have a baby?
                 </p>

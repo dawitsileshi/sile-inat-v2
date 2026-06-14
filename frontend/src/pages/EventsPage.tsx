@@ -277,7 +277,7 @@ export function EventsPage() {
                   <span
                     className={cn(
                       'inline-flex rounded-full px-3 py-1 text-xs font-semibold',
-                      badgeStyles[event.category] ?? 'bg-cream-dark text-text-secondary'
+                      badgeStyles[event.category] ?? 'bg-stone-100 text-text-secondary'
                     )}
                   >
                     {event.category}
@@ -374,7 +374,7 @@ function UpcomingStrip({
     <motion.section
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="mb-8 rounded-2xl bg-gradient-to-br from-brand-light/60 via-brand-light/30 to-cream/50 p-5"
+      className="mb-8 rounded-2xl bg-gradient-to-br from-brand-light/60 via-brand-light/30 to-white p-5"
     >
       <div className="mb-3 flex items-center gap-2">
         <CheckCircle2 className="h-4 w-4 text-brand" />
@@ -451,7 +451,7 @@ function RegistrationReceipt({
         You're registered
       </div>
 
-      <div className="rounded-xl bg-cream/60 px-4 py-3 text-xs leading-relaxed">
+      <div className="rounded-xl bg-stone-50 px-4 py-3 text-xs leading-relaxed">
         <p className="mb-1 font-medium text-text-primary">
           {formatNextOccurrence(event)} · {event.time}
         </p>
@@ -542,7 +542,7 @@ function RegistrationReceipt({
               type="button"
               onClick={openGoogleCalendar}
               disabled={!gcalUrl}
-              className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-text-primary hover:bg-cream-dark disabled:opacity-50"
+              className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-text-primary hover:bg-stone-100 disabled:opacity-50"
             >
               <GoogleCalIcon />
               <span className="flex-1">
@@ -556,7 +556,7 @@ function RegistrationReceipt({
             <button
               type="button"
               onClick={handleIcsDownload}
-              className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-text-primary hover:bg-cream-dark"
+              className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-text-primary hover:bg-stone-100"
             >
               <Calendar className="h-4 w-4 text-brand" />
               <span className="flex-1">

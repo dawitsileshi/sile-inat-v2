@@ -90,7 +90,7 @@ export function FindHelpPage() {
             positioning which is frequently stale; this button is the user's
             escape hatch when the map opens on yesterday's office instead of
             today's home. */}
-        <div className="mt-3 flex items-center justify-between rounded-xl bg-cream/50 px-4 py-2.5 text-xs text-text-secondary">
+        <div className="mt-3 flex items-center justify-between rounded-xl bg-stone-50 px-4 py-2.5 text-xs text-text-secondary">
           <span className="inline-flex items-center gap-1.5">
             <LocateFixed className="h-3.5 w-3.5" />
             {denied
@@ -109,7 +109,7 @@ export function FindHelpPage() {
         </div>
 
         {!GOOGLE_MAPS_API_KEY ? (
-          <div className="mt-6 rounded-2xl bg-cream/60 p-6 text-sm text-text-secondary">
+          <div className="mt-6 rounded-2xl bg-stone-50 p-6 text-sm text-text-secondary">
             Map unavailable — Google Maps API key not configured. Add{' '}
             <code className="mx-1 rounded bg-white px-1.5 py-0.5 text-xs">
               VITE_GOOGLE_MAPS_API_KEY
@@ -133,7 +133,7 @@ export function FindHelpPage() {
             </div>
 
             {denied && (
-              <p className="mt-3 rounded-lg bg-cream/60 px-3 py-2 text-xs text-text-secondary">
+              <p className="mt-3 rounded-lg bg-stone-50 px-3 py-2 text-xs text-text-secondary">
                 Showing results around Addis Ababa. Allow location to see places near you.
               </p>
             )}

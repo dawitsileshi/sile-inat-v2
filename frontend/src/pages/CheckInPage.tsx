@@ -307,7 +307,7 @@ export function CheckInPage() {
                         'flex flex-col items-center gap-1.5 rounded-xl border-2 px-2 py-3 transition-all',
                         active
                           ? 'border-brand bg-brand-light'
-                          : 'border-transparent hover:bg-cream-dark/50'
+                          : 'border-transparent hover:bg-stone-100/70'
                       )}
                     >
                       <m.Icon className={cn('h-7 w-7', m.color)} />
@@ -411,7 +411,7 @@ export function CheckInPage() {
                         'rounded-xl border-2 px-3 py-3 text-sm font-medium transition-colors',
                         active
                           ? 'border-brand bg-brand-light text-brand'
-                          : 'border-transparent bg-cream-dark/40 text-text-secondary hover:bg-cream-dark/70'
+                          : 'border-transparent bg-stone-100/60 text-text-secondary hover:bg-stone-200/80'
                       )}
                     >
                       {opt.label}
@@ -486,7 +486,7 @@ function ResponseCard({
       ))}
 
       {response.supported === 'no' && (
-        <div className="mt-6 rounded-xl bg-cream/60 p-5">
+        <div className="mt-6 rounded-xl bg-stone-50 p-5">
           <p className="text-sm text-text-secondary">
             It might help to hear from others, or just talk it through.
           </p>
@@ -508,7 +508,7 @@ function ResponseCard({
       )}
 
       {response.supported === 'somewhat' && (
-        <div className="mt-6 rounded-xl bg-cream/60 p-5">
+        <div className="mt-6 rounded-xl bg-stone-50 p-5">
           <p className="text-sm text-text-secondary">
             Sometimes a few quiet minutes helps.
           </p>

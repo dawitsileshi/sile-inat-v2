@@ -268,7 +268,7 @@ export function CommunityPage() {
                 'rounded-full px-4 py-1.5 text-sm font-medium transition-colors',
                 activeCategory === cat
                   ? 'bg-brand text-white'
-                  : 'bg-cream-dark text-text-secondary hover:bg-cream-dark/80'
+                  : 'bg-stone-100 text-text-secondary hover:bg-stone-200'
               )}
             >
               {cat === 'All' ? 'All Topics' : cat}
@@ -436,7 +436,7 @@ function EmptyForum({ activeCategory, onCreate }: { activeCategory: string; onCr
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 + i * 0.08 }}
-            className="flex gap-3 rounded-xl border border-gray-100 bg-cream/50 px-4 py-3"
+            className="flex gap-3 rounded-xl border border-gray-100 bg-stone-50 px-4 py-3"
           >
             <span className="text-2xl leading-none text-brand/40">"</span>
             <div className="flex-1">

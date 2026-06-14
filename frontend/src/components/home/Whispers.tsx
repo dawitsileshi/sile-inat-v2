@@ -33,7 +33,7 @@ export function Whispers() {
   const visible = Array.from({ length: VISIBLE }, (_, i) => QUOTES[(start + i) % QUOTES.length])
 
   return (
-    <section className="bg-cream px-6 pt-14 pb-6">
+    <section className="bg-white px-6 pt-14 pb-6">
       <div className="mx-auto max-w-2xl space-y-4">
         <AnimatePresence mode="popLayout" initial={false}>
           {visible.map((q) => (

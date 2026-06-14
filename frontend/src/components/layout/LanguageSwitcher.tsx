@@ -20,7 +20,7 @@ export function LanguageSwitcher({ wide = false }: { wide?: boolean }) {
   return (
     <div
       className={cn(
-        'inline-flex items-center gap-0.5 rounded-full bg-cream-dark/60 p-1',
+        'inline-flex items-center gap-0.5 rounded-full bg-stone-100/80 p-1',
         wide && 'w-full justify-center gap-1 p-1.5',
       )}
       role="group"
