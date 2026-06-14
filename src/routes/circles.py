@@ -106,18 +106,9 @@ def join_circle(circle_id: int):
     if not circle:
         return jsonify({"error": "Circle not found."}), 404
 
-    if circle.member_count >= circle.capacity:
-        # Check whether this client is already in — if so, allow the no-op.
-        already = db.session.query(CircleMembership.id).filter_by(
-            circle_id=circle_id, client_id=client_id
-        ).first()
-        if not already:
-            return jsonify({
-                "error": "This circle is full.",
-                "circle_id": circle_id,
-                "member_count": circle.member_count,
-                "capacity": circle.capacity,
-            }), 409
+    # Capacity is uncapped — circles can hold unlimited members. The
+    # `capacity` column on the Circle model stays as advisory metadata
+    # (useful for UI hints) but is no longer enforced at join time.
 
     # Try to insert membership. Unique constraint catches duplicates.
     membership = CircleMembership(circle_id=circle_id, client_id=client_id)
