@@ -138,10 +138,12 @@ export function CheckInPage() {
   const dispatch = useDispatch<AppDispatch>()
   const { status, error, logs } = useSelector((state: RootState) => state.tracker)
   const isSignedIn = useIsAuthenticated()
-  // Tracks how long the current submit has been pending so the button can
-  // show progressively honest copy ("Saving..." -> "Almost there..." ->
-  // "Still working — Render free tier sometimes naps") instead of feeling
-  // frozen during a ~60s cold-start.
+  // Local saving state — we deliberately don't read this from redux's
+  // `status` because that flag is shared with fetchLogs, which fires
+  // right after a successful save. Listening to redux makes the button
+  // appear stuck on "Saving..." during the background history refresh,
+  // even though the real save already finished.
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [savingSeconds, setSavingSeconds] = useState(0)
 
   // Warm-up ping when the page mounts. On Render's free tier the API can
@@ -154,13 +156,13 @@ export function CheckInPage() {
 
   // Drive the per-second counter only while a save is in flight.
   useEffect(() => {
-    if (status !== 'loading') {
+    if (!isSubmitting) {
       setSavingSeconds(0)
       return
     }
     const id = setInterval(() => setSavingSeconds((s) => s + 1), 1000)
     return () => clearInterval(id)
-  }, [status])
+  }, [isSubmitting])
 
   const savingLabel =
     savingSeconds < 4
@@ -197,33 +199,40 @@ export function CheckInPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    const authResult = await dispatch(ensureAuth())
-    if (!ensureAuth.fulfilled.match(authResult)) return
+    setIsSubmitting(true)
+    try {
+      const authResult = await dispatch(ensureAuth())
+      if (!ensureAuth.fulfilled.match(authResult)) return
 
-    const payload = {
-      gestational_week: 20,
-      sleep_hours: sleep,
-      water_liters: water,
-      symptom_score: energyToSymptomScore(energy),
-      mood_score: MOOD_TO_API[mood],
-      feels_supported: supported || null,
-      notes: notes.trim() || null,
-    }
-    const result = await dispatch(submitDailyLog(payload))
-    if (submitDailyLog.fulfilled.match(result)) {
-      const user = getStoredUser()
-      setResponse({
-        mood,
-        supported,
-        notes,
-        weeksPostpartum:
-          user?.baby_status === 'born'
-            ? weeksPostpartum(user.baby_birth_date)
-            : null,
-        proseMessage: result.payload.log.response_message ?? null,
-      })
-      // Refresh history so the new entry shows up below.
-      dispatch(fetchLogs())
+      const payload = {
+        gestational_week: 20,
+        sleep_hours: sleep,
+        water_liters: water,
+        symptom_score: energyToSymptomScore(energy),
+        mood_score: MOOD_TO_API[mood],
+        feels_supported: supported || null,
+        notes: notes.trim() || null,
+      }
+      const result = await dispatch(submitDailyLog(payload))
+      if (submitDailyLog.fulfilled.match(result)) {
+        const user = getStoredUser()
+        setResponse({
+          mood,
+          supported,
+          notes,
+          weeksPostpartum:
+            user?.baby_status === 'born'
+              ? weeksPostpartum(user.baby_birth_date)
+              : null,
+          proseMessage: result.payload.log.response_message ?? null,
+        })
+        // Refresh history so the new entry shows up below. Fire-and-forget —
+        // the button is already free of the saving state and shouldn't wait
+        // for this background fetch to complete.
+        dispatch(fetchLogs())
+      }
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -457,11 +466,11 @@ export function CheckInPage() {
 
             <button
               type="submit"
-              disabled={status === 'loading'}
+              disabled={isSubmitting}
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark disabled:opacity-60"
             >
               <HeartIcon className="h-4 w-4" />
-              {status === 'loading' ? savingLabel : 'Save tonight'}
+              {isSubmitting ? savingLabel : 'Save tonight'}
             </button>
           </motion.form>
         )}
