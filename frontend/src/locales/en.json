@@ -125,7 +125,10 @@
     "stage1FirstBody": "These questions follow on from the first set. You can start there.",
     "stage1FirstAction": "Go to the first questions",
     "notIndicatedTitle": "Nothing further to ask",
-    "notIndicatedBody": "Your answers did not lead to this second set. Everything else is still open to you."
+    "notIndicatedBody": "Your answers did not lead to this second set. Everything else is still open to you.",
+    "entryTitle": "A few questions about how you have been",
+    "entryBody": "There is a short set of questions about how you have been feeling since your baby was born. It takes about two minutes, nobody else sees your answers, and you can stop at any point.",
+    "entryAction": "Read more first"
   },
   "footer": {
     "tagline": "A safe, supportive space for mothers during the postpartum journey."

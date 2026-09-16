@@ -128,7 +128,10 @@
     "stage1FirstBody": "እነዚህ ጥያቄዎች ከመጀመሪያው ክፍል የሚቀጥሉ ናቸው። እዚያ መጀመር ትችያለሽ።",
     "stage1FirstAction": "ወደ መጀመሪያዎቹ ጥያቄዎች ተመለሺ",
     "notIndicatedTitle": "ተጨማሪ ጥያቄ የለም",
-    "notIndicatedBody": "መልሶችሽ ወደዚህ ሁለተኛ ክፍል አላደረሱንም። ሌላው ሁሉ አሁንም ክፍት ነው።"
+    "notIndicatedBody": "መልሶችሽ ወደዚህ ሁለተኛ ክፍል አላደረሱንም። ሌላው ሁሉ አሁንም ክፍት ነው።",
+    "entryTitle": "A few questions about how you have been",
+    "entryBody": "There is a short set of questions about how you have been feeling since your baby was born. It takes about two minutes, nobody else sees your answers, and you can stop at any point.",
+    "entryAction": "Read more first"
   },
   "footer": {
     "tagline": "ለእናቶች ከወሊድ በኋላ ለሚያጋጥማቸው ችግር ደህንነቱ የተጠበቀ እና በቂ ድጋፍ የሚያገኙበት ቦታ።"

@@ -308,6 +308,28 @@ export function ReflectionPage() {
               )}
             </AnimatePresence>
 
+            {/* A standing offer, not a verdict. Screening lives here rather
+                than in the nav because this is already the page where she
+                looks back at how she has been — the one place where "a few
+                more questions" follows naturally from what she is reading. */}
+            <section className="mt-12 rounded-2xl border border-brand-muted bg-white px-6 py-6">
+              <h2 className="text-base font-semibold text-text-primary">
+                {t('screening.entryTitle')}
+              </h2>
+              <p className="mt-2 text-sm leading-relaxed text-text-secondary">
+                {t('screening.entryBody')}
+              </p>
+              <Link
+                to="/screening/consent"
+                className="mt-4 inline-flex items-center gap-1.5 rounded-full border-2
+                           border-brand-muted bg-white px-5 py-2.5 text-sm font-medium
+                           text-text-primary transition hover:border-brand"
+              >
+                {t('screening.entryAction')}
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </section>
+
             {/* Quiet footer */}
             <p className="mt-16 text-center text-xs text-text-muted">
               {t(

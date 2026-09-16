@@ -557,6 +557,24 @@ function ResponseCard({
         </div>
       )}
 
+      {/* The same standing offer as on the reflection page. Placed after the
+          support and crisis blocks on purpose: if she has just disclosed
+          something hard, being met comes first, and a questionnaire second. */}
+      <div className="mt-6 border-t border-gray-100 pt-5">
+        <p className="text-sm font-medium text-text-primary">
+          {t('screening.entryTitle')}
+        </p>
+        <p className="mt-1 text-xs leading-relaxed text-text-secondary">
+          {t('screening.entryBody')}
+        </p>
+        <Link
+          to="/screening/consent"
+          className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-brand hover:underline"
+        >
+          {t('screening.entryAction')} <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
+      </div>
+
       {!storedUserKnown && response.weeksPostpartum === null && (
         <p className="mt-6 text-xs text-text-muted">
           {t('checkIn.response.personalize')}
