@@ -1,11 +1,11 @@
 {
   "content_key": "epds",
   "version": "1.0.0",
-  "language": "en",
+  "language": "am",
   "stage": 2,
-  "status": "active",
+  "status": "draft",
   "review_required": true,
-  "notes": "Edinburgh Postnatal Depression Scale, original English wording and item scoring as published in Cox, Holden & Sagovsky (1987). Items 1, 2 and 4 score 0-3 top to bottom; items 3 and 5-10 are reverse-scored (3-0 top to bottom). The option values below encode that, so the engine needs no special case. Reproduced under the authors' published terms, which require the authors, title and source to appear on every reproduced copy - see `attribution`, which the Stage 2 screen renders. STILL PENDING THE CLINICAL LEAD before publishing (decision #8): (1) every scoring band boundary and label - the bands below are the old placeholders, NOT EPDS cut-offs, and the cut-off validated for Ethiopian mothers may differ from the UK original; (2) safety_trigger_min_value on item 10 (set to 1 = any answer other than 'Never', the most conservative choice); (3) all result copy and the safety response copy; (4) the screen title, which is Sile Enat copy rather than instrument wording. The Amharic EPDS must be the validated Amharic version supplied by the clinical lead - never a translation of this file.",
+  "notes": "AMHARIC SKELETON, NOT READY TO PUBLISH. Structure copied from the English 1.0.0 bundle so the two stay in step; every value below is still the English text. TWO KINDS OF TEXT LIVE IN THIS FILE AND THEY ARE NOT HANDLED THE SAME WAY. (1) FREE COPY - translate these in place: title, intro, results.*.title, results.*.body, safety_response.*, continue_label, back_label. (2) INSTRUMENT WORDING - do NOT translate: instruction, items[].text and items[].options[].label. These are EPDS. They must be replaced with the validated Amharic version supplied by the clinical lead: a hand translation is no longer the instrument that was validated, and its scores would not be comparable to any published cut-off. Leave `attribution` until the clinical lead confirms how the validated Amharic source is to be cited. Do not touch any `code`, `value`, `index`, `min`, `max`, `status` or `next` field - those are identifiers and scoring, not text. Publish only after sign-off, with scripts/publish_screening_content.py.",
   "attribution": "Edinburgh Postnatal Depression Scale (EPDS). Source: Cox, J.L., Holden, J.M., and Sagovsky, R. 1987. Detection of postnatal depression: Development of the 10-item Edinburgh Postnatal Depression Scale. British Journal of Psychiatry 150:782-786.",
   "title": "How you have been feeling",
   "intro": "As you are pregnant or have recently had a baby, we would like to know how you are feeling.",
@@ -136,11 +136,29 @@
   "scoring": {
     "max_score": 30,
     "bands": [
-      { "status": "PLACEHOLDER_band_low", "min": 0, "max": 9, "next": "end" },
-      { "status": "PLACEHOLDER_band_mid", "min": 10, "max": 19, "next": "end" },
-      { "status": "PLACEHOLDER_band_high", "min": 20, "max": 30, "next": "end" }
+      {
+        "status": "PLACEHOLDER_band_low",
+        "min": 0,
+        "max": 9,
+        "next": "end"
+      },
+      {
+        "status": "PLACEHOLDER_band_mid",
+        "min": 10,
+        "max": 19,
+        "next": "end"
+      },
+      {
+        "status": "PLACEHOLDER_band_high",
+        "min": 20,
+        "max": 30,
+        "next": "end"
+      }
     ],
-    "safety_override": { "status": "PLACEHOLDER_band_high", "next": "end" }
+    "safety_override": {
+      "status": "PLACEHOLDER_band_high",
+      "next": "end"
+    }
   },
   "results": {
     "PLACEHOLDER_band_low": {
@@ -162,5 +180,10 @@
     "action_label": "PLACEHOLDER - safety action label"
   },
   "continue_label": "Continue",
-  "back_label": "Back"
+  "back_label": "Back",
+  "translation_note": {
+    "free_copy": "TRANSLATE IN PLACE - this is Sile Enat copy, not instrument wording.",
+    "instrument_wording": "DO NOT TRANSLATE BY HAND - replace with the validated Amharic EPDS wording from the clinical lead.",
+    "instrument": "EPDS"
+  }
 }

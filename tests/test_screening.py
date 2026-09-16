@@ -30,11 +30,12 @@ def screening_app():
     application = create_app(TestingConfig)
     with application.app_context():
         _db.create_all()
-        from src.services.screening_content import publish, sync_content
+        from src.services.screening_content import sync_content
         sync_content()
-        # Placeholder instruments ship as drafts; publishing is normally a
-        # deliberate human act. Tests publish explicitly so the draft gate is
-        # exercised first (see test_stage1_draft_not_servable).
+        # The 1.0.0 instruments ship active (published for clinical review);
+        # the 0.1.0 placeholders ship as drafts. These tests drive the
+        # placeholder codes, so they publish it explicitly and
+        # test_stage1_draft_not_servable proves the draft gate separately.
         yield application
         _db.session.remove()
         _db.drop_all()
@@ -125,12 +126,32 @@ class TestConsentGate:
 
 
 class TestStage1:
-    def test_stage1_draft_not_servable(self, api):
-        """Unpublished clinical content must never reach a participant."""
+    def test_stage1_draft_not_servable(self, api, screening_app):
+        """Unpublished clinical content must never reach a participant.
+
+        Asserted by taking every Stage 1 bundle back to 'draft' rather than by
+        assuming what ships unpublished — which version is active is a clinical
+        decision that changes, but 'a draft is never served' must not.
+        """
         token = _consented(api)
-        r = api.get("/api/screening/stage1", headers={HEADER: token})
-        assert r.status_code == 409
-        assert r.get_json()["code"] == "content_unavailable"
+        with screening_app.app_context():
+            from src.models import ScreeningContentVersion
+            rows = ScreeningContentVersion.query.filter_by(
+                content_key="stage1_triage", status="active").all()
+            restore = [row.id for row in rows]
+            for row in rows:
+                row.status = "draft"
+            _db.session.commit()
+        try:
+            r = api.get("/api/screening/stage1", headers={HEADER: token})
+            assert r.status_code == 409
+            assert r.get_json()["code"] == "content_unavailable"
+        finally:
+            with screening_app.app_context():
+                from src.models import ScreeningContentVersion
+                for row_id in restore:
+                    _db.session.get(ScreeningContentVersion, row_id).status = "active"
+                _db.session.commit()
 
     def test_full_run_and_banding(self, api, screening_app):
         _publish_instruments(screening_app)
