@@ -30,6 +30,7 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -59,6 +60,50 @@ REQUIRED_KEYS = {
 
 class ContentError(Exception):
     """Raised when a bundle is malformed or unavailable."""
+
+
+#: The script a language's question wording must actually be written in.
+#: A bundle can declare `"language": "am"` and carry English words — a
+#: structurally perfect file that would put English PHQ items in front of a
+#: mother who asked for Amharic, and score her on them. Nothing else in this
+#: module can catch that: the JSON is valid, the items are present, the bands
+#: cover the range. Only the script tells you the words are the wrong ones.
+#: Languages absent from this map are unconstrained.
+REQUIRED_SCRIPT = {
+    "am": ("Ethiopic", re.compile(r"[\u1200-\u137F]")),
+}
+
+
+def script_violations(bundle: dict) -> list:
+    """Item codes whose wording is not in the script its language requires.
+
+    Checks the question text only. That is the participant-facing wording that
+    decides her answers, and it is the text that must never be a language she
+    did not choose.
+    """
+    entry = REQUIRED_SCRIPT.get(bundle.get("language"))
+    if entry is None:
+        return []
+    _, pattern = entry
+    return [
+        item.get("code", f"#{i}")
+        for i, item in enumerate(bundle.get("items") or [])
+        if not pattern.search(str(item.get("text", "")))
+    ]
+
+
+def _publishable(bundle: dict, label: str) -> bool:
+    """False, loudly, when publishing this bundle would serve the wrong language."""
+    bad = script_violations(bundle)
+    if not bad:
+        return True
+    script = REQUIRED_SCRIPT[bundle["language"]][0]
+    log.error(
+        "REFUSING to publish %s: %d item(s) carry no %s text (%s). A bundle "
+        "that declares a language must be written in it. Left as draft.",
+        label, len(bad), script, ", ".join(map(str, bad[:5])),
+    )
+    return False
 
 
 def _checksum(payload: str) -> str:
@@ -239,8 +284,16 @@ def sync_content() -> dict:
             language=bundle["language"],
         ).one_or_none()
 
+        # Declared status, downgraded to draft when the wording is not in the
+        # language the bundle claims. Never raises: a bad bundle must not stop
+        # the app from booting, it must only fail to publish.
+        declared_status = bundle.get("status", "active")
+        if declared_status == "active" and not _publishable(
+            bundle, f"{key}@{bundle['version']}/{bundle['language']}"
+        ):
+            declared_status = "draft"
+
         if row is None:
-            declared_status = bundle.get("status", "active")
             row = ScreeningContentVersion(
                 content_key=key,
                 version=bundle["version"],
@@ -279,7 +332,7 @@ def sync_content() -> dict:
                     log.info("Content updated: %s", row.label)
 
             # Rule 4. Never the other way round.
-            if bundle.get("status", "active") == "active" and row.status == "draft":
+            if declared_status == "active" and row.status == "draft":
                 row.status = "active"
                 row.published_at = row.published_at or datetime.utcnow()
                 written[key] = written.get(key, 0) + 1
@@ -335,6 +388,17 @@ def publish(content_key: str, version: str, language: str) -> ScreeningContentVe
     ).one_or_none()
     if row is None:
         raise ContentError(f"No such content: {content_key}@{version}/{language}")
+
+    bad = script_violations(bundle_of(row))
+    if bad:
+        script = REQUIRED_SCRIPT[language][0]
+        raise ContentError(
+            f"Refusing to publish {row.label}: {len(bad)} item(s) carry no "
+            f"{script} text ({', '.join(map(str, bad[:5]))}). This bundle "
+            f"declares {language!r} but its questions are not written in it. "
+            f"Publishing it would put the wrong language in front of a "
+            f"participant and score her answers to it."
+        )
 
     row.status = "active"
     if row.published_at is None:

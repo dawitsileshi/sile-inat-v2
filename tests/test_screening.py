@@ -394,3 +394,31 @@ class TestContentPublication:
                 row = self._row("0.1.0-placeholder")
                 row.status = before
                 _db.session.commit()
+
+    def test_cannot_publish_a_bundle_written_in_another_language(self, screening_app):
+        """A bundle may not be published in a language it is not written in.
+
+        The Amharic instruments ship as English skeletons awaiting the
+        validated Amharic wording. Publishing one would put English PHQ items
+        in front of a mother who chose Amharic and score her answers to them —
+        a file that is structurally perfect and clinically wrong.
+        """
+        from src.services.screening_content import (
+            ContentError, publish, script_violations)
+        with screening_app.app_context():
+            with pytest.raises(ContentError) as exc:
+                publish("stage1_triage", "1.0.0", "am")
+            assert "Ethiopic" in str(exc.value)
+            assert self._row_any("stage1_triage", "1.0.0", "am").status == "draft"
+
+            # The Amharic consent bundle is really translated, so it passes.
+            from src.models import ScreeningContentVersion
+            from src.services.screening_content import bundle_of
+            consent = ScreeningContentVersion.query.filter_by(
+                content_key="consent", language="am").first()
+            assert script_violations(bundle_of(consent)) == []
+
+    def _row_any(self, key, version, language):
+        from src.models import ScreeningContentVersion
+        return ScreeningContentVersion.query.filter_by(
+            content_key=key, version=version, language=language).one()
