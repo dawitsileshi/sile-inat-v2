@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next'
 import { SUPPORTED_LANGS, type SupportedLang } from '@/lib/i18n'
 import { DevResetParticipant } from '@/components/screening/DevResetParticipant'
 import {
+  clearScreeningToken,
   fetchConsentContent,
   fetchConsentState,
   submitConsent,
@@ -58,7 +59,20 @@ export function ScreeningConsentPage() {
         if (cancelled || !state) return
         if (state.status === 'accepted') navigate('/screening/stage1', { replace: true })
         else if (state.status === 'declined') setView('declined')
-        else if (state.status === 'withdrawn') setView('withdrawn')
+        else if (state.status === 'withdrawn') {
+          setView('withdrawn')
+          // She sees the confirmation once, then this browser forgets the
+          // token. Her withdrawal stays recorded on the server exactly as it
+          // was — the consent log is append-only and nothing here touches it.
+          // But the token itself can never do anything again, because the
+          // server refuses to re-consent a withdrawn participant, so keeping
+          // it only means every later visit meets this same wall. Forgetting
+          // it lets her start fresh if she ever comes back.
+          //
+          // A DECLINED participant keeps her token on purpose: the server
+          // still lets her accept later, so it is not a dead end.
+          clearScreeningToken()
+        }
         if (state.language) setLanguage(state.language as SupportedLang)
       })
       .catch(() => { /* no usable state; start at the language question */ })
