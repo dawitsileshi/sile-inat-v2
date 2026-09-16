@@ -69,6 +69,7 @@ export function InstrumentRunner({
       setResult(await complete())
       setView('result')
     } catch (err) {
+      console.error('[screening] complete failed:', err)
       setError(err instanceof Error ? err.message : String(err))
       setView('questions')
     } finally {
@@ -103,6 +104,7 @@ export function InstrumentRunner({
       }
       advance(at)
     } catch (err) {
+      console.error('[screening] answer failed:', err)
       setError(err instanceof Error ? err.message : String(err))
     } finally {
       setBusy(false)
@@ -181,7 +183,7 @@ export function InstrumentRunner({
               })}
             </div>
 
-            {error && <Note>{error}</Note>}
+            {error && <Note>{t('errors.generic')}</Note>}
 
             {/* A validated instrument's licence requires its source on every
                 reproduced copy. The citation text comes from the bundle. */}

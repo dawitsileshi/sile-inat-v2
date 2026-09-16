@@ -79,6 +79,7 @@ export function ScreeningConsentPage() {
     } catch (err) {
       // No fallback language by design: we would rather say "not available"
       // than show her a consent she may not be able to read.
+      console.error('[screening] consent content failed:', err)
       setError(err instanceof Error ? err.message : String(err))
     } finally {
       setLoading(false)
@@ -105,6 +106,7 @@ export function ScreeningConsentPage() {
       if (result.next === 'stage1') navigate('/screening/stage1')
       else setView('declined')
     } catch (err) {
+      console.error('[screening] consent decision failed:', err)
       setError(err instanceof Error ? err.message : String(err))
     } finally {
       setSubmitting(false)
@@ -146,7 +148,7 @@ export function ScreeningConsentPage() {
                 </button>
               ))}
             </div>
-            {error && <ErrorNote message={error} />}
+            {error && <ErrorNote message={t('errors.generic')} />}
           </Panel>
         )}
 
@@ -239,7 +241,7 @@ export function ScreeningConsentPage() {
               </button>
             </div>
 
-            {error && <ErrorNote message={error} />}
+            {error && <ErrorNote message={t('errors.generic')} />}
 
             {bundle.review_required && (
               <p className="mt-8 rounded-xl bg-stone-100 px-4 py-3 text-xs text-text-secondary">

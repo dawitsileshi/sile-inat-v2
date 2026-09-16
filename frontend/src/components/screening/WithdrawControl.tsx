@@ -12,6 +12,7 @@
 
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import { Loader2 } from 'lucide-react'
 
@@ -28,6 +29,7 @@ export function WithdrawControl({
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const navigate = useNavigate()
+  const { t } = useTranslation()
 
   const confirm = async () => {
     setBusy(true)
@@ -39,6 +41,7 @@ export function WithdrawControl({
       // withdrawn confirmation.
       navigate('/screening/consent', { replace: true })
     } catch (err) {
+      console.error('[screening] withdraw failed:', err)
       setError(err instanceof Error ? err.message : String(err))
     } finally {
       setBusy(false)
@@ -70,7 +73,7 @@ export function WithdrawControl({
             <p className="mt-3 leading-relaxed text-text-secondary">{copy.body}</p>
             {error && (
               <p className="mt-5 rounded-xl bg-stone-100 px-4 py-3 text-sm text-text-secondary">
-                {error}
+                {t('errors.generic')}
               </p>
             )}
             <div className="mt-6 flex flex-col gap-3 sm:flex-row-reverse">

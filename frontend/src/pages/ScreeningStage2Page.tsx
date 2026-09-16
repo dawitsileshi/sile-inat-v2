@@ -12,7 +12,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 
 import type { SupportedLang } from '@/lib/i18n'
-import { InstrumentRunner, Note } from '@/components/screening/InstrumentRunner'
+import { InstrumentRunner } from '@/components/screening/InstrumentRunner'
 import { Loading } from '@/pages/ScreeningStage1Page'
 import {
   answerStage2,
@@ -72,6 +72,7 @@ export function ScreeningStage2Page() {
           setBlocked('stage2_not_indicated')
         } else {
           setBlocked('unavailable')
+          console.error('[screening] stage 2 unavailable:', message)
           setError(message)
         }
       } finally {
@@ -113,7 +114,6 @@ export function ScreeningStage2Page() {
       <div className="mx-auto max-w-2xl px-5 py-10 sm:py-14">
         <h1 className="text-2xl font-semibold text-text-primary">{copy.title}</h1>
         <p className="mt-4 leading-relaxed text-text-secondary">{copy.body}</p>
-        {error && <Note>{error}</Note>}
         <Link
           to={copy.to}
           className="mt-8 inline-flex items-center justify-center rounded-full bg-brand

@@ -12,7 +12,7 @@ import { Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import type { SupportedLang } from '@/lib/i18n'
-import { InstrumentRunner, Note } from '@/components/screening/InstrumentRunner'
+import { InstrumentRunner } from '@/components/screening/InstrumentRunner'
 import {
   answerStage1,
   completeStage1,
@@ -57,6 +57,9 @@ export function ScreeningStage1Page() {
         setWithdrawCopy(consent?.content.withdraw ?? null)
       } catch (err) {
         if (cancelled) return
+        // Detail goes to the console, not to her — it names internal content
+        // keys and languages.
+        console.error('[screening] stage 1 unavailable:', err)
         setError(err instanceof Error ? err.message : String(err))
       } finally {
         if (!cancelled) setLoading(false)
@@ -78,7 +81,6 @@ export function ScreeningStage1Page() {
           {t('screening.unavailableBody',
              'The questions are not ready in this language yet. Everything else is still open to you.')}
         </p>
-        {error && <Note>{error}</Note>}
         <Link
           to="/"
           className="mt-8 inline-flex items-center justify-center rounded-full bg-brand
