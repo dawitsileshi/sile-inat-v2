@@ -49,7 +49,8 @@ def create_app(config=None) -> Flask:
         app,
         resources={r"/api/*": {
             "origins": app.config["CORS_ORIGINS"],
-            "allow_headers": ["Content-Type", "Authorization", "X-Anonymous-Client-Id"],
+            "allow_headers": ["Content-Type", "Authorization", "X-Anonymous-Client-Id",
+                              "X-Screening-Token"],
         }},
     )
 
@@ -62,6 +63,12 @@ def create_app(config=None) -> Flask:
             User, UserSession, DailyLog,
             ForumPost, ForumReply, ForumReaction,
             Circle, CirclePost, CircleMembership,
+            # Two-stage postpartum depression screening (research pilot)
+            ScreeningContentVersion, ScreeningParticipant, ScreeningConsent,
+            ScreeningSession, ScreeningItemResponse,
+            SafetyEvent, SafetyAlertAttempt,
+            ScreeningFollowUp, FollowUpTransition, ScreeningParticipantLink,
+            ScreeningAccessToken,
         )
         db.create_all()
         log.info("Database initialised at: %s", app.config["SQLALCHEMY_DATABASE_URI"])
@@ -75,36 +82,39 @@ def create_app(config=None) -> Flask:
         except Exception as exc:
             log.warning("Seed auto-run skipped: %s", exc)
 
+        # Publish the versioned consent bundles. Idempotent; only writes when a
+        # bundle is new or its checksum changed. Failure must not take the app
+        # down, but it does mean the consent gate will refuse to serve text —
+        # which is the correct failure direction.
+        try:
+            from src.services.screening_consent import sync_consent_content
+            written = sync_consent_content()
+            if written:
+                log.info("Consent content synced: %d bundle(s).", written)
+        except Exception as exc:
+            log.error("Consent content sync FAILED: %s", exc)
+
     # ── ML Service ────────────────────────────────────────────────────────────
-    from src.services.ml_service import create_ml_service
+    # REMOVED 2026-09-15 (decisions #1, #8). The unvalidated ML "well-being
+    # index" and its EPDS-derived risk labels are gone. Clinical screening now
+    # runs solely through src/services/screening_instrument.py against
+    # versioned, published content. Nothing here may score a mother again.
 
-    model_path = Path(app.config["MODEL_PATH"])
-    create_ml_service(
-        model_path   = model_path,
-        metrics_path = Path(app.config["METRICS_PATH"]),
-    )
-    if not model_path.exists():
-        log.warning(
-            "⚠️  ML model not found. Inference endpoints will return "
-            "predictions=null until `python src/ml/train.py` is run."
-        )
-
-    # ── Blueprints ────────────────────────────────────────────────────────────
     from src.routes.auth       import auth_bp
     from src.routes.logs       import logs_bp
-    from src.routes.ml_metrics import ml_bp
     from src.routes.forum      import forum_bp
     from src.routes.chatbot    import chatbot_bp
     from src.routes.circles    import circles_bp
     from src.routes.reflection import reflection_bp
+    from src.routes.screening  import screening_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(logs_bp)
-    app.register_blueprint(ml_bp)
     app.register_blueprint(forum_bp)
     app.register_blueprint(chatbot_bp)
     app.register_blueprint(circles_bp)
     app.register_blueprint(reflection_bp)
+    app.register_blueprint(screening_bp)
 
     # ── Root Health Check ─────────────────────────────────────────────────────
     @app.route("/health", methods=["GET"])

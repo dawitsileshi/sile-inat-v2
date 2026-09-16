@@ -24,12 +24,10 @@ export function getStoredUser(): StoredUser | null {
 }
 
 export interface DailyLogPayload {
-  gestational_week: number;
   sleep_hours: number;
   water_liters: number;
   symptom_score: number;
   mood_score: number;
-  hrv_delta?: number | null;
   feels_supported?: 'yes' | 'somewhat' | 'no' | null;
   notes?: string | null;
   log_date?: string;
@@ -39,16 +37,13 @@ export interface DailyLog {
   id: number;
   user_id: number;
   log_date: string;
-  gestational_week: number;
   sleep_hours: number;
   water_liters: number;
   symptom_score: number;
   mood_score: number;
-  hrv_delta: number | null;
   feels_supported: 'yes' | 'somewhat' | 'no' | null;
   notes: string | null;
   response_message: string | null;
-  predicted_stress_index: number | null;
   created_at: string;
 }
 
@@ -56,9 +51,6 @@ interface TrackerState {
   authToken: string | null;
   logs: DailyLog[];
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
-  latestPrediction: DailyLog | null;
-  predictionLabel: string | null;
-  insights: string[];
   error: string | null;
 }
 
@@ -128,8 +120,6 @@ export const submitDailyLog = createAsyncThunk(
       return await parseResponse<{
         log: DailyLog;
         model_ready: boolean;
-        prediction_label?: string;
-        insights?: string[];
       }>(response);
     } catch (err) {
       return rejectWithValue(err instanceof Error ? err.message : 'Failed to submit log');
@@ -158,9 +148,6 @@ const trackerSlice = createSlice({
     authToken: getStoredToken(),
     logs: [],
     status: 'idle',
-    latestPrediction: null,
-    predictionLabel: null,
-    insights: [],
     error: null,
   } as TrackerState,
   reducers: {
@@ -186,7 +173,6 @@ const trackerSlice = createSlice({
         state.status = 'succeeded';
         state.logs = action.payload.logs;
         if (state.logs.length > 0) {
-          state.latestPrediction = state.logs[state.logs.length - 1];
         }
         state.error = null;
       })
@@ -200,9 +186,6 @@ const trackerSlice = createSlice({
       })
       .addCase(submitDailyLog.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        state.latestPrediction = action.payload.log;
-        state.predictionLabel = action.payload.prediction_label ?? null;
-        state.insights = action.payload.insights ?? [];
         const existing = state.logs.findIndex((l) => l.id === action.payload.log.id);
         if (existing >= 0) {
           state.logs[existing] = action.payload.log;

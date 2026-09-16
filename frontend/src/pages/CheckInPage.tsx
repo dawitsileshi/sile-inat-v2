@@ -5,6 +5,8 @@ import {
   Frown, Meh, Smile, Laugh, Heart as HeartIcon, Zap, Moon,
   SmilePlus, ArrowRight,
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { cn } from '@/lib/utils'
 import { useIsAuthenticated } from '@/lib/useIsAuthenticated'
 import { SignInPrompt } from '@/components/SignInPrompt'
@@ -19,23 +21,19 @@ import type { AppDispatch, RootState } from '@/store/store'
 type MoodValue = 'rough' | 'low' | 'okay' | 'good' | 'great'
 type SupportValue = 'yes' | 'somewhat' | 'no'
 
+// Mood labels live under checkIn.moods.<value> in the locale files.
 interface MoodOption {
   value: MoodValue
-  label: string
   Icon: typeof Frown
   color: string
 }
 
 const MOODS: MoodOption[] = [
-  { value: 'rough', label: 'Surviving',          Icon: Frown, color: 'text-[#c4456b]' },
-  { value: 'low',   label: 'Holding on',         Icon: Frown, color: 'text-[#c98a1f]' },
-  { value: 'okay',  label: 'Okay-ish',           Icon: Meh,   color: 'text-[#d6a02f]' },
-  { value: 'good',  label: 'Some good moments',  Icon: Smile, color: 'text-[#5a9d6a]' },
-  { value: 'great', label: 'Felt like myself',   Icon: Laugh, color: 'text-brand' },
-]
-
-const ENERGY_LABELS = [
-  'Empty', 'Running on coffee', 'Holding it together', 'A bit of me back', 'Like myself today',
+  { value: 'rough', Icon: Frown, color: 'text-[#c4456b]' },
+  { value: 'low',   Icon: Frown, color: 'text-[#c98a1f]' },
+  { value: 'okay',  Icon: Meh,   color: 'text-[#d6a02f]' },
+  { value: 'good',  Icon: Smile, color: 'text-[#5a9d6a]' },
+  { value: 'great', Icon: Laugh, color: 'text-brand' },
 ]
 
 // Maps the friendlier MoodValue to the API's mood_score (1=calm/best, 5=anxious/worst).
@@ -65,14 +63,6 @@ function energyToSymptomScore(energy: number): number {
   return 1
 }
 
-const MOOD_MESSAGES: Record<1 | 2 | 3 | 4 | 5, string> = {
-  1: 'Thank you for checking in today. Even doing this — pausing for one minute to notice how you feel — is something. You don’t have to be okay. You just have to keep going.',
-  2: 'Holding on is enough. You showed up for your baby today and you showed up here. That’s real. Rest when you can.',
-  3: 'Okay-ish is a real place. Not good, not bad — just getting through. Many mothers are right here with you tonight.',
-  4: 'Some good moments is worth holding onto. They don’t erase the hard parts, but they’re real too.',
-  5: 'That’s a good day. Remember this one. On the harder days, it helps to know they exist.',
-}
-
 const CRISIS_PHRASES = [
   'want to disappear',
   "don't want to be here",
@@ -97,31 +87,21 @@ function weeksPostpartum(birthIso: string | null): number | null {
   return Math.floor(days / 7)
 }
 
-function stageMessage(weeks: number): string {
-  if (weeks <= 2) {
-    return 'You are in the very first days. Sleep, nourishment, and being held are the whole job right now.'
-  }
-  if (weeks <= 6) {
-    return 'The first weeks are their own season. Whatever today looked like, it counted.'
-  }
-  if (weeks <= 12) {
-    return 'You’re past the earliest stretch. The body is still healing — go gently with yourself.'
-  }
-  if (weeks <= 26) {
-    return 'Months three to six are quietly hard. The newness fades but the tiredness can stay. You’re still in it.'
-  }
-  if (weeks <= 52) {
-    return 'You’ve carried this for over half a year. That is a long time. Be proud of the small steady things.'
-  }
-  return 'A year in, and still figuring it out. That is allowed. Motherhood doesn’t arrive all at once.'
+function stageMessageKey(weeks: number): string {
+  if (weeks <= 2) return 'checkIn.stage.firstDays'
+  if (weeks <= 6) return 'checkIn.stage.firstWeeks'
+  if (weeks <= 12) return 'checkIn.stage.pastEarliest'
+  if (weeks <= 26) return 'checkIn.stage.threeToSix'
+  if (weeks <= 52) return 'checkIn.stage.halfYear'
+  return 'checkIn.stage.yearIn'
 }
 
-function moodLabelFromApi(score: number): string {
+function moodLabelFromApi(score: number, t: TFunction): string {
   // Reverse MOOD_TO_API
   const match = (Object.entries(MOOD_TO_API) as [MoodValue, number][])
     .find(([, v]) => v === score)
-  if (!match) return 'Checked in'
-  return MOODS.find((m) => m.value === match[0])?.label ?? 'Checked in'
+  if (!match) return t('checkIn.checkedIn')
+  return t(`checkIn.moods.${match[0]}`)
 }
 
 function formatLogDate(iso: string): string {
@@ -138,6 +118,7 @@ export function CheckInPage() {
   const dispatch = useDispatch<AppDispatch>()
   const { status, error, logs } = useSelector((state: RootState) => state.tracker)
   const isSignedIn = useIsAuthenticated()
+  const { t } = useTranslation()
   // Local saving state — we deliberately don't read this from redux's
   // `status` because that flag is shared with fetchLogs, which fires
   // right after a successful save. Listening to redux makes the button
@@ -166,10 +147,10 @@ export function CheckInPage() {
 
   const savingLabel =
     savingSeconds < 4
-      ? 'Saving…'
+      ? t('checkIn.saving')
       : savingSeconds < 12
-        ? 'Almost there…'
-        : 'Still working — first save after a quiet period can take a moment.'
+        ? t('checkIn.almostThere')
+        : t('checkIn.stillWorking')
 
   const [mood, setMood] = useState<MoodValue>('okay')
   const [energy, setEnergy] = useState(50)
@@ -195,7 +176,8 @@ export function CheckInPage() {
 
   const storedUser = useMemo(() => getStoredUser(), [response])
   const currentMood = MOODS.find((m) => m.value === mood)!
-  const energyBucket = ENERGY_LABELS[Math.min(4, Math.floor(energy / 20))]
+  const energyLabels = t('checkIn.energyLabels', { returnObjects: true }) as string[]
+  const energyBucket = energyLabels[Math.min(4, Math.floor(energy / 20))]
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -205,7 +187,6 @@ export function CheckInPage() {
       if (!ensureAuth.fulfilled.match(authResult)) return
 
       const payload = {
-        gestational_week: 20,
         sleep_hours: sleep,
         water_liters: water,
         symptom_score: energyToSymptomScore(energy),
@@ -249,8 +230,8 @@ export function CheckInPage() {
   if (!isSignedIn) {
     return (
       <SignInPrompt
-        title="Sign in to check in"
-        body="Your check-ins are tied to your account so you can look back at them later in your journal."
+        title={t('checkIn.signInTitle')}
+        body={t('checkIn.signInBody')}
       />
     )
   }
@@ -267,10 +248,10 @@ export function CheckInPage() {
             <SmilePlus className="h-6 w-6 text-brand" />
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight text-text-primary">
-            How are you, really?
+            {t('checkIn.title')}
           </h1>
           <p className="mt-2 text-sm text-text-secondary">
-            Just for you. Not for anyone else to see.
+            {t('checkIn.subtitle')}
           </p>
         </motion.div>
 
@@ -291,11 +272,10 @@ export function CheckInPage() {
             <section className="mb-10">
               <div className="mb-5 text-center">
                 <h2 className="text-2xl font-bold text-text-primary">
-                  Anything on your mind?
+                  {t('checkIn.mindTitle')}
                 </h2>
                 <p className="mt-1.5 text-sm leading-relaxed text-text-secondary">
-                  Start here, however you can. Speak it, type it, or skip it —
-                  the rest is optional.
+                  {t('checkIn.mindBody')}
                 </p>
               </div>
 
@@ -303,14 +283,14 @@ export function CheckInPage() {
 
               <div className="mt-5">
                 <p className="mb-1.5 text-center text-xs uppercase tracking-wider text-text-muted">
-                  Or write it
+                  {t('checkIn.orWrite')}
                 </p>
                 <textarea
                   id="notes"
                   rows={3}
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  placeholder="You don't have to write anything."
+                  placeholder={t('checkIn.notesPlaceholder')}
                   className="w-full resize-none rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:border-brand focus:outline-none"
                 />
               </div>
@@ -319,7 +299,7 @@ export function CheckInPage() {
             <div className="mb-8 flex items-center gap-3">
               <div className="h-px flex-1 bg-gray-200" />
               <span className="text-xs font-medium uppercase tracking-wide text-text-muted">
-                A few quick things
+                {t('checkIn.quickThings')}
               </span>
               <div className="h-px flex-1 bg-gray-200" />
             </div>
@@ -327,11 +307,11 @@ export function CheckInPage() {
             <div className="mb-8">
               <div className="mb-4 flex items-center justify-between">
                 <label className="text-base font-semibold text-text-primary">
-                  How are you feeling today?
+                  {t('checkIn.feelingToday')}
                 </label>
                 <span className="flex items-center gap-1.5 text-sm font-medium text-text-secondary">
                   <currentMood.Icon className={cn('h-4 w-4', currentMood.color)} />
-                  {currentMood.label}
+                  {t(`checkIn.moods.${currentMood.value}`)}
                 </span>
               </div>
               <div className="grid grid-cols-5 gap-2">
@@ -350,7 +330,7 @@ export function CheckInPage() {
                       )}
                     >
                       <m.Icon className={cn('h-7 w-7', m.color)} />
-                      <span className="text-xs font-medium text-text-secondary">{m.label}</span>
+                      <span className="text-xs font-medium text-text-secondary">{t(`checkIn.moods.${m.value}`)}</span>
                     </button>
                   )
                 })}
@@ -359,7 +339,7 @@ export function CheckInPage() {
 
             <div className="mb-8">
               <div className="mb-3 flex items-center justify-between">
-                <label className="text-base font-semibold text-text-primary">Energy level</label>
+                <label className="text-base font-semibold text-text-primary">{t('checkIn.energyLevel')}</label>
                 <span className="flex items-center gap-1.5 text-sm font-medium text-text-secondary">
                   <Zap className="h-4 w-4 text-brand" />
                   {energyBucket}
@@ -377,14 +357,14 @@ export function CheckInPage() {
                 }}
               />
               <div className="mt-2 flex justify-between text-xs text-text-secondary">
-                <span>Exhausted</span>
-                <span>Vibrant</span>
+                <span>{t('checkIn.exhausted')}</span>
+                <span>{t('checkIn.vibrant')}</span>
               </div>
             </div>
 
             <div className="mb-8">
               <div className="mb-3 flex items-center justify-between">
-                <label className="text-base font-semibold text-text-primary">Hours of sleep</label>
+                <label className="text-base font-semibold text-text-primary">{t('checkIn.hoursOfSleep')}</label>
                 <span className="flex items-center gap-1.5 text-sm font-medium text-text-secondary">
                   <Moon className="h-4 w-4 text-brand" />
                   {sleep}h
@@ -409,7 +389,7 @@ export function CheckInPage() {
 
             <div className="mb-8">
               <div className="mb-3 flex items-center justify-between">
-                <label className="text-base font-semibold text-text-primary">Water intake</label>
+                <label className="text-base font-semibold text-text-primary">{t('checkIn.waterIntake')}</label>
                 <span className="text-sm font-medium text-text-secondary">{water.toFixed(1)} L</span>
               </div>
               <input
@@ -432,13 +412,13 @@ export function CheckInPage() {
 
             <div className="mb-8">
               <label className="mb-3 block text-base font-semibold text-text-primary">
-                Do you feel supported right now?
+                {t('checkIn.supportedQuestion')}
               </label>
               <div className="grid grid-cols-3 gap-2">
                 {([
-                  { value: 'yes',      label: 'Yes' },
-                  { value: 'somewhat', label: 'Somewhat' },
-                  { value: 'no',       label: 'Not really' },
+                  { value: 'yes',      label: t('checkIn.supported.yes') },
+                  { value: 'somewhat', label: t('checkIn.supported.somewhat') },
+                  { value: 'no',       label: t('checkIn.supported.no') },
                 ] as { value: SupportValue; label: string }[]).map((opt) => {
                   const active = supported === opt.value
                   return (
@@ -470,7 +450,7 @@ export function CheckInPage() {
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark disabled:opacity-60"
             >
               <HeartIcon className="h-4 w-4" />
-              {isSubmitting ? savingLabel : 'Save tonight'}
+              {isSubmitting ? savingLabel : t('checkIn.save')}
             </button>
           </motion.form>
         )}
@@ -496,13 +476,14 @@ function ResponseCard({
   storedUserKnown: boolean
   onReset: () => void
 }) {
+  const { t } = useTranslation()
   // Prefer the prose generated and stored on the backend so the journal can
   // replay the same wording. Fall back to local templates if the server
   // didn't supply one (offline / older row).
   const displayScore = MOOD_TO_DISPLAY[response.mood]
-  const fallbackMood = MOOD_MESSAGES[displayScore]
+  const fallbackMood = t(`checkIn.moodMessages.${displayScore}`)
   const fallbackStage =
-    response.weeksPostpartum !== null ? stageMessage(response.weeksPostpartum) : null
+    response.weeksPostpartum !== null ? t(stageMessageKey(response.weeksPostpartum)) : null
   const proseLines = response.proseMessage
     ? response.proseMessage.split(/\n{2,}/)
     : fallbackStage
@@ -527,20 +508,20 @@ function ResponseCard({
       {response.supported === 'no' && (
         <div className="mt-6 rounded-xl bg-stone-50 p-5">
           <p className="text-sm text-text-secondary">
-            It might help to hear from others, or just talk it through.
+            {t('checkIn.response.notSupported')}
           </p>
           <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:gap-4">
             <Link
               to="/circles"
               className="inline-flex items-center gap-1.5 text-sm font-medium text-brand hover:underline"
             >
-              Find mothers like me <ArrowRight className="h-3.5 w-3.5" />
+              {t('home.paths.circles.title')} <ArrowRight className="h-3.5 w-3.5" />
             </Link>
             <Link
               to="/ai-assistant"
               className="inline-flex items-center gap-1.5 text-sm font-medium text-brand hover:underline"
             >
-              Talk to someone <ArrowRight className="h-3.5 w-3.5" />
+              {t('checkIn.response.talkToSomeone')} <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
         </div>
@@ -549,13 +530,13 @@ function ResponseCard({
       {response.supported === 'somewhat' && (
         <div className="mt-6 rounded-xl bg-stone-50 p-5">
           <p className="text-sm text-text-secondary">
-            Sometimes a few quiet minutes helps.
+            {t('checkIn.response.somewhatSupported')}
           </p>
           <Link
             to="/comfort"
             className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-brand hover:underline"
           >
-            A quiet moment <ArrowRight className="h-3.5 w-3.5" />
+            {t('home.paths.comfort.title')} <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
       )}
@@ -564,13 +545,13 @@ function ResponseCard({
         // Same warm palette — no red. This is an offer, not an alarm.
         <div className="mt-6 rounded-xl border border-brand/20 bg-brand-light/40 p-5">
           <p className="text-sm leading-relaxed text-text-primary">
-            If things feel like too much right now, you don’t have to carry it alone.{' '}
+            {t('checkIn.response.crisis')}{' '}
             <button
               type="button"
               onClick={() => window.dispatchEvent(new CustomEvent('crisis:open'))}
               className="font-semibold text-brand hover:underline"
             >
-              Get help now
+              {t('crisis.button')}
             </button>
           </p>
         </div>
@@ -578,8 +559,7 @@ function ResponseCard({
 
       {!storedUserKnown && response.weeksPostpartum === null && (
         <p className="mt-6 text-xs text-text-muted">
-          Want a more personal response next time? Tell us a little when you create
-          an account.
+          {t('checkIn.response.personalize')}
         </p>
       )}
 
@@ -588,26 +568,27 @@ function ResponseCard({
         onClick={onReset}
         className="mt-8 w-full rounded-xl border border-brand/30 bg-white py-3 text-sm font-semibold text-brand transition-colors hover:bg-brand-light"
       >
-        Check in again
+        {t('checkIn.response.again')}
       </button>
     </motion.div>
   )
 }
 
 function RecentCheckIns({ logs, hidden }: { logs: DailyLog[]; hidden: boolean }) {
+  const { t } = useTranslation()
   if (hidden) return null
   const recent = [...logs].sort((a, b) => b.log_date.localeCompare(a.log_date)).slice(0, 5)
   if (recent.length === 0) return null
 
   return (
     <section className="mt-10">
-      <h2 className="mb-4 text-lg font-bold text-text-primary">Your recent check-ins</h2>
+      <h2 className="mb-4 text-lg font-bold text-text-primary">{t('checkIn.recent')}</h2>
       <ul className="divide-y divide-gray-100 overflow-hidden rounded-2xl bg-white card-shadow-sm">
         {recent.map((log) => (
           <li key={log.id} className="flex items-center justify-between px-5 py-3">
             <span className="text-sm text-text-secondary">{formatLogDate(log.log_date)}</span>
             <span className="text-sm font-medium text-text-primary">
-              {moodLabelFromApi(log.mood_score)}
+              {moodLabelFromApi(log.mood_score, t)}
             </span>
           </li>
         ))}

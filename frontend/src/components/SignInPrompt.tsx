@@ -1,4 +1,5 @@
 import { LogIn } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 interface SignInPromptProps {
   title: string
@@ -15,7 +16,8 @@ interface SignInPromptProps {
  * Voice rules: empty states are invitations, not errors — no apology,
  * just direction.
  */
-export function SignInPrompt({ title, body, ctaLabel = 'Sign in or join' }: SignInPromptProps) {
+export function SignInPrompt({ title, body, ctaLabel }: SignInPromptProps) {
+  const { t } = useTranslation()
   function open() {
     window.dispatchEvent(new Event('auth:open'))
   }
@@ -34,7 +36,7 @@ export function SignInPrompt({ title, body, ctaLabel = 'Sign in or join' }: Sign
         className="mt-6 inline-flex items-center gap-2 rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-dark"
       >
         <LogIn className="h-4 w-4" />
-        {ctaLabel}
+        {ctaLabel ?? t('common.signInOrJoin')}
       </button>
     </div>
   )

@@ -1,0 +1,81 @@
+{
+  "content_key": "consent",
+  "version": "1.0.0",
+  "language": "en",
+  "stage": null,
+  "review_required": false,
+  "notes": "Plain-language consent for the two-stage postpartum screening pilot. Covers the ten required elements: purpose, procedure, time, benefit, discomfort, confidentiality, safety exception, voluntariness, right to stop, and non-penalty on decline.",
+  "title": "Before You Begin",
+  "intro": "We would like to ask you some questions about how you have been feeling since your baby was born. Please read this first, and take as long as you need.",
+  "sections": [
+    {
+      "id": "purpose",
+      "heading": "Why we are asking",
+      "body": "Many mothers feel low, anxious or exhausted after birth, and it often goes unspoken. These questions help you notice what you are carrying, and help us learn how to support mothers better. This is not a diagnosis, and it is not a test you can pass or fail."
+    },
+    {
+      "id": "procedure",
+      "heading": "What will happen",
+      "body": "First we will ask you a short set of questions. Depending on your answers, we may ask you a second, longer set. You answer by choosing the option closest to how you have felt in the past seven days. There are no right answers."
+    },
+    {
+      "id": "time",
+      "heading": "How long it takes",
+      "body": "The first set takes about two minutes. If we ask you to continue to the second set, that takes about five minutes more. You can stop at any point."
+    },
+    {
+      "id": "benefit",
+      "heading": "What you get from it",
+      "body": "At the end you will see what your answers suggest, in plain words, along with things that may help and places you can go if you want support. You may also find it useful simply to have named how you feel."
+    },
+    {
+      "id": "discomfort",
+      "heading": "What may be difficult",
+      "body": "Some questions ask about sadness, self-blame, and thoughts of harming yourself. Reading them can be upsetting. You may skip any question, take a break, or stop altogether, and nothing bad will happen if you do."
+    },
+    {
+      "id": "confidentiality",
+      "heading": "Your privacy",
+      "body": "You do not have to give your name or phone number. Your answers are stored under a random code, not under your name, and are kept separately from anything that could identify you. When we study the results, we see only the code."
+    },
+    {
+      "id": "safety_exception",
+      "heading": "The one exception",
+      "body": "There is one situation where we do not simply keep your answers to ourselves. If you tell us you are thinking of harming yourself, that answer is recorded and a trained person from our team may try to reach you, so that you are not left alone with it. We are telling you this now so that nothing later comes as a surprise."
+    },
+    {
+      "id": "voluntary",
+      "heading": "It is your choice",
+      "body": "Taking part is entirely up to you. Nobody will ask you why you said yes or no."
+    },
+    {
+      "id": "right_to_stop",
+      "heading": "You can stop at any time",
+      "body": "You can close the questions whenever you want, and you can withdraw afterwards using the Stop and withdraw option. If you withdraw, we stop asking and your answers are handled according to the study rules."
+    },
+    {
+      "id": "no_penalty",
+      "heading": "Saying no changes nothing else",
+      "body": "If you decide not to take part, everything else in ስለ እናት stays open to you exactly as before, including the companion, the circles, the community, and the help directory."
+    }
+  ],
+  "checkbox_label": "I have read and understood this, and I know I can stop at any time.",
+  "agree_label": "I Agree & Continue",
+  "decline_label": "I Do Not Agree",
+  "checkbox_required_message": "Please read and tick the box above before continuing.",
+  "decline": {
+    "title": "That is completely fine",
+    "body": "You do not need to answer anything to be welcome here. Everything else in ስለ እናት is still open to you, and you can come back to this later if you ever want to.",
+    "primary_label": "Back to home",
+    "secondary_label": "Talk to the companion"
+  },
+  "withdraw": {
+    "trigger_label": "Stop and withdraw",
+    "title": "Stop and withdraw?",
+    "body": "You can stop here. We will not ask you anything further, and your withdrawal is recorded. You can still use everything else in ስለ እናት.",
+    "confirm_label": "Yes, stop and withdraw",
+    "cancel_label": "Go back",
+    "confirmed_title": "You have withdrawn",
+    "confirmed_body": "Nothing further will be asked. Thank you for telling us."
+  }
+}

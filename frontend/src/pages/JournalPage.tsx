@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { BookOpen, Frown, Meh, Smile, Laugh, Moon, Droplet, Zap, HeartHandshake } from 'lucide-react'
 import { useDispatch, useSelector } from 'react-redux'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { fetchLogs, ensureAuth, type DailyLog } from '@/store/trackerSlice'
 import type { AppDispatch, RootState } from '@/store/store'
 import { cn } from '@/lib/utils'
@@ -11,21 +13,16 @@ import { SignInPrompt } from '@/components/SignInPrompt'
 
 // Same mapping the check-in form uses, just keyed by API mood_score.
 // API: 1 = calm/best (Felt like myself), 5 = anxious/worst (Surviving).
-const MOOD_BY_API: Record<number, { label: string; Icon: typeof Frown; color: string }> = {
-  1: { label: 'Felt like myself',  Icon: Laugh, color: 'text-brand' },
-  2: { label: 'Some good moments', Icon: Smile, color: 'text-[#5a9d6a]' },
-  3: { label: 'Okay-ish',          Icon: Meh,   color: 'text-[#d6a02f]' },
-  4: { label: 'Holding on',        Icon: Frown, color: 'text-[#c98a1f]' },
-  5: { label: 'Surviving',         Icon: Frown, color: 'text-[#c4456b]' },
+// Labels come from checkIn.moods.<mood> in the locale files.
+const MOOD_BY_API: Record<number, { mood: string; Icon: typeof Frown; color: string }> = {
+  1: { mood: 'great', Icon: Laugh, color: 'text-brand' },
+  2: { mood: 'good',  Icon: Smile, color: 'text-[#5a9d6a]' },
+  3: { mood: 'okay',  Icon: Meh,   color: 'text-[#d6a02f]' },
+  4: { mood: 'low',   Icon: Frown, color: 'text-[#c98a1f]' },
+  5: { mood: 'rough', Icon: Frown, color: 'text-[#c4456b]' },
 }
 
-const SUPPORT_LABEL: Record<NonNullable<DailyLog['feels_supported']>, string> = {
-  yes: 'Yes',
-  somewhat: 'Somewhat',
-  no: 'Not really',
-}
-
-function formatDateHeading(iso: string): string {
+function formatDateHeading(iso: string, t: TFunction): string {
   // iso is YYYY-MM-DD from the backend.
   const d = new Date(iso + 'T00:00:00')
   if (Number.isNaN(d.getTime())) return iso
@@ -34,8 +31,8 @@ function formatDateHeading(iso: string): string {
   const that = new Date(d)
   that.setHours(0, 0, 0, 0)
   const diffDays = Math.round((today.getTime() - that.getTime()) / 86_400_000)
-  if (diffDays === 0) return 'Today'
-  if (diffDays === 1) return 'Yesterday'
+  if (diffDays === 0) return t('journal.today')
+  if (diffDays === 1) return t('journal.yesterday')
   if (diffDays < 7) {
     return d.toLocaleDateString(undefined, { weekday: 'long' })
   }
@@ -49,6 +46,7 @@ export function JournalPage() {
   const dispatch = useDispatch<AppDispatch>()
   const { logs, status } = useSelector((state: RootState) => state.tracker)
   const isSignedIn = useIsAuthenticated()
+  const { t } = useTranslation()
 
   useEffect(() => {
     if (!isSignedIn) return
@@ -62,8 +60,8 @@ export function JournalPage() {
   if (!isSignedIn) {
     return (
       <SignInPrompt
-        title="Sign in to see your journal"
-        body="Your journal is a private record of every check-in. Sign in to read it back."
+        title={t('journal.signInTitle')}
+        body={t('journal.signInBody')}
       />
     )
   }
@@ -84,15 +82,15 @@ export function JournalPage() {
             <BookOpen className="h-6 w-6 text-brand" />
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight text-text-primary">
-            Your journal
+            {t('journal.title')}
           </h1>
           <p className="mt-2 text-sm text-text-secondary">
-            Everything you’ve said to yourself here. No one else sees it.
+            {t('journal.subtitle')}
           </p>
         </motion.header>
 
         {isLoading ? (
-          <p className="text-center text-sm text-text-muted">Loading…</p>
+          <p className="text-center text-sm text-text-muted">{t('common.loading')}…</p>
         ) : ordered.length === 0 ? (
           <EmptyJournal />
         ) : (
@@ -108,6 +106,7 @@ export function JournalPage() {
 }
 
 function EmptyJournal() {
+  const { t } = useTranslation()
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -115,27 +114,28 @@ function EmptyJournal() {
       className="rounded-2xl bg-white px-8 py-16 text-center card-shadow-sm"
     >
       <p className="text-lg text-text-primary">
-        Your check-ins will live here. Nothing yet.
+        {t('journal.emptyTitle')}
       </p>
       <p className="mt-3 text-sm text-text-secondary">
-        Start with a quiet minute on the check-in page.
+        {t('journal.emptyBody')}
       </p>
       <Link
         to="/check-in"
         className="mt-6 inline-flex rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-dark"
       >
-        Check in
+        {t('journal.checkIn')}
       </Link>
     </motion.div>
   )
 }
 
 function JournalCard({ log, index }: { log: DailyLog; index: number }) {
+  const { t } = useTranslation()
   const mood = MOOD_BY_API[log.mood_score] ?? MOOD_BY_API[3]
   const proseLines = log.response_message
     ? log.response_message.split(/\n{2,}/).filter(Boolean)
     : []
-  const supportLabel = log.feels_supported ? SUPPORT_LABEL[log.feels_supported] : null
+  const supportLabel = log.feels_supported ? t(`checkIn.supported.${log.feels_supported}`) : null
 
   return (
     <motion.article
@@ -146,11 +146,11 @@ function JournalCard({ log, index }: { log: DailyLog; index: number }) {
     >
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-base font-bold text-text-primary">
-          {formatDateHeading(log.log_date)}
+          {formatDateHeading(log.log_date, t)}
         </h2>
         <span className="inline-flex items-center gap-1.5 rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-text-secondary">
           <mood.Icon className={cn('h-3.5 w-3.5', mood.color)} />
-          {mood.label}
+          {t(`checkIn.moods.${mood.mood}`)}
         </span>
       </div>
 
@@ -159,17 +159,17 @@ function JournalCard({ log, index }: { log: DailyLog; index: number }) {
           “{log.notes}”
         </blockquote>
       ) : (
-        <p className="text-xs italic text-text-muted">No note that day.</p>
+        <p className="text-xs italic text-text-muted">{t('journal.noNote')}</p>
       )}
 
       <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-xs text-text-secondary">
-        <MetaItem icon={<Moon className="h-3.5 w-3.5" />} label={`${log.sleep_hours}h sleep`} />
-        <MetaItem icon={<Droplet className="h-3.5 w-3.5" />} label={`${log.water_liters.toFixed(1)} L water`} />
-        <MetaItem icon={<Zap className="h-3.5 w-3.5" />} label={energyLabel(log.symptom_score)} />
+        <MetaItem icon={<Moon className="h-3.5 w-3.5" />} label={t('journal.sleep', { hours: log.sleep_hours })} />
+        <MetaItem icon={<Droplet className="h-3.5 w-3.5" />} label={t('journal.water', { liters: log.water_liters.toFixed(1) })} />
+        <MetaItem icon={<Zap className="h-3.5 w-3.5" />} label={energyLabel(log.symptom_score, t)} />
         {supportLabel && (
           <MetaItem
             icon={<HeartHandshake className="h-3.5 w-3.5" />}
-            label={`Support: ${supportLabel}`}
+            label={t('journal.support', { value: supportLabel })}
           />
         )}
       </div>
@@ -177,7 +177,7 @@ function JournalCard({ log, index }: { log: DailyLog; index: number }) {
       {proseLines.length > 0 && (
         <div className="mt-5 border-t border-gray-100 pt-4">
           <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">
-            What you read that day
+            {t('journal.whatYouRead')}
           </p>
           <div className="mt-2 space-y-2">
             {proseLines.map((line, i) => (
@@ -207,14 +207,10 @@ function MetaItem({ icon, label }: { icon: React.ReactNode; label: string }) {
   )
 }
 
-function energyLabel(symptomScore: number): string {
-  // symptom_score: 1 = vibrant, 5 = exhausted
-  switch (symptomScore) {
-    case 1: return 'Like myself today'
-    case 2: return 'A bit of me back'
-    case 3: return 'Holding it together'
-    case 4: return 'Running on coffee'
-    case 5: return 'Empty'
-    default: return 'Energy logged'
-  }
+function energyLabel(symptomScore: number, t: TFunction): string {
+  // symptom_score: 1 = vibrant, 5 = exhausted. checkIn.energyLabels runs
+  // the other way (0 = Empty), so flip the index.
+  if (symptomScore < 1 || symptomScore > 5) return t('journal.energyLogged')
+  const labels = t('checkIn.energyLabels', { returnObjects: true }) as string[]
+  return labels[5 - symptomScore]
 }

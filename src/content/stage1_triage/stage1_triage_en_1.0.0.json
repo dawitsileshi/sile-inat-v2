@@ -1,0 +1,106 @@
+{
+  "content_key": "stage1_triage",
+  "version": "1.0.0",
+  "language": "en",
+  "stage": 1,
+  "status": "draft",
+  "review_required": true,
+  "notes": "DRAFT FOR CLINICAL REVIEW. Items 1-4 are the PHQ-4 (Kroenke, Spitzer, Williams & Lowe 2009) in its published wording and response scale: items 1-2 are the GAD-2 (anxiety), items 3-4 the PHQ-2 (depression). Item 5 is PHQ-9 item 9 (thoughts of death or self-harm), used as the safety question; any answer other than 'Not at all' triggers the safety response and routes to Stage 2. Tiers use the published PHQ-4 total categories: 0-2 normal -> green, ends here; 3-5 mild -> amber, goes to the EPDS; 6-12 moderate/severe -> orange, goes to the EPDS. The total includes item 5, but any non-zero item 5 is overridden to orange, so the tiers only ever apply to a pure PHQ-4 total (0-12); the orange band extends to 15 only to keep the band table complete. FOR THE CLINICAL LEAD TO CONFIRM: (1) whether a PHQ-4 total of 3 is the right point to send a mother on to the EPDS, or whether the per-subscale rule (GAD-2 >= 3 or PHQ-2 >= 3) is preferred; (2) the 2-week recall window here versus the EPDS's 7 days; (3) that the validated Amharic PHQ wording is used for the Amharic bundle - never a translation of this file; (4) all result and safety copy, which is Sile Enat copy, not instrument wording. This replaces the earlier 7-item plan in decisions.md #8.",
+  "attribution": "Questions 1-4: PHQ-4. Kroenke K, Spitzer RL, Williams JBW, Lowe B. An ultra-brief screening scale for anxiety and depression: the PHQ-4. Psychosomatics 2009;50(6):613-621. Question 5: PHQ-9, item 9. The PHQ was developed by Drs. Robert L. Spitzer, Janet B.W. Williams, Kurt Kroenke and colleagues, with an educational grant from Pfizer Inc. No permission required to reproduce, translate, display or distribute.",
+  "title": "A few questions about how you have been",
+  "intro": "There are no right or wrong answers. This is only about how things have really been for you.",
+  "instruction": "Over the last 2 weeks, how often have you been bothered by the following problems?",
+  "items": [
+    {
+      "code": "phq4_1",
+      "index": 0,
+      "text": "Feeling nervous, anxious or on edge",
+      "is_safety_item": false,
+      "options": [
+        { "value": 0, "label": "Not at all" },
+        { "value": 1, "label": "Several days" },
+        { "value": 2, "label": "More than half the days" },
+        { "value": 3, "label": "Nearly every day" }
+      ]
+    },
+    {
+      "code": "phq4_2",
+      "index": 1,
+      "text": "Not being able to stop or control worrying",
+      "is_safety_item": false,
+      "options": [
+        { "value": 0, "label": "Not at all" },
+        { "value": 1, "label": "Several days" },
+        { "value": 2, "label": "More than half the days" },
+        { "value": 3, "label": "Nearly every day" }
+      ]
+    },
+    {
+      "code": "phq4_3",
+      "index": 2,
+      "text": "Little interest or pleasure in doing things",
+      "is_safety_item": false,
+      "options": [
+        { "value": 0, "label": "Not at all" },
+        { "value": 1, "label": "Several days" },
+        { "value": 2, "label": "More than half the days" },
+        { "value": 3, "label": "Nearly every day" }
+      ]
+    },
+    {
+      "code": "phq4_4",
+      "index": 3,
+      "text": "Feeling down, depressed, or hopeless",
+      "is_safety_item": false,
+      "options": [
+        { "value": 0, "label": "Not at all" },
+        { "value": 1, "label": "Several days" },
+        { "value": 2, "label": "More than half the days" },
+        { "value": 3, "label": "Nearly every day" }
+      ]
+    },
+    {
+      "code": "phq9_9",
+      "index": 4,
+      "text": "Thoughts that you would be better off dead, or of hurting yourself in some way",
+      "is_safety_item": true,
+      "safety_trigger_min_value": 1,
+      "options": [
+        { "value": 0, "label": "Not at all" },
+        { "value": 1, "label": "Several days" },
+        { "value": 2, "label": "More than half the days" },
+        { "value": 3, "label": "Nearly every day" }
+      ]
+    }
+  ],
+  "scoring": {
+    "max_score": 15,
+    "tiers": [
+      { "tier": "green", "min": 0, "max": 2, "next": "end" },
+      { "tier": "amber", "min": 3, "max": 5, "next": "stage2" },
+      { "tier": "orange", "min": 6, "max": 15, "next": "stage2" }
+    ],
+    "safety_override": { "tier": "orange", "next": "stage2" }
+  },
+  "results": {
+    "green": {
+      "title": "Thank you for sharing this",
+      "body": "It sounds like the past two weeks have been fairly steady for you. Things can change, and if they do, you can come back to these questions any time. Everything else here is still open to you."
+    },
+    "amber": {
+      "title": "Thank you for being honest",
+      "body": "Some of what you have been carrying lately sounds heavy, and you do not have to sort it out alone. There are a few more questions next, so we can understand a little better how you have been feeling."
+    },
+    "orange": {
+      "title": "Thank you for telling us",
+      "body": "It sounds like the past two weeks have been really hard. That matters, and so do you. There are a few more questions next, so we can understand how best to support you."
+    }
+  },
+  "safety_response": {
+    "title": "Thank you for telling us this",
+    "body": "Thoughts like these can feel frightening and lonely, and saying so takes courage. You do not have to carry this by yourself. There are people ready to talk with you right now.",
+    "action_label": "Talk to someone now"
+  },
+  "continue_label": "Continue",
+  "back_label": "Back"
+}

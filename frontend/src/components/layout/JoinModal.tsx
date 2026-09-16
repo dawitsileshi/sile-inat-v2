@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Shield, MessageCircle, Loader2, Sparkles } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Modal } from '@/components/ui/Modal'
 import { cn } from '@/lib/utils'
 
@@ -29,6 +30,7 @@ export function JoinModal({ open, onClose }: JoinModalProps) {
   const [babyBirthDate, setBabyBirthDate] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const { t } = useTranslation()
 
   function reset() {
     setEmail('')
@@ -56,19 +58,19 @@ export function JoinModal({ open, onClose }: JoinModalProps) {
       if (!response.ok) {
         throw new Error(
           (data && typeof data.error === 'string' && data.error) ||
-            `Request failed (${response.status})`,
+            t('errors.requestFailed', { status: response.status }),
         )
       }
       const token: string | undefined = data.token
       const user: AuthUser | undefined = data.user
-      if (!token) throw new Error('Server did not return a session token.')
+      if (!token) throw new Error(t('join.errors.noToken'))
       localStorage.setItem(TOKEN_KEY, token)
       if (user) localStorage.setItem(USER_KEY, JSON.stringify(user))
       window.dispatchEvent(new Event('auth:changed'))
       handleClose()
       window.location.reload()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not start a demo session.')
+      setError(err instanceof Error ? err.message : t('join.errors.demoFailed'))
     } finally {
       setSubmitting(false)
     }
@@ -96,12 +98,12 @@ export function JoinModal({ open, onClose }: JoinModalProps) {
       if (!response.ok) {
         throw new Error(
           (data && typeof data.error === 'string' && data.error) ||
-            `Request failed (${response.status})`
+            t('errors.requestFailed', { status: response.status })
         )
       }
       const token: string | undefined = data.token
       const user: AuthUser | undefined = data.user
-      if (!token) throw new Error('Server did not return a session token.')
+      if (!token) throw new Error(t('join.errors.noToken'))
       localStorage.setItem(TOKEN_KEY, token)
       if (user) localStorage.setItem(USER_KEY, JSON.stringify(user))
       // Tell any in-page listeners (Navbar, etc) so they update without a reload.
@@ -110,7 +112,7 @@ export function JoinModal({ open, onClose }: JoinModalProps) {
       // Soft reload so any page reading auth state at mount picks it up too.
       window.location.reload()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong.')
+      setError(err instanceof Error ? err.message : t('errors.generic'))
     } finally {
       setSubmitting(false)
     }
@@ -127,7 +129,7 @@ export function JoinModal({ open, onClose }: JoinModalProps) {
           />
           <h2 className="font-amharic text-3xl font-bold text-text-primary">ስለ እናት</h2>
           <p className="mt-2 text-sm text-text-secondary">
-            A safe space for mothers during the postpartum journey
+            {t('join.tagline')}
           </p>
         </div>
 
@@ -136,10 +138,10 @@ export function JoinModal({ open, onClose }: JoinModalProps) {
             other's data. The credentials are never displayed. */}
         <div className="mt-6 rounded-2xl border border-brand/20 bg-brand-light/30 p-4">
           <p className="text-sm font-semibold text-text-primary">
-            Just looking around?
+            {t('join.demoTitle')}
           </p>
           <p className="mt-1 text-xs leading-relaxed text-text-secondary">
-            Try the app with a fresh demo account — no signup, your data stays separate from other visitors.
+            {t('join.demoBody')}
           </p>
           <button
             type="button"
@@ -152,7 +154,7 @@ export function JoinModal({ open, onClose }: JoinModalProps) {
             ) : (
               <Sparkles className="h-4 w-4" />
             )}
-            Continue as demo user
+            {t('join.demoButton')}
           </button>
         </div>
 
@@ -169,7 +171,7 @@ export function JoinModal({ open, onClose }: JoinModalProps) {
                 tab === 'signin' ? 'bg-white text-text-primary shadow-sm' : 'text-text-secondary'
               )}
             >
-              Sign In
+              {t('join.signIn')}
             </button>
             <button
               type="button"
@@ -182,14 +184,14 @@ export function JoinModal({ open, onClose }: JoinModalProps) {
                 tab === 'join' ? 'bg-white text-text-primary shadow-sm' : 'text-text-secondary'
               )}
             >
-              Join
+              {t('common.join')}
             </button>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-text-primary">
-                Email
+                {t('join.email')}
               </label>
               <input
                 id="email"
@@ -204,7 +206,7 @@ export function JoinModal({ open, onClose }: JoinModalProps) {
             </div>
             <div>
               <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-text-primary">
-                Password
+                {t('join.password')}
               </label>
               <input
                 id="password"
@@ -222,16 +224,16 @@ export function JoinModal({ open, onClose }: JoinModalProps) {
             {tab === 'join' && (
               <div className="rounded-xl border border-gray-100 bg-stone-50 p-4">
                 <p className="text-sm font-medium text-text-primary">
-                  Are you currently expecting, or do you have a baby?
+                  {t('join.babyQuestion')}
                 </p>
                 <p className="mt-1 text-xs text-text-muted">
-                  This helps us show you what's most relevant. You can skip this.
+                  {t('join.babyHelp')}
                 </p>
                 <div className="mt-3 grid gap-2">
                   {[
-                    { value: 'pregnant', label: "I'm expecting" },
-                    { value: 'born', label: 'I have a baby' },
-                    { value: 'skip', label: "I'd rather not say" },
+                    { value: 'pregnant', label: t('join.babyPregnant') },
+                    { value: 'born', label: t('join.babyBorn') },
+                    { value: 'skip', label: t('join.babySkip') },
                   ].map((opt) => (
                     <button
                       key={opt.value}
@@ -255,7 +257,7 @@ export function JoinModal({ open, onClose }: JoinModalProps) {
                       htmlFor="baby-birth-date"
                       className="mb-1.5 block text-sm font-medium text-text-primary"
                     >
-                      When was your baby born?
+                      {t('join.babyBirthDate')}
                     </label>
                     <input
                       id="baby-birth-date"
@@ -278,7 +280,7 @@ export function JoinModal({ open, onClose }: JoinModalProps) {
               className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark disabled:opacity-60"
             >
               {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
-              {tab === 'signin' ? 'Sign In' : 'Create Account'}
+              {tab === 'signin' ? t('join.signIn') : t('join.createAccount')}
             </button>
           </form>
         </div>
@@ -286,11 +288,11 @@ export function JoinModal({ open, onClose }: JoinModalProps) {
         <div className="mt-6 flex items-center justify-center gap-6 text-xs text-text-secondary">
           <span className="inline-flex items-center gap-1.5">
             <Shield className="h-3.5 w-3.5" />
-            Anonymous community
+            {t('join.anonymousCommunity')}
           </span>
           <span className="inline-flex items-center gap-1.5">
             <MessageCircle className="h-3.5 w-3.5" />
-            Expert support
+            {t('join.expertSupport')}
           </span>
         </div>
       </div>

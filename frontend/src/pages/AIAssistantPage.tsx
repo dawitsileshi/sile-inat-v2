@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Send, Baby, Loader2, Plus, ChevronDown, ChevronUp, MessageCircle, Trash2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { cn } from '@/lib/utils'
 import { useDispatch, useSelector } from 'react-redux'
 import {
@@ -10,24 +12,17 @@ import {
 import { getAnonymousClientId } from '@/lib/clientId'
 import type { AppDispatch, RootState } from '@/store/store'
 
-const suggestions = [
-  'Is it normal to regret having a baby?',
-  'How do I know if it\'s postpartum depression?',
-  'Why am I crying for no reason?',
-  'I don\'t feel like a mother yet. What\'s wrong with me?',
-]
-
-function formatRelative(iso: string): string {
-  const t = new Date(iso).getTime()
-  if (Number.isNaN(t)) return ''
-  const diffSec = Math.max(0, Math.floor((Date.now() - t) / 1000))
-  if (diffSec < 60) return 'just now'
+function formatRelative(iso: string, t: TFunction): string {
+  const ms = new Date(iso).getTime()
+  if (Number.isNaN(ms)) return ''
+  const diffSec = Math.max(0, Math.floor((Date.now() - ms) / 1000))
+  if (diffSec < 60) return t('time.justNow')
   const m = Math.floor(diffSec / 60)
-  if (m < 60) return `${m} min ago`
+  if (m < 60) return t('time.minutesAgo', { count: m })
   const h = Math.floor(m / 60)
-  if (h < 24) return `${h} ${h === 1 ? 'hour' : 'hours'} ago`
+  if (h < 24) return t('time.hoursAgo', { count: h })
   const d = Math.floor(h / 24)
-  if (d < 7) return `${d} ${d === 1 ? 'day' : 'days'} ago`
+  if (d < 7) return t('time.daysAgo', { count: d })
   return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
 }
 
@@ -39,6 +34,8 @@ export function AIAssistantPage() {
   const [input, setInput] = useState('')
   const [historyOpen, setHistoryOpen] = useState(false)
   const endRef = useRef<HTMLDivElement>(null)
+  const { t } = useTranslation()
+  const suggestions = t('ai.suggestions', { returnObjects: true }) as string[]
 
   useEffect(() => {
     getAnonymousClientId()
@@ -91,11 +88,10 @@ export function AIAssistantPage() {
               <Baby className="h-6 w-6 text-brand" />
             </div>
             <h1 className="text-2xl font-bold text-text-primary">
-              Ask me what you'd ask a friend who's been through this.
+              {t('ai.emptyTitle')}
             </h1>
             <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-text-secondary">
-              Not what you'd ask a doctor. I'll listen, share what's been studied,
-              and never make you feel ashamed for asking.
+              {t('ai.emptyBody')}
             </p>
 
             <div className="mt-8 flex flex-wrap justify-center gap-2">
@@ -131,7 +127,7 @@ export function AIAssistantPage() {
             {isLoading && (
               <div className="self-start flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm text-text-secondary card-shadow-sm">
                 <Loader2 className="h-4 w-4 animate-spin text-brand" />
-                Thinking…
+                {t('ai.thinking')}
               </div>
             )}
             <div ref={endRef} />
@@ -155,13 +151,13 @@ export function AIAssistantPage() {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask anything about postpartum support..."
+              placeholder={t('ai.placeholder')}
               disabled={isLoading}
               className="flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-muted focus:outline-none disabled:opacity-60"
             />
             <button
               type="submit"
-              aria-label="Send"
+              aria-label={t('ai.send')}
               className="flex h-9 w-9 items-center justify-center rounded-full bg-brand text-white transition-colors hover:bg-brand-dark disabled:opacity-50"
               disabled={!input.trim() || isLoading}
             >
@@ -169,8 +165,7 @@ export function AIAssistantPage() {
             </button>
           </form>
           <p className="mt-2 text-center text-xs text-text-muted">
-            I can listen. I can share what's been studied. I can't replace your
-            doctor — and won't pretend to.
+            {t('ai.disclaimer')}
           </p>
         </div>
       </div>
@@ -191,6 +186,7 @@ function ChatToolbar({
   onDeletePastChat: (id: string) => void
 }) {
   const hasHistory = pastChats.length > 0
+  const { t } = useTranslation()
   return (
     <div className="rounded-2xl bg-white/60 px-4 py-3 backdrop-blur-sm">
       <div className="flex items-center justify-between gap-2">
@@ -201,7 +197,7 @@ function ChatToolbar({
           className="inline-flex items-center gap-1.5 rounded-full bg-brand px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-brand-dark disabled:opacity-40"
         >
           <Plus className="h-3.5 w-3.5" />
-          New chat
+          {t('ai.newChat')}
         </button>
 
         {hasHistory && (
@@ -211,7 +207,7 @@ function ChatToolbar({
             className="inline-flex items-center gap-1.5 text-xs font-medium text-text-secondary hover:text-brand"
           >
             <MessageCircle className="h-3.5 w-3.5" />
-            Previous chats ({pastChats.length})
+            {t('ai.previousChats', { count: pastChats.length })}
             {historyOpen ? (
               <ChevronUp className="h-3.5 w-3.5" />
             ) : (
@@ -231,7 +227,7 @@ function ChatToolbar({
           >
             {pastChats.map((c) => {
               const firstUser = c.messages.find((m) => m.role === 'user')
-              const preview = firstUser?.text ?? '(no message)'
+              const preview = firstUser?.text ?? t('ai.noMessage')
               return (
                 <li
                   key={c.id}
@@ -244,15 +240,15 @@ function ChatToolbar({
                   >
                     <p className="line-clamp-1 text-sm text-text-primary">{preview}</p>
                     <p className="mt-0.5 text-xs text-text-muted">
-                      {c.messages.length} {c.messages.length === 1 ? 'message' : 'messages'}
+                      {t('ai.messageCount', { count: c.messages.length })}
                       {' · '}
-                      {formatRelative(c.endedAt)}
+                      {formatRelative(c.endedAt, t)}
                     </p>
                   </button>
                   <button
                     type="button"
                     onClick={() => onDeletePastChat(c.id)}
-                    aria-label="Delete this chat"
+                    aria-label={t('ai.deleteChat')}
                     className="flex-none rounded-full p-1.5 text-text-muted hover:bg-stone-100 hover:text-text-primary"
                   >
                     <Trash2 className="h-3.5 w-3.5" />

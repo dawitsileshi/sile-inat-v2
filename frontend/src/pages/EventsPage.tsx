@@ -6,13 +6,37 @@ import {
   ShieldCheck, CalendarPlus, BellRing, ArrowRight, Mail,
   ChevronDown, X,
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { wellnessEvents, type WellnessEvent } from '@/data/events'
 import { cn } from '@/lib/utils'
 
 const badgeStyles: Record<string, string> = {
-  'Expert Talk': 'bg-[#fde0e6] text-[#c4456b]',
-  Workshop: 'bg-[#dbe7f5] text-[#4a78b8]',
-  'Support Group': 'bg-[#cfe9da] text-[#2e8253]',
+  expertTalk: 'bg-[#fde0e6] text-[#c4456b]',
+  workshop: 'bg-[#dbe7f5] text-[#4a78b8]',
+  supportGroup: 'bg-[#cfe9da] text-[#2e8253]',
+}
+
+function useWellnessEvents(): WellnessEvent[] {
+  const { t, i18n } = useTranslation()
+  return useMemo(
+    () =>
+      wellnessEvents.map((e) => {
+        const k = `events.items.${e.id}`
+        return {
+          ...e,
+          title: t(`${k}.title`),
+          expert: t(`${k}.expert`),
+          bio: e.hasBio ? t(`${k}.bio`) : undefined,
+          dateLabel: t(`${k}.dateLabel`),
+          location: t(`${k}.location`),
+          capacity: t(`${k}.capacity`),
+          description: t(`${k}.description`),
+        }
+      }),
+    // i18n.language re-runs the mapping when the visitor switches language.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [t, i18n.language]
+  )
 }
 
 const RSVP_KEY = 'rsvped_event_ids'
@@ -109,7 +133,7 @@ function nextOccurrenceWithTime(event: WellnessEvent): { start: Date; end: Date 
 
 function formatNextOccurrence(event: WellnessEvent): string {
   const occ = nextOccurrenceWithTime(event)
-  if (!occ) return `${event.date} · ${event.time}`
+  if (!occ) return `${event.dateLabel} · ${event.time}`
   return occ.start.toLocaleDateString(undefined, {
     weekday: 'long', month: 'short', day: 'numeric',
   })
@@ -185,6 +209,8 @@ function googleCalendarUrl(event: WellnessEvent): string | null {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export function EventsPage() {
+  const { t } = useTranslation()
+  const events = useWellnessEvents()
   const [rsvped, setRsvped] = useState<Set<string>>(() => readRsvps())
   const [reminderEmails, setReminderEmails] = useState<Record<string, string>>(
     () => readReminderEmails()
@@ -226,8 +252,8 @@ export function EventsPage() {
   }
 
   const upcoming = useMemo(
-    () => wellnessEvents.filter((e) => rsvped.has(e.id)),
-    [rsvped]
+    () => events.filter((e) => rsvped.has(e.id)),
+    [events, rsvped]
   )
 
   return (
@@ -239,15 +265,15 @@ export function EventsPage() {
           className="mb-6"
         >
           <h1 className="text-4xl font-extrabold tracking-tight text-text-primary">
-            Events & Circles
+            {t('events.title')}
           </h1>
           <p className="mt-2 text-base text-text-secondary">
-            Small gatherings, expert sessions, and quiet places to be with other mothers.
+            {t('events.subtitle')}
           </p>
 
           <p className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-brand-light px-3 py-1 text-xs font-medium text-brand">
             <ShieldCheck className="h-3.5 w-3.5" />
-            Hosted by clinicians and community partners we've vetted.
+            {t('events.vetted')}
           </p>
         </motion.header>
 
@@ -262,7 +288,7 @@ export function EventsPage() {
         )}
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {wellnessEvents.map((event, i) => {
+          {events.map((event, i) => {
             const isRsvped = rsvped.has(event.id)
             return (
               <motion.article
@@ -280,18 +306,18 @@ export function EventsPage() {
                       badgeStyles[event.category] ?? 'bg-stone-100 text-text-secondary'
                     )}
                   >
-                    {event.category}
+                    {t(`events.categories.${event.category}`)}
                   </span>
                   <span className="inline-flex items-center gap-1 rounded-full bg-brand-light px-2.5 py-1 text-[11px] font-medium text-brand">
                     <ShieldCheck className="h-3 w-3" />
-                    Verified host
+                    {t('events.verifiedHost')}
                   </span>
                 </div>
 
                 <h2 className="text-lg font-bold leading-snug text-text-primary">
                   {event.title}
                 </h2>
-                <p className="mt-1 text-sm text-brand">with {event.expert}</p>
+                <p className="mt-1 text-sm text-brand">{t('events.withExpert', { expert: event.expert })}</p>
                 {event.bio && (
                   <p className="mt-2 text-xs leading-relaxed text-text-muted">{event.bio}</p>
                 )}
@@ -299,7 +325,7 @@ export function EventsPage() {
                 <ul className="mt-4 space-y-2 text-sm text-text-secondary">
                   <li className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-brand" />
-                    {event.date}
+                    {event.dateLabel}
                   </li>
                   <li className="flex items-center gap-2">
                     <Clock className="h-4 w-4 text-brand" />
@@ -337,7 +363,7 @@ export function EventsPage() {
                       onClick={() => handleRsvp(event.id)}
                       className="w-full rounded-full bg-brand py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
                     >
-                      RSVP to attend
+                      {t('events.rsvp')}
                     </button>
                   )}
                 </div>
@@ -348,13 +374,13 @@ export function EventsPage() {
 
         <footer className="mt-12 rounded-2xl bg-white p-6 text-center card-shadow-sm">
           <p className="text-sm text-text-secondary">
-            Are you a clinician or facilitator?
+            {t('events.hostPrompt')}
           </p>
           <Link
             to="/host-with-us"
             className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-brand hover:underline"
           >
-            Host with us <ArrowRight className="h-4 w-4" />
+            {t('host.title')} <ArrowRight className="h-4 w-4" />
           </Link>
         </footer>
       </div>
@@ -370,6 +396,7 @@ function UpcomingStrip({
   events: WellnessEvent[]
   onJump: (id: string) => void
 }) {
+  const { t } = useTranslation()
   return (
     <motion.section
       initial={{ opacity: 0, y: 8 }}
@@ -379,10 +406,10 @@ function UpcomingStrip({
       <div className="mb-3 flex items-center gap-2">
         <CheckCircle2 className="h-4 w-4 text-brand" />
         <h2 className="text-sm font-semibold text-text-primary">
-          You're attending
+          {t('events.attending')}
         </h2>
         <span className="text-xs text-text-muted">
-          · {events.length} event{events.length === 1 ? '' : 's'}
+          · {t('events.eventCount', { count: events.length })}
         </span>
       </div>
       <div className="-mx-1 flex gap-3 overflow-x-auto px-1 pb-1">
@@ -400,7 +427,7 @@ function UpcomingStrip({
               {formatNextOccurrence(e)} · {e.time.split(/[–-]/)[0].trim()}
             </p>
             <p className="mt-0.5 line-clamp-1 text-xs text-text-muted">
-              {e.is_virtual ? 'Virtual' : e.location}
+              {e.is_virtual ? t('circles.virtual') : e.location}
             </p>
           </button>
         ))}
@@ -423,6 +450,7 @@ function RegistrationReceipt({
   const [submitted, setSubmitted] = useState(!!savedEmail)
   const [calendarOpen, setCalendarOpen] = useState(false)
   const [confirmingCancel, setConfirmingCancel] = useState(false)
+  const { t } = useTranslation()
   const occurrence = nextOccurrenceWithTime(event)
   const gcalUrl = googleCalendarUrl(event)
 
@@ -448,7 +476,7 @@ function RegistrationReceipt({
     <div className="space-y-3">
       <div className="flex items-center justify-center gap-2 rounded-full bg-brand-light py-2.5 text-sm font-semibold text-brand">
         <CheckCircle2 className="h-4 w-4" />
-        You're registered
+        {t('events.receipt.registered')}
       </div>
 
       <div className="rounded-xl bg-stone-50 px-4 py-3 text-xs leading-relaxed">
@@ -456,23 +484,23 @@ function RegistrationReceipt({
           {formatNextOccurrence(event)} · {event.time}
         </p>
         <p className="text-text-secondary">
-          {event.is_virtual ? '🔗 Virtual — join link comes here' : `📍 ${event.location}`}
+          {event.is_virtual ? `🔗 ${t('events.receipt.virtualLink')}` : `📍 ${event.location}`}
         </p>
 
         <div className="mt-3 border-t border-black/[0.05] pt-3">
           <p className="mb-2 font-semibold uppercase tracking-wide text-text-muted text-[10px]">
-            Here's what happens next
+            {t('events.receipt.nextTitle')}
           </p>
           <ul className="space-y-1.5 text-text-secondary">
             <li className="flex items-start gap-1.5">
               <BellRing className="mt-0.5 h-3 w-3 flex-none text-brand" />
               {event.is_virtual
-                ? 'The video link will appear here 30 minutes before.'
-                : 'We\'ll remind you the day before.'}
+                ? t('events.receipt.videoLinkNote')
+                : t('events.receipt.remindDayBefore')}
             </li>
             <li className="flex items-start gap-1.5">
               <CalendarPlus className="mt-0.5 h-3 w-3 flex-none text-brand" />
-              Add it to your phone calendar below — your calendar will remind you.
+              {t('events.receipt.addToPhone')}
             </li>
           </ul>
         </div>
@@ -481,16 +509,12 @@ function RegistrationReceipt({
           {submitted ? (
             <p className="text-text-secondary">
               <Mail className="mr-1 inline-block h-3 w-3 text-brand align-[-1px]" />
-              We’ll email{' '}
-              <span className="font-medium text-text-primary">
-                {savedEmail ?? emailDraft}
-              </span>{' '}
-              a day before.
+              {t('events.receipt.emailConfirm', { email: savedEmail ?? emailDraft })}
             </p>
           ) : (
             <form onSubmit={handleEmailSubmit} className="space-y-2">
               <label className="block text-text-secondary">
-                Want an email reminder too? (optional)
+                {t('events.receipt.emailPrompt')}
               </label>
               <div className="flex gap-2">
                 <input
@@ -505,7 +529,7 @@ function RegistrationReceipt({
                   disabled={!emailDraft.trim()}
                   className="rounded-full bg-brand px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-dark disabled:opacity-50"
                 >
-                  Save
+                  {t('events.receipt.save')}
                 </button>
               </div>
             </form>
@@ -522,7 +546,7 @@ function RegistrationReceipt({
           className="flex w-full items-center justify-center gap-1.5 rounded-full border border-brand/30 bg-white py-2 text-sm font-semibold text-brand transition-colors hover:bg-brand-light disabled:opacity-50"
         >
           <CalendarPlus className="h-4 w-4" />
-          Add to calendar
+          {t('events.receipt.addToCalendar')}
           <ChevronDown
             className={cn(
               'h-3.5 w-3.5 transition-transform',
@@ -548,7 +572,7 @@ function RegistrationReceipt({
               <span className="flex-1">
                 Google Calendar
                 <span className="block text-[11px] text-text-muted">
-                  Opens calendar.google.com
+                  {t('events.receipt.opensGoogle')}
                 </span>
               </span>
             </button>
@@ -562,7 +586,7 @@ function RegistrationReceipt({
               <span className="flex-1">
                 Apple / Outlook
                 <span className="block text-[11px] text-text-muted">
-                  Downloads .ics file
+                  {t('events.receipt.downloadsIcs')}
                 </span>
               </span>
             </button>
@@ -571,7 +595,7 @@ function RegistrationReceipt({
       </div>
 
       <p className="text-center text-xs italic text-text-muted">
-        You're on the list. See you there.
+        {t('events.receipt.seeYou')}
       </p>
 
       {/* Cancel — quiet two-tap to confirm so it can't fire on accident */}
@@ -584,14 +608,14 @@ function RegistrationReceipt({
               className="inline-flex items-center gap-1 rounded-full bg-text-secondary/10 px-3 py-1 text-xs font-medium text-text-secondary hover:bg-text-secondary/20"
             >
               <X className="h-3 w-3" />
-              Tap again to cancel
+              {t('events.receipt.tapAgain')}
             </button>
             <button
               type="button"
               onClick={() => setConfirmingCancel(false)}
               className="text-xs text-text-muted hover:text-text-primary"
             >
-              Keep it
+              {t('events.receipt.keepIt')}
             </button>
           </div>
         ) : (
@@ -600,7 +624,7 @@ function RegistrationReceipt({
             onClick={() => setConfirmingCancel(true)}
             className="text-xs text-text-muted hover:text-text-primary hover:underline"
           >
-            Cancel registration
+            {t('events.receipt.cancel')}
           </button>
         )}
       </div>

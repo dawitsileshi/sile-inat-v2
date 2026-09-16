@@ -29,7 +29,11 @@
     "openInJournal": "Open in journal",
     "seeJournal": "See full journal",
     "signInPrompt": "Sign in to see your reflection.",
-    "footer": "This page reads back your own check-ins. Nothing here is a diagnosis."
+    "footer": "This page reads back your own check-ins. Nothing here is a diagnosis.",
+    "signInTitle": "Sign in to see your reflection",
+    "signInBody": "Your weekly look-back is built from your own check-ins. Sign in to see it.",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month"
   },
   "common": {
     "join": "Join",
@@ -39,7 +43,12 @@
     "you": "You",
     "language": "Language",
     "english": "English",
-    "amharic": "አማርኛ"
+    "amharic": "አማርኛ",
+    "loading": "Loading",
+    "toggleMenu": "Toggle menu",
+    "signInOrJoin": "Sign in or join",
+    "close": "Close",
+    "back": "Back"
   },
   "home": {
     "hero": {
@@ -64,6 +73,488 @@
     "stat": "1 in 3 Ethiopian mothers experience postpartum depression. Most never talk about it. You found this place."
   },
   "crisis": {
-    "button": "Get help now"
+    "button": "Get help now",
+    "hub": {
+      "title": "You don’t have to carry this alone.",
+      "subtitle": "What kind of help do you need right now?",
+      "medicalTitle": "This is a medical emergency",
+      "medicalSubtitle": "Call an ambulance or find a hospital near me.",
+      "supportTitle": "I’m struggling and need support",
+      "supportSubtitle": "Talk to someone now, find other mothers, or reach a professional.",
+      "counselorTitle": "Find a counselor near me",
+      "counselorSubtitle": "See mental health clinics and psychologists on a map."
+    },
+    "medical": {
+      "title": "Medical emergency",
+      "body": "If you or your baby need urgent medical help, call an ambulance now.",
+      "call": "Call {{number}} — Ambulance",
+      "callNote": "Ethiopia’s national ambulance service.",
+      "findHospital": "Find a hospital near you"
+    },
+    "support": {
+      "title": "You don’t have to be alone with this.",
+      "subtitle": "Three ways to get support — start with whichever feels right.",
+      "aiTitle": "Talk to the AI companion",
+      "aiSubtitle": "Right now. No phone call, no waiting.",
+      "circlesTitle": "Find mothers like you",
+      "circlesSubtitle": "Peer support from women in the same moment.",
+      "amanuelTitle": "Amanuel Mental Specialized Hospital",
+      "amanuelBody": "The main public psychiatric hospital in Addis Ababa. You can walk in, or call ahead.",
+      "browseCounselors": "Browse the counselor directory"
+    }
+  },
+  "screening": {
+    "languageTitle": "Which language would you like?",
+    "languageHelp": "You can change this later.",
+    "changeLanguage": "Change language",
+    "declinedTitle": "That is completely fine",
+    "declinedBody": "Everything else is still open to you.",
+    "withdrawnTitle": "You have withdrawn",
+    "withdrawnBody": "Nothing further will be asked.",
+    "backHome": "Back to home",
+    "talk": "Talk to the companion",
+    "progress": "{{current}} of {{total}}",
+    "back": "Back",
+    "continue": "Continue",
+    "doneTitle": "Thank you",
+    "unavailableTitle": "Not available yet",
+    "unavailableBody": "The questions are not ready in this language yet. Everything else is still open to you.",
+    "stage2Invite": "There is a second, longer set of questions we would like to ask.",
+    "stage2Continue": "Continue",
+    "stage1FirstTitle": "The first questions come first",
+    "stage1FirstBody": "These questions follow on from the first set. You can start there.",
+    "stage1FirstAction": "Go to the first questions",
+    "notIndicatedTitle": "Nothing further to ask",
+    "notIndicatedBody": "Your answers did not lead to this second set. Everything else is still open to you."
+  },
+  "footer": {
+    "tagline": "A safe, supportive space for mothers during the postpartum journey."
+  },
+  "demoBanner": {
+    "title": "This is a demo session.",
+    "body": "Please don’t enter anything personal — check-ins, notes, and voice memos made here are visible to the project team and may be cleared after the review round."
+  },
+  "whispers": {
+    "quotes": [
+      "I love my baby. I didn’t feel like a mother for weeks. Both things were true.",
+      "Everyone kept saying I looked so happy. I was crying in the bathroom every morning.",
+      "I didn’t know there was a name for what I was feeling. I thought I was broken.",
+      "My mother-in-law said I just needed to pray more. Maybe she was right. Maybe she wasn’t. I needed somewhere to put it.",
+      "The baby was healthy. Everyone said that was enough. It didn’t feel like enough.",
+      "I called my sister at 3am. She didn’t answer. I wish I’d found this sooner.",
+      "Forty days inside and then the world expected me to be myself again."
+    ]
+  },
+  "errors": {
+    "generic": "Something went wrong.",
+    "couldNotLoad": "Could not load.",
+    "requestFailed": "Request failed ({{status}})"
+  },
+  "join": {
+    "tagline": "A safe space for mothers during the postpartum journey",
+    "demoTitle": "Just looking around?",
+    "demoBody": "Try the app with a fresh demo account — no signup, your data stays separate from other visitors.",
+    "demoButton": "Continue as demo user",
+    "signIn": "Sign In",
+    "createAccount": "Create Account",
+    "email": "Email",
+    "password": "Password",
+    "babyQuestion": "Are you currently expecting, or do you have a baby?",
+    "babyHelp": "This helps us show you what's most relevant. You can skip this.",
+    "babyPregnant": "I'm expecting",
+    "babyBorn": "I have a baby",
+    "babySkip": "I'd rather not say",
+    "babyBirthDate": "When was your baby born?",
+    "anonymousCommunity": "Anonymous community",
+    "expertSupport": "Expert support",
+    "errors": {
+      "noToken": "Server did not return a session token.",
+      "demoFailed": "Could not start a demo session."
+    }
+  },
+  "checkIn": {
+    "signInTitle": "Sign in to check in",
+    "signInBody": "Your check-ins are tied to your account so you can look back at them later in your journal.",
+    "title": "How are you, really?",
+    "subtitle": "Just for you. Not for anyone else to see.",
+    "mindTitle": "Anything on your mind?",
+    "mindBody": "Start here, however you can. Speak it, type it, or skip it — the rest is optional.",
+    "orWrite": "Or write it",
+    "notesPlaceholder": "You don't have to write anything.",
+    "quickThings": "A few quick things",
+    "feelingToday": "How are you feeling today?",
+    "moods": {
+      "rough": "Surviving",
+      "low": "Holding on",
+      "okay": "Okay-ish",
+      "good": "Some good moments",
+      "great": "Felt like myself"
+    },
+    "checkedIn": "Checked in",
+    "energyLevel": "Energy level",
+    "energyLabels": [
+      "Empty",
+      "Running on coffee",
+      "Holding it together",
+      "A bit of me back",
+      "Like myself today"
+    ],
+    "exhausted": "Exhausted",
+    "vibrant": "Vibrant",
+    "hoursOfSleep": "Hours of sleep",
+    "waterIntake": "Water intake",
+    "supportedQuestion": "Do you feel supported right now?",
+    "supported": {
+      "yes": "Yes",
+      "somewhat": "Somewhat",
+      "no": "Not really"
+    },
+    "save": "Save tonight",
+    "saving": "Saving…",
+    "almostThere": "Almost there…",
+    "stillWorking": "Still working — first save after a quiet period can take a moment.",
+    "moodMessages": {
+      "1": "Thank you for checking in today. Even doing this — pausing for one minute to notice how you feel — is something. You don’t have to be okay. You just have to keep going.",
+      "2": "Holding on is enough. You showed up for your baby today and you showed up here. That’s real. Rest when you can.",
+      "3": "Okay-ish is a real place. Not good, not bad — just getting through. Many mothers are right here with you tonight.",
+      "4": "Some good moments is worth holding onto. They don’t erase the hard parts, but they’re real too.",
+      "5": "That’s a good day. Remember this one. On the harder days, it helps to know they exist."
+    },
+    "stage": {
+      "firstDays": "You are in the very first days. Sleep, nourishment, and being held are the whole job right now.",
+      "firstWeeks": "The first weeks are their own season. Whatever today looked like, it counted.",
+      "pastEarliest": "You’re past the earliest stretch. The body is still healing — go gently with yourself.",
+      "threeToSix": "Months three to six are quietly hard. The newness fades but the tiredness can stay. You’re still in it.",
+      "halfYear": "You’ve carried this for over half a year. That is a long time. Be proud of the small steady things.",
+      "yearIn": "A year in, and still figuring it out. That is allowed. Motherhood doesn’t arrive all at once."
+    },
+    "response": {
+      "notSupported": "It might help to hear from others, or just talk it through.",
+      "talkToSomeone": "Talk to someone",
+      "somewhatSupported": "Sometimes a few quiet minutes helps.",
+      "crisis": "If things feel like too much right now, you don’t have to carry it alone.",
+      "personalize": "Want a more personal response next time? Tell us a little when you create an account.",
+      "again": "Check in again"
+    },
+    "recent": "Your recent check-ins"
+  },
+  "voiceMemo": {
+    "moreLanguagesSoon": "Afaan Oromoo · ትግርኛ soon",
+    "switchToEnglish": "Switch to English",
+    "stop": "Stop voice memo"
+  },
+  "journal": {
+    "signInTitle": "Sign in to see your journal",
+    "signInBody": "Your journal is a private record of every check-in. Sign in to read it back.",
+    "title": "Your journal",
+    "subtitle": "Everything you’ve said to yourself here. No one else sees it.",
+    "emptyTitle": "Your check-ins will live here. Nothing yet.",
+    "emptyBody": "Start with a quiet minute on the check-in page.",
+    "checkIn": "Check in",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "noNote": "No note that day.",
+    "sleep": "{{hours}}h sleep",
+    "water": "{{liters}} L water",
+    "support": "Support: {{value}}",
+    "energyLogged": "Energy logged",
+    "whatYouRead": "What you read that day"
+  },
+  "comfort": {
+    "title": "A quiet moment",
+    "subtitle": "No agenda. Just this.",
+    "breath": {
+      "in": "Breathe in",
+      "hold": "Hold",
+      "out": "Breathe out",
+      "ready": "Ready when you are",
+      "pause": "Pause",
+      "begin": "Begin"
+    },
+    "orthodoxTitle": "For Orthodox Christian mothers",
+    "orthodoxBody": "Some mothers find Mahlet grounding during difficult moments. Choose what feels right.",
+    "muslimTitle": "For Muslim mothers",
+    "muslimBody": "Quiet nasheed and Quran recitation for difficult moments.",
+    "links": {
+      "mezmurPeace": "Mezmur for peace of mind",
+      "mahletMorning": "Mahlet — morning comfort",
+      "kidasie": "Kidasie — gentle listening",
+      "tsomeDildiy": "Tsome Dildiy mezmur",
+      "nasheedMothers": "Nasheed for mothers",
+      "quranPeace": "Quran recitation for peace",
+      "islamicLullabies": "Islamic lullabies",
+      "ruqyah": "Ruqyah for anxiety"
+    },
+    "wordsTitle": "Words that ground",
+    "passages": {
+      "tooHeavy": {
+        "heading": "On the days that feel too heavy:",
+        "body": "There is a kind of tired that sleep does not fix. Ethiopian mothers know this. It lives in the bones, not the eyes. If you are carrying that tired today — it does not mean you are failing. It means you are human, and you have been asked to do something enormous. Rest is not weakness. It is how you survive this."
+      },
+      "notYourself": {
+        "heading": "On not feeling like yourself:",
+        "body": "The woman you were before this baby has not disappeared. She is resting. She is watching you learn something she did not yet know how to do. One day — not today, maybe not this month — she will return, changed, but still yours. You do not have to find her right now. You only have to get through today."
+      },
+      "slowLove": {
+        "heading": "On the love that doesn't feel like you imagined:",
+        "body": "Nobody tells you that love for a child can arrive slowly. That you can feed them, protect them, lose sleep for them — and still be waiting to feel what the songs describe. This is not a sign that something is wrong with you. It is a sign that you are honest. The love is coming. It builds itself quietly, in the middle of the night, in ways you will only recognize later."
+      }
+    }
+  },
+  "time": {
+    "justNow": "just now",
+    "minutesAgo_one": "{{count}} min ago",
+    "minutesAgo_other": "{{count}} min ago",
+    "hoursAgo_one": "{{count}} hour ago",
+    "hoursAgo_other": "{{count}} hours ago",
+    "daysAgo_one": "{{count}} day ago",
+    "daysAgo_other": "{{count}} days ago",
+    "minutesAgoShort": "{{count}}m ago",
+    "hoursAgoShort": "{{count}}h ago",
+    "daysAgoShort": "{{count}}d ago"
+  },
+  "ai": {
+    "suggestions": [
+      "Is it normal to regret having a baby?",
+      "How do I know if it's postpartum depression?",
+      "Why am I crying for no reason?",
+      "I don't feel like a mother yet. What's wrong with me?"
+    ],
+    "emptyTitle": "Ask me what you'd ask a friend who's been through this.",
+    "emptyBody": "Not what you'd ask a doctor. I'll listen, share what's been studied, and never make you feel ashamed for asking.",
+    "thinking": "Thinking…",
+    "placeholder": "Ask anything about postpartum support...",
+    "send": "Send",
+    "disclaimer": "I can listen. I can share what's been studied. I can't replace your doctor — and won't pretend to.",
+    "newChat": "New chat",
+    "previousChats_one": "Previous chats ({{count}})",
+    "previousChats_other": "Previous chats ({{count}})",
+    "noMessage": "(no message)",
+    "messageCount_one": "{{count}} message",
+    "messageCount_other": "{{count}} messages",
+    "deleteChat": "Delete this chat"
+  },
+  "findHelp": {
+    "title": "Find help near you",
+    "subtitle": "Mental health, maternity, and emergency care nearby.",
+    "serviceType": "Service Type",
+    "distance": "Distance",
+    "withinKm": "Within {{km}} km",
+    "types": {
+      "psychological": "Psychological service",
+      "maternity": "Maternity Clinic",
+      "hospital": "Hospital",
+      "pharmacy": "Pharmacy"
+    },
+    "locationOff": "Location off — showing results centered on Addis Ababa.",
+    "usingLocation": "Using your current location.",
+    "locating": "Locating you…",
+    "refreshLocation": "Refresh location",
+    "mapTitle": "Nearby places map",
+    "deniedNote": "Showing results around Addis Ababa. Allow location to see places near you.",
+    "results": "{{type}} — results",
+    "looking": "Looking nearby…",
+    "noneFound": "None found within {{km}} km. Try expanding the distance.",
+    "loadError": "Could not load places.",
+    "unknownPlace": "Unknown place",
+    "away": "{{distance}} away",
+    "call": "Call",
+    "directions": "Directions"
+  },
+  "counselors": {
+    "title": "Counselor directory",
+    "body": "We’re building a directory of verified maternal mental health professionals in Addis Ababa.",
+    "contact": "If you’re a clinician interested in being listed, contact us."
+  },
+  "host": {
+    "eyebrow": "For clinicians and community partners",
+    "title": "Host with us",
+    "intro": "ስለ እናት partners with vetted clinicians, doulas, midwives, and community organizations to hold space for new mothers in Ethiopia. Every event on this platform is reviewed by our team before it goes live.",
+    "whoTitle": "Who we list",
+    "whoList": [
+      "Licensed clinicians: OBGYNs, lactation consultants, psychologists, counselors.",
+      "Community facilitators with experience holding mother groups.",
+      "Partner organizations like Amanuel Hospital and accredited maternal clinics."
+    ],
+    "vettingTitle": "How vetting works",
+    "vettingBody": "We verify credentials, talk to two prior clients, and review your session format before listing your first event. Hosts agree to our code of conduct around anonymity, cultural sensitivity, and non-clinical framing in any peer-support contexts.",
+    "interestedTitle": "Interested?",
+    "interestedBody": "Email us a short note about your work and a few proposed event ideas. We respond within a week."
+  },
+  "circles": {
+    "title": "Mother Circles",
+    "subtitle": "Small, quiet groups. You don't have to explain yourself to get in.",
+    "phases": {
+      "all": "All",
+      "weeks1to6": "Weeks 1–6",
+      "weeks6to12": "Weeks 6–12",
+      "months3to6": "Months 3–6",
+      "months3to12": "Months 3–12",
+      "allPhases": "All phases"
+    },
+    "emptyPhase": "No circles in this phase yet.",
+    "open": "Open {{name}}",
+    "mothersHere_one": "{{count}} mother here",
+    "mothersHere_other": "{{count}} mothers here",
+    "virtual": "Virtual",
+    "inPerson": "In-person",
+    "youreInThisCircle": "You're in this circle",
+    "youreIn": "You're in",
+    "join": "Join this circle",
+    "noPosts": "No one has written here yet.",
+    "composerPlaceholder": "Write something. Anonymously.",
+    "postAnonymously": "Post anonymously",
+    "joinToWrite": "Join this circle to write here. It’s anonymous.",
+    "live": "Live",
+    "errors": {
+      "loadCircles": "Failed to load circles.",
+      "loadCircle": "Failed to load circle.",
+      "join": "Could not join this circle.",
+      "post": "Could not post."
+    }
+  },
+  "forum": {
+    "title": "Community Forum",
+    "subtitle": "Ask questions and share experiences anonymously",
+    "newPost": "New Post",
+    "allTopics": "All Topics",
+    "categories": {
+      "childbirth": "Childbirth",
+      "recovery": "Recovery",
+      "breastfeeding": "Breastfeeding",
+      "newbornCare": "Newborn Care",
+      "mentalHealth": "Mental Health",
+      "sleep": "Sleep",
+      "parenting": "Parenting",
+      "general": "General"
+    },
+    "loadingPosts": "Loading posts…",
+    "replyCount_one": "{{count}} reply",
+    "replyCount_other": "{{count}} replies",
+    "backToForum": "Back to forum",
+    "replies_one": "Replies ({{count}})",
+    "replies_other": "Replies ({{count}})",
+    "replyPlaceholder": "Write a supportive reply…",
+    "postReply": "Post Reply",
+    "category": "Category",
+    "postTitle": "Title",
+    "titlePlaceholder": "What's on your mind?",
+    "content": "Content",
+    "contentPlaceholder": "Share your experience or question…",
+    "publish": "Publish Post",
+    "reaction": {
+      "iveBeenThere": "I've been there",
+      "youBeenHere": "You've been here",
+      "youAndOthers_one": "You and {{count}} other mother have been here",
+      "youAndOthers_other": "You and {{count}} other mothers have been here",
+      "mothersBeenHere_one": "{{count}} mother has been here",
+      "mothersBeenHere_other": "{{count}} mothers have been here"
+    },
+    "empty": {
+      "firstHere": "You're the first one here right now.",
+      "nothingIn": "Nothing in {{category}} yet.",
+      "notFirst": "But you're not the first to feel what you're feeling. Recent whispers from other mothers:",
+      "anonymous": "Anonymous, {{when}}",
+      "yourTurn": "Your turn, when you're ready.",
+      "write": "Write something",
+      "whispers": [
+        {
+          "text": "I love my baby. I miss who I was. Both are true.",
+          "when": "3 days postpartum"
+        },
+        {
+          "text": "Cried in the shower again. He didn't notice. Maybe that's okay.",
+          "when": "2 weeks postpartum"
+        },
+        {
+          "text": "It's 3am and I'm Googling whether this is normal. I hope it is.",
+          "when": "6 days postpartum"
+        },
+        {
+          "text": "I haven't told anyone how scared I am. I'm telling you.",
+          "when": "11 days postpartum"
+        }
+      ]
+    }
+  },
+  "events": {
+    "title": "Events & Circles",
+    "subtitle": "Small gatherings, expert sessions, and quiet places to be with other mothers.",
+    "vetted": "Hosted by clinicians and community partners we've vetted.",
+    "categories": {
+      "expertTalk": "Expert Talk",
+      "workshop": "Workshop",
+      "supportGroup": "Support Group"
+    },
+    "verifiedHost": "Verified host",
+    "withExpert": "with {{expert}}",
+    "rsvp": "RSVP to attend",
+    "hostPrompt": "Are you a clinician or facilitator?",
+    "attending": "You're attending",
+    "eventCount_one": "{{count}} event",
+    "eventCount_other": "{{count}} events",
+    "receipt": {
+      "registered": "You're registered",
+      "virtualLink": "Virtual — join link comes here",
+      "nextTitle": "Here's what happens next",
+      "videoLinkNote": "The video link will appear here 30 minutes before.",
+      "remindDayBefore": "We'll remind you the day before.",
+      "addToPhone": "Add it to your phone calendar below — your calendar will remind you.",
+      "emailConfirm": "We’ll email {{email}} a day before.",
+      "emailPrompt": "Want an email reminder too? (optional)",
+      "save": "Save",
+      "addToCalendar": "Add to calendar",
+      "opensGoogle": "Opens calendar.google.com",
+      "downloadsIcs": "Downloads .ics file",
+      "seeYou": "You're on the list. See you there.",
+      "tapAgain": "Tap again to cancel",
+      "keepIt": "Keep it",
+      "cancel": "Cancel registration"
+    },
+    "items": {
+      "1": {
+        "title": "Mother Circle — Friendship Park",
+        "expert": "Facilitated by ስለ እናት Community",
+        "dateLabel": "Saturdays",
+        "location": "Friendship Park, Bole Road",
+        "capacity": "Limited to 12 mothers",
+        "description": "An open-air gathering for mothers in any phase. Bring your baby, your tea, and whatever you want to talk about. No agenda. Quiet, warm, and welcoming."
+      },
+      "2": {
+        "title": "Postpartum Yoga (3–12 months)",
+        "expert": "Elena Rodriguez, Certified PT",
+        "bio": "TODO: Placeholder bio — replace with real text. Elena is a certified postpartum physical therapist based in Addis Ababa, specializing in pelvic floor recovery and gentle movement for new mothers.",
+        "dateLabel": "Wednesdays",
+        "location": "Virtual event",
+        "capacity": "Limited to 25 attendees",
+        "description": "Gentle, postpartum-safe yoga for mothers 3 to 12 months out. Focuses on pelvic floor recovery, posture, and shoulders carrying so much weight."
+      },
+      "3": {
+        "title": "Breastfeeding Support Session",
+        "expert": "Hanna Bekele, IBCLC",
+        "bio": "TODO: Placeholder bio — replace with real text. Hanna is an internationally board-certified lactation consultant with over a decade of experience supporting Ethiopian mothers through latch, supply, and weaning challenges.",
+        "dateLabel": "Saturdays",
+        "location": "Bole Medhanialem Health Center",
+        "capacity": "Limited to 8 mothers",
+        "description": "A small-group session for mothers working through breastfeeding questions — latch, supply, pain, weaning. Bring your baby. No question is too small."
+      },
+      "4": {
+        "title": "Counselor Open Hours",
+        "expert": "Dr. Amina Yusuf, Clinical Psychologist",
+        "bio": "TODO: Placeholder bio — replace with real text. Dr. Yusuf is a clinical psychologist focused on perinatal mental health. She works with mothers experiencing anxiety, postpartum depression, and birth-related trauma.",
+        "dateLabel": "Tuesdays & Thursdays",
+        "location": "Virtual event",
+        "capacity": "Drop-in, 1:1 conversations",
+        "description": "A counselor is available for short, anonymous 1:1 conversations. Join the video call when you have a few minutes. No appointment needed."
+      },
+      "5": {
+        "title": "Dad-and-Newborn Walk",
+        "expert": "Facilitated by ስለ እናት Community",
+        "dateLabel": "Sundays",
+        "location": "Entoto Park entrance",
+        "capacity": "Open to all fathers/partners",
+        "description": "A slow walk for fathers and partners with their newborns. Come to listen, meet other dads, and share what you’re carrying. Not a workshop — just a walk."
+      }
+    }
   }
 }

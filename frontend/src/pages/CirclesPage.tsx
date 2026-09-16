@@ -1,6 +1,8 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Check, Loader2, Users, Video, MapPin, X, ChevronLeft, Send, Radio } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { API_URL, anonymousHeaders, parseResponse } from '@/lib/api'
 import { cn } from '@/lib/utils'
 
@@ -43,6 +45,22 @@ const PHASE_FILTERS = [
 
 type PhaseFilter = (typeof PHASE_FILTERS)[number]
 
+// The filter values double as the backend's phase_tag strings, so they stay
+// in English; only the displayed label is translated.
+const PHASE_LABEL_KEYS: Record<string, string> = {
+  'All': 'circles.phases.all',
+  'Weeks 1–6': 'circles.phases.weeks1to6',
+  'Weeks 6–12': 'circles.phases.weeks6to12',
+  'Months 3–6': 'circles.phases.months3to6',
+  'Months 3–12': 'circles.phases.months3to12',
+  'All phases': 'circles.phases.allPhases',
+}
+
+function phaseLabel(tag: string, t: TFunction): string {
+  const key = PHASE_LABEL_KEYS[tag]
+  return key ? t(key) : tag
+}
+
 // ─── Local persistence (defensive, backend is source of truth) ─────────────────
 const LS_KEY = 'sile_joined_circles'
 
@@ -71,6 +89,7 @@ export function CirclesPage() {
   const [error, setError] = useState<string | null>(null)
   const [activePhase, setActivePhase] = useState<PhaseFilter>('All')
   const [openCircleId, setOpenCircleId] = useState<number | null>(null)
+  const { t } = useTranslation()
 
   // Local cache of joined ids — used for optimistic UI on the cards.
   const [joinedIds, setJoinedIds] = useState<Set<number>>(readJoinedFromLS())
@@ -88,7 +107,7 @@ export function CirclesPage() {
         setJoinedIds(fromServer)
         writeJoinedToLS(fromServer)
       })
-      .catch((e) => !cancelled && setError(e instanceof Error ? e.message : 'Failed to load circles.'))
+      .catch((e) => !cancelled && setError(e instanceof Error ? e.message : t('circles.errors.loadCircles')))
     return () => {
       cancelled = true
     }
@@ -157,7 +176,7 @@ export function CirclesPage() {
             )
           : prev
       )
-      setError(e instanceof Error ? e.message : 'Could not join this circle.')
+      setError(e instanceof Error ? e.message : t('circles.errors.join'))
     }
   }
 
@@ -166,10 +185,10 @@ export function CirclesPage() {
       <div className="mx-auto max-w-4xl">
         <header>
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-text-primary">
-            Mother Circles
+            {t('circles.title')}
           </h1>
           <p className="mt-2 text-base text-text-secondary">
-            Small, quiet groups. You don't have to explain yourself to get in.
+            {t('circles.subtitle')}
           </p>
         </header>
 
@@ -190,7 +209,7 @@ export function CirclesPage() {
                       : 'bg-stone-100 text-text-secondary hover:bg-stone-200'
                   )}
                 >
-                  {phase}
+                  {phaseLabel(phase, t)}
                 </button>
               )
             })}
@@ -213,7 +232,7 @@ export function CirclesPage() {
 
           {circles && filtered?.length === 0 && (
             <p className="py-12 text-center text-text-secondary">
-              No circles in this phase yet.
+              {t('circles.emptyPhase')}
             </p>
           )}
 
@@ -257,6 +276,7 @@ function CircleCard({
   onOpen: () => void
   onJoin: () => void
 }) {
+  const { t } = useTranslation()
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -268,7 +288,7 @@ function CircleCard({
         type="button"
         onClick={onOpen}
         className="block w-full text-left"
-        aria-label={`Open ${circle.name}`}
+        aria-label={t('circles.open', { name: circle.name })}
       >
         <div className="flex items-start justify-between gap-3">
           <h2 className="text-lg font-semibold text-text-primary leading-snug">
@@ -276,7 +296,7 @@ function CircleCard({
           </h2>
           {circle.phase_tag && (
             <span className="shrink-0 rounded-full bg-brand-light px-2.5 py-0.5 text-[11px] font-medium text-brand">
-              {circle.phase_tag}
+              {phaseLabel(circle.phase_tag, t)}
             </span>
           )}
         </div>
@@ -288,16 +308,16 @@ function CircleCard({
       <div className="mt-4 flex items-center justify-between text-xs text-text-muted">
         <span className="inline-flex items-center gap-1.5">
           <Users className="h-3.5 w-3.5" />
-          {circle.member_count} mother{circle.member_count === 1 ? '' : 's'} here
+          {t('circles.mothersHere', { count: circle.member_count })}
         </span>
         <span className="inline-flex items-center gap-1.5">
           {circle.is_virtual ? (
             <>
-              <Video className="h-3.5 w-3.5" /> Virtual
+              <Video className="h-3.5 w-3.5" /> {t('circles.virtual')}
             </>
           ) : (
             <>
-              <MapPin className="h-3.5 w-3.5" /> In-person
+              <MapPin className="h-3.5 w-3.5" /> {t('circles.inPerson')}
             </>
           )}
         </span>
@@ -307,7 +327,7 @@ function CircleCard({
         {circle.is_joined ? (
           <div className="inline-flex items-center gap-1.5 rounded-full bg-brand-light px-3 py-1.5 text-sm font-medium text-brand">
             <Check className="h-4 w-4" />
-            You're in this circle
+            {t('circles.youreInThisCircle')}
           </div>
         ) : (
           <button
@@ -318,7 +338,7 @@ function CircleCard({
             }}
             className="inline-flex items-center gap-1.5 rounded-full bg-brand px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-brand-dark"
           >
-            Join this circle
+            {t('circles.join')}
           </button>
         )}
       </div>
@@ -342,6 +362,7 @@ function CircleDetailPanel({
   const [error, setError] = useState<string | null>(null)
   const [draft, setDraft] = useState('')
   const [posting, setPosting] = useState(false)
+  const { t } = useTranslation()
 
   // Lock background scroll while open.
   useEffect(() => {
@@ -388,7 +409,7 @@ function CircleDetailPanel({
         })
       } catch (e) {
         if (cancelled || !isInitial) return
-        setError(e instanceof Error ? e.message : 'Failed to load circle.')
+        setError(e instanceof Error ? e.message : t('circles.errors.loadCircle'))
       } finally {
         if (!cancelled) {
           timer = setTimeout(() => pull(false), 5000)
@@ -421,7 +442,7 @@ function CircleDetailPanel({
       )
       setDraft('')
     } catch (e2) {
-      setError(e2 instanceof Error ? e2.message : 'Could not post.')
+      setError(e2 instanceof Error ? e2.message : t('circles.errors.post'))
     } finally {
       setPosting(false)
     }
@@ -459,7 +480,7 @@ function CircleDetailPanel({
             type="button"
             onClick={onClose}
             className="rounded-full p-1.5 text-text-secondary hover:bg-stone-100 sm:hidden"
-            aria-label="Back"
+            aria-label={t('common.back')}
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
@@ -469,7 +490,7 @@ function CircleDetailPanel({
               type="button"
               onClick={onClose}
               className="rounded-full p-1.5 text-text-secondary hover:bg-stone-100"
-              aria-label="Close"
+              aria-label={t('common.close')}
             >
               <X className="h-5 w-5" />
             </button>
@@ -499,7 +520,7 @@ function CircleDetailPanel({
                 </h2>
                 {detail.circle.phase_tag && (
                   <span className="shrink-0 rounded-full bg-brand-light px-2.5 py-0.5 text-[11px] font-medium text-brand">
-                    {detail.circle.phase_tag}
+                    {phaseLabel(detail.circle.phase_tag, t)}
                   </span>
                 )}
               </div>
@@ -510,8 +531,7 @@ function CircleDetailPanel({
               <div className="mt-4 flex items-center justify-between text-xs text-text-muted">
                 <span className="inline-flex items-center gap-1.5">
                   <Users className="h-3.5 w-3.5" />
-                  {detail.circle.member_count} mother
-                  {detail.circle.member_count === 1 ? '' : 's'} here
+                  {t('circles.mothersHere', { count: detail.circle.member_count })}
                 </span>
                 {!isJoined ? (
                   <button
@@ -519,12 +539,12 @@ function CircleDetailPanel({
                     onClick={onJoin}
                     className="rounded-full bg-brand px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-brand-dark"
                   >
-                    Join this circle
+                    {t('circles.join')}
                   </button>
                 ) : (
                   <span className="inline-flex items-center gap-1 text-xs font-medium text-brand">
                     <Check className="h-3.5 w-3.5" />
-                    You're in
+                    {t('circles.youreIn')}
                   </span>
                 )}
               </div>
@@ -534,8 +554,8 @@ function CircleDetailPanel({
               {/* Posts */}
               <h3 className="text-sm font-medium text-text-muted">
                 {detail.count === 0
-                  ? 'No one has written here yet.'
-                  : `${detail.count} message${detail.count === 1 ? '' : 's'}`}
+                  ? t('circles.noPosts')
+                  : t('ai.messageCount', { count: detail.count })}
               </h3>
 
               <ul className="mt-3 space-y-3">
@@ -551,7 +571,7 @@ function CircleDetailPanel({
                   >
                     <p>{p.content}</p>
                     <p className="mt-1.5 text-[11px] text-text-muted">
-                      {p.author_label} · {timeAgo(p.created_at)}
+                      {p.author_label} · {timeAgo(p.created_at, t)}
                     </p>
                   </li>
                 ))}
@@ -569,7 +589,7 @@ function CircleDetailPanel({
             <textarea
               value={draft}
               onChange={(e) => setDraft(e.target.value.slice(0, 280))}
-              placeholder="Write something. Anonymously."
+              placeholder={t('circles.composerPlaceholder')}
               rows={3}
               className="w-full resize-none rounded-lg border border-black/[0.06] bg-white px-3 py-2 text-sm leading-relaxed text-text-primary placeholder:text-text-muted focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/15"
             />
@@ -588,21 +608,21 @@ function CircleDetailPanel({
                 className="inline-flex items-center gap-1.5 rounded-full bg-brand px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {posting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
-                Post anonymously
+                {t('circles.postAnonymously')}
               </button>
             </div>
           </form>
         ) : (
           <div className="border-t border-black/[0.04] bg-white px-5 py-5 text-center">
             <p className="text-sm text-text-secondary">
-              Join this circle to write here. It’s anonymous.
+              {t('circles.joinToWrite')}
             </p>
             <button
               type="button"
               onClick={onJoin}
               className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-brand px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-dark"
             >
-              Join this circle
+              {t('circles.join')}
             </button>
           </div>
         )}
@@ -613,29 +633,30 @@ function CircleDetailPanel({
 
 // ─── Live indicator ───────────────────────────────────────────────────────────
 function LiveDot() {
+  const { t } = useTranslation()
   return (
     <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-text-secondary">
       <span className="relative flex h-2 w-2">
         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand opacity-70" />
         <span className="relative inline-flex h-2 w-2 rounded-full bg-brand" />
       </span>
-      Live
+      {t('circles.live')}
       <Radio className="h-3 w-3 text-text-muted" aria-hidden />
     </span>
   )
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-function timeAgo(iso: string): string {
+function timeAgo(iso: string, t: TFunction): string {
   const then = new Date(iso).getTime()
   if (isNaN(then)) return ''
   const seconds = Math.max(0, Math.floor((Date.now() - then) / 1000))
-  if (seconds < 60) return 'just now'
+  if (seconds < 60) return t('time.justNow')
   const minutes = Math.floor(seconds / 60)
-  if (minutes < 60) return `${minutes}m ago`
+  if (minutes < 60) return t('time.minutesAgoShort', { count: minutes })
   const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours}h ago`
+  if (hours < 24) return t('time.hoursAgoShort', { count: hours })
   const days = Math.floor(hours / 24)
-  if (days < 30) return `${days}d ago`
+  if (days < 30) return t('time.daysAgoShort', { count: days })
   return new Date(iso).toLocaleDateString()
 }

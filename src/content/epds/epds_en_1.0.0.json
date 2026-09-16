@@ -1,0 +1,166 @@
+{
+  "content_key": "epds",
+  "version": "1.0.0",
+  "language": "en",
+  "stage": 2,
+  "status": "draft",
+  "review_required": true,
+  "notes": "Edinburgh Postnatal Depression Scale, original English wording and item scoring as published in Cox, Holden & Sagovsky (1987). Items 1, 2 and 4 score 0-3 top to bottom; items 3 and 5-10 are reverse-scored (3-0 top to bottom). The option values below encode that, so the engine needs no special case. Reproduced under the authors' published terms, which require the authors, title and source to appear on every reproduced copy - see `attribution`, which the Stage 2 screen renders. STILL PENDING THE CLINICAL LEAD before publishing (decision #8): (1) every scoring band boundary and label - the bands below are the old placeholders, NOT EPDS cut-offs, and the cut-off validated for Ethiopian mothers may differ from the UK original; (2) safety_trigger_min_value on item 10 (set to 1 = any answer other than 'Never', the most conservative choice); (3) all result copy and the safety response copy; (4) the screen title, which is Sile Enat copy rather than instrument wording. The Amharic EPDS must be the validated Amharic version supplied by the clinical lead - never a translation of this file.",
+  "attribution": "Edinburgh Postnatal Depression Scale (EPDS). Source: Cox, J.L., Holden, J.M., and Sagovsky, R. 1987. Detection of postnatal depression: Development of the 10-item Edinburgh Postnatal Depression Scale. British Journal of Psychiatry 150:782-786.",
+  "title": "How you have been feeling",
+  "intro": "As you are pregnant or have recently had a baby, we would like to know how you are feeling.",
+  "instruction": "Please choose the answer that comes closest to how you have felt in the past 7 days, not just how you feel today.",
+  "items": [
+    {
+      "code": "epds_1",
+      "index": 0,
+      "text": "I have been able to laugh and see the funny side of things",
+      "is_safety_item": false,
+      "options": [
+        { "value": 0, "label": "As much as I always could" },
+        { "value": 1, "label": "Not quite so much now" },
+        { "value": 2, "label": "Definitely not so much now" },
+        { "value": 3, "label": "Not at all" }
+      ]
+    },
+    {
+      "code": "epds_2",
+      "index": 1,
+      "text": "I have looked forward with enjoyment to things",
+      "is_safety_item": false,
+      "options": [
+        { "value": 0, "label": "As much as I ever did" },
+        { "value": 1, "label": "Rather less than I used to" },
+        { "value": 2, "label": "Definitely less than I used to" },
+        { "value": 3, "label": "Hardly at all" }
+      ]
+    },
+    {
+      "code": "epds_3",
+      "index": 2,
+      "text": "I have blamed myself unnecessarily when things went wrong",
+      "is_safety_item": false,
+      "options": [
+        { "value": 3, "label": "Yes, most of the time" },
+        { "value": 2, "label": "Yes, some of the time" },
+        { "value": 1, "label": "Not very often" },
+        { "value": 0, "label": "No, never" }
+      ]
+    },
+    {
+      "code": "epds_4",
+      "index": 3,
+      "text": "I have been anxious or worried for no good reason",
+      "is_safety_item": false,
+      "options": [
+        { "value": 0, "label": "No, not at all" },
+        { "value": 1, "label": "Hardly ever" },
+        { "value": 2, "label": "Yes, sometimes" },
+        { "value": 3, "label": "Yes, very often" }
+      ]
+    },
+    {
+      "code": "epds_5",
+      "index": 4,
+      "text": "I have felt scared or panicky for no very good reason",
+      "is_safety_item": false,
+      "options": [
+        { "value": 3, "label": "Yes, quite a lot" },
+        { "value": 2, "label": "Yes, sometimes" },
+        { "value": 1, "label": "No, not much" },
+        { "value": 0, "label": "No, not at all" }
+      ]
+    },
+    {
+      "code": "epds_6",
+      "index": 5,
+      "text": "Things have been getting on top of me",
+      "is_safety_item": false,
+      "options": [
+        { "value": 3, "label": "Yes, most of the time I haven't been able to cope at all" },
+        { "value": 2, "label": "Yes, sometimes I haven't been coping as well as usual" },
+        { "value": 1, "label": "No, most of the time I have coped quite well" },
+        { "value": 0, "label": "No, I have been coping as well as ever" }
+      ]
+    },
+    {
+      "code": "epds_7",
+      "index": 6,
+      "text": "I have been so unhappy that I have had difficulty sleeping",
+      "is_safety_item": false,
+      "options": [
+        { "value": 3, "label": "Yes, most of the time" },
+        { "value": 2, "label": "Yes, sometimes" },
+        { "value": 1, "label": "Not very often" },
+        { "value": 0, "label": "No, not at all" }
+      ]
+    },
+    {
+      "code": "epds_8",
+      "index": 7,
+      "text": "I have felt sad or miserable",
+      "is_safety_item": false,
+      "options": [
+        { "value": 3, "label": "Yes, most of the time" },
+        { "value": 2, "label": "Yes, quite often" },
+        { "value": 1, "label": "Not very often" },
+        { "value": 0, "label": "No, not at all" }
+      ]
+    },
+    {
+      "code": "epds_9",
+      "index": 8,
+      "text": "I have been so unhappy that I have been crying",
+      "is_safety_item": false,
+      "options": [
+        { "value": 3, "label": "Yes, most of the time" },
+        { "value": 2, "label": "Yes, quite often" },
+        { "value": 1, "label": "Only occasionally" },
+        { "value": 0, "label": "No, never" }
+      ]
+    },
+    {
+      "code": "epds_10",
+      "index": 9,
+      "text": "The thought of harming myself has occurred to me",
+      "is_safety_item": true,
+      "safety_trigger_min_value": 1,
+      "options": [
+        { "value": 3, "label": "Yes, quite often" },
+        { "value": 2, "label": "Sometimes" },
+        { "value": 1, "label": "Hardly ever" },
+        { "value": 0, "label": "Never" }
+      ]
+    }
+  ],
+  "scoring": {
+    "max_score": 30,
+    "bands": [
+      { "status": "PLACEHOLDER_band_low", "min": 0, "max": 9, "next": "end" },
+      { "status": "PLACEHOLDER_band_mid", "min": 10, "max": 19, "next": "end" },
+      { "status": "PLACEHOLDER_band_high", "min": 20, "max": 30, "next": "end" }
+    ],
+    "safety_override": { "status": "PLACEHOLDER_band_high", "next": "end" }
+  },
+  "results": {
+    "PLACEHOLDER_band_low": {
+      "title": "PLACEHOLDER - low band result title",
+      "body": "PLACEHOLDER - what she reads when her total falls in the low band. Band boundaries pending the clinical lead."
+    },
+    "PLACEHOLDER_band_mid": {
+      "title": "PLACEHOLDER - mid band result title",
+      "body": "PLACEHOLDER - what she reads when her total falls in the mid band. Band boundaries pending the clinical lead."
+    },
+    "PLACEHOLDER_band_high": {
+      "title": "PLACEHOLDER - high band result title",
+      "body": "PLACEHOLDER - what she reads when her total falls in the high band. Band boundaries pending the clinical lead."
+    }
+  },
+  "safety_response": {
+    "title": "PLACEHOLDER - safety response title",
+    "body": "PLACEHOLDER - what she reads immediately after answering item 10 above threshold. Must not contain an unverified phone number. Route her to the crisis hub, which already holds the verified contacts.",
+    "action_label": "PLACEHOLDER - safety action label"
+  },
+  "continue_label": "Continue",
+  "back_label": "Back"
+}

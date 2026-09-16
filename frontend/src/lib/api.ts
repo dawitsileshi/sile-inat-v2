@@ -21,6 +21,12 @@ export async function parseResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     const message =
       (data && typeof data.error === 'string' && data.error) ||
+      // In dev, an empty 502 is Vite's proxy failing to reach Flask at all —
+      // the backend is stopped or crashed, not slow. On Render a 502 can be a
+      // cold start, so production keeps the "try again" wording.
+      (import.meta.env.DEV && response.status === 502 && !raw
+        ? "Can't reach the backend. Is the Flask server running on port 5050?"
+        : null) ||
       (response.status === 504 || response.status === 502
         ? 'The server took too long to respond. Please try again in a moment.'
         : `Request failed (${response.status})`);

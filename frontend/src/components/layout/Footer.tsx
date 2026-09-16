@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom'
 import { Heart } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 export function Footer() {
+  const { t } = useTranslation()
   return (
     <footer className="border-t border-black/[0.04] bg-white">
       {/* 3-col grid keeps the tagline truly centered no matter how the brand
@@ -13,7 +15,7 @@ export function Footer() {
           <span className="text-sm font-semibold text-text-primary">ስለ እናት</span>
         </Link>
         <p className="text-center text-sm text-text-secondary">
-          A safe, supportive space for mothers during the postpartum journey.
+          {t('footer.tagline')}
         </p>
         <div aria-hidden className="hidden sm:block" />
       </div>

@@ -35,17 +35,6 @@ install:
 	cp -n .env.example .env || true
 	@echo "✅ Dependencies installed. Edit .env as needed."
 
-# ─── ML Pipeline ──────────────────────────────────────────────────────────────
-.PHONY: synthesise
-synthesise:
-	$(PYTHON) src/ml/synthesize_data.py
-	@echo "✅ Synthetic dataset generated."
-
-.PHONY: train
-train: synthesise
-	$(PYTHON) src/ml/train.py
-	@echo "✅ Model trained and saved to src/ml/artifacts/"
-
 # ─── Server ───────────────────────────────────────────────────────────────────
 .PHONY: run
 run:
@@ -63,11 +52,11 @@ test:
 
 # ─── Full Bootstrap ───────────────────────────────────────────────────────────
 .PHONY: all
-all: install train run
+all: install run
 
 # ─── Clean ────────────────────────────────────────────────────────────────────
 .PHONY: clean
 clean:
-	rm -rf $(VENV) instance/ src/ml/artifacts/ src/ml/data/*.csv __pycache__
+	rm -rf $(VENV) instance/ __pycache__
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
 	@echo "✅ Cleaned."

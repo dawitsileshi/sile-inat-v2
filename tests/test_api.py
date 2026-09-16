@@ -87,7 +87,6 @@ class TestDailyLogs:
 
     def test_create_log_unauthorized(self, client):
         r = client.post("/api/logs", json={
-            "gestational_week": 24,
             "sleep_hours":      7.5,
             "water_liters":     2.1,
             "symptom_score":    2,
@@ -99,7 +98,6 @@ class TestDailyLogs:
         r = client.post("/api/logs", 
                         headers=get_auth_headers("invalid-token-12345"),
                         json={
-                            "gestational_week": 24,
                             "sleep_hours":      7.5,
                             "water_liters":     2.1,
                             "symptom_score":    2,
@@ -111,50 +109,73 @@ class TestDailyLogs:
         r = client.post("/api/logs", 
                         headers=get_auth_headers(self.token),
                         json={
-                            "gestational_week": 24,
                             "sleep_hours":      7.5,
                             "water_liters":     2.1,
                             "symptom_score":    2,
                             "mood_score":       2,
-                            "hrv_delta":        -3.5,
                             "log_date":         "2025-06-01",
                         })
         assert r.status_code == 201
         data = r.get_json()
-        assert data["log"]["gestational_week"] == 24
-        # Since model might not be ready, prediction could be float or null, both are fine
-        assert "model_ready" in data
+        assert data["log"]["sleep_hours"] == 7.5
+        assert data["log"]["mood_score"] == 2
 
-    def test_duplicate_log_rejected(self, client):
-        # Submit first
-        client.post("/api/logs", 
-                    headers=get_auth_headers(self.token),
-                    json={
-                        "gestational_week": 24,
-                        "sleep_hours":      7.5,
-                        "water_liters":     2.1,
-                        "symptom_score":    2,
-                        "mood_score":       2,
-                        "log_date":         "2025-06-02",
-                    })
-        # Submit duplicate
-        r = client.post("/api/logs", 
-                        headers=get_auth_headers(self.token),
-                        json={
-                            "gestational_week": 24,
-                            "sleep_hours":      8.0,
-                            "water_liters":     2.5,
-                            "symptom_score":    1,
-                            "mood_score":       1,
-                            "log_date":         "2025-06-02",
-                        })
-        assert r.status_code == 409
+    def test_multiple_logs_per_day_allowed(self, client):
+        """
+        A second check-in on the same (user, date) must succeed.
+
+        The old uq_user_date unique constraint was dropped deliberately: a
+        postpartum day can swing between morning and night, and collapsing
+        that into one row per day threw away the swing. This test replaces
+        test_duplicate_log_rejected, which asserted the constraint that no
+        longer exists.
+        """
+        day = "2025-06-02"
+
+        morning = client.post("/api/logs",
+                              headers=get_auth_headers(self.token),
+                              json={
+                                  "sleep_hours":      7.5,
+                                  "water_liters":     2.1,
+                                  "symptom_score":    2,
+                                  "mood_score":       2,
+                                  "log_date":         day,
+                              })
+        assert morning.status_code == 201
+
+        evening = client.post("/api/logs",
+                              headers=get_auth_headers(self.token),
+                              json={
+                                  "sleep_hours":      8.0,
+                                  "water_liters":     2.5,
+                                  "symptom_score":    1,
+                                  "mood_score":       1,
+                                  "log_date":         day,
+                              })
+        assert evening.status_code == 201
+
+        morning_log = morning.get_json()["log"]
+        evening_log = evening.get_json()["log"]
+        assert morning_log["id"] != evening_log["id"]
+
+        # The 201s alone would also pass if the second insert were silently
+        # dropped or overwrote the first, so read it back: both rows must be
+        # in the database, each keeping its own values.
+        history = client.get("/api/logs/history",
+                             headers=get_auth_headers(self.token)).get_json()
+        same_day = [log for log in history["logs"] if log["log_date"] == day]
+        assert len(same_day) == 2
+
+        by_id = {log["id"]: log for log in same_day}
+        assert by_id[morning_log["id"]]["mood_score"] == 2
+        assert by_id[morning_log["id"]]["sleep_hours"] == 7.5
+        assert by_id[evening_log["id"]]["mood_score"] == 1
+        assert by_id[evening_log["id"]]["sleep_hours"] == 8.0
 
     def test_log_invalid_mood_score(self, client):
         r = client.post("/api/logs", 
                         headers=get_auth_headers(self.token),
                         json={
-                            "gestational_week": 10,
                             "sleep_hours":      7.0,
                             "water_liters":     2.0,
                             "symptom_score":    2,
@@ -167,7 +188,6 @@ class TestDailyLogs:
         client.post("/api/logs", 
                     headers=get_auth_headers(self.token),
                     json={
-                        "gestational_week": 24,
                         "sleep_hours":      7.5,
                         "water_liters":     2.1,
                         "symptom_score":    2,
@@ -185,16 +205,11 @@ class TestDailyLogs:
         assert r.status_code == 401
 
 
-# ── ML Metrics Tests ──────────────────────────────────────────────────────────
-class TestMLMetrics:
-    def test_model_health(self, client):
-        r = client.get("/api/ml/health")
-        assert r.status_code in (200, 503)
-
-    def test_metrics_endpoint(self, client):
-        r = client.get("/api/ml/metrics")
-        assert r.status_code in (200, 206, 503)
-
+# ── Health ────────────────────────────────────────────────────────────────────
+# The former TestMLMetrics class covered /api/ml/health and /api/ml/metrics.
+# Both endpoints were removed with the legacy well-being index (decisions #1,
+# #8). test_root_health is unrelated to ML and is kept.
+class TestHealth:
     def test_root_health(self, client):
         r = client.get("/health")
         assert r.status_code == 200

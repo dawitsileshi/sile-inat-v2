@@ -1,0 +1,303 @@
+{
+  "content_key": "epds",
+  "version": "0.1.0-placeholder",
+  "language": "en",
+  "stage": 2,
+  "status": "draft",
+  "review_required": true,
+  "notes": "PLACEHOLDER - NOT THE EPDS. Structure only, so the Stage 2 engine can be built and tested before the real instrument is supplied. The EPDS is a specific, licensed instrument with specific wording and specific scoring bands; none of it is reproduced here and none of it may be guessed. Every item text is a placeholder and the bands below are arbitrary. Status is 'draft', so this bundle is NOT servable - get_active_content ignores it until someone runs scripts/publish_screening_content.py. Replace item text, option labels, option values, safety_trigger_min_value and every band boundary with the supplied instrument, and have the banding confirmed clinically, before publishing.",
+  "title": "PLACEHOLDER - Stage 2 title",
+  "intro": "PLACEHOLDER - Stage 2 introduction.",
+  "instruction": "PLACEHOLDER - recall window instruction for Stage 2.",
+  "items": [
+    {
+      "code": "epds_1",
+      "index": 0,
+      "text": "PLACEHOLDER - EPDS item 1 text goes here.",
+      "is_safety_item": false,
+      "options": [
+        {
+          "value": 0,
+          "label": "PLACEHOLDER - item 1 option value 0"
+        },
+        {
+          "value": 1,
+          "label": "PLACEHOLDER - item 1 option value 1"
+        },
+        {
+          "value": 2,
+          "label": "PLACEHOLDER - item 1 option value 2"
+        },
+        {
+          "value": 3,
+          "label": "PLACEHOLDER - item 1 option value 3"
+        }
+      ]
+    },
+    {
+      "code": "epds_2",
+      "index": 1,
+      "text": "PLACEHOLDER - EPDS item 2 text goes here.",
+      "is_safety_item": false,
+      "options": [
+        {
+          "value": 0,
+          "label": "PLACEHOLDER - item 2 option value 0"
+        },
+        {
+          "value": 1,
+          "label": "PLACEHOLDER - item 2 option value 1"
+        },
+        {
+          "value": 2,
+          "label": "PLACEHOLDER - item 2 option value 2"
+        },
+        {
+          "value": 3,
+          "label": "PLACEHOLDER - item 2 option value 3"
+        }
+      ]
+    },
+    {
+      "code": "epds_3",
+      "index": 2,
+      "text": "PLACEHOLDER - EPDS item 3 text goes here.",
+      "is_safety_item": false,
+      "options": [
+        {
+          "value": 0,
+          "label": "PLACEHOLDER - item 3 option value 0"
+        },
+        {
+          "value": 1,
+          "label": "PLACEHOLDER - item 3 option value 1"
+        },
+        {
+          "value": 2,
+          "label": "PLACEHOLDER - item 3 option value 2"
+        },
+        {
+          "value": 3,
+          "label": "PLACEHOLDER - item 3 option value 3"
+        }
+      ]
+    },
+    {
+      "code": "epds_4",
+      "index": 3,
+      "text": "PLACEHOLDER - EPDS item 4 text goes here.",
+      "is_safety_item": false,
+      "options": [
+        {
+          "value": 0,
+          "label": "PLACEHOLDER - item 4 option value 0"
+        },
+        {
+          "value": 1,
+          "label": "PLACEHOLDER - item 4 option value 1"
+        },
+        {
+          "value": 2,
+          "label": "PLACEHOLDER - item 4 option value 2"
+        },
+        {
+          "value": 3,
+          "label": "PLACEHOLDER - item 4 option value 3"
+        }
+      ]
+    },
+    {
+      "code": "epds_5",
+      "index": 4,
+      "text": "PLACEHOLDER - EPDS item 5 text goes here.",
+      "is_safety_item": false,
+      "options": [
+        {
+          "value": 0,
+          "label": "PLACEHOLDER - item 5 option value 0"
+        },
+        {
+          "value": 1,
+          "label": "PLACEHOLDER - item 5 option value 1"
+        },
+        {
+          "value": 2,
+          "label": "PLACEHOLDER - item 5 option value 2"
+        },
+        {
+          "value": 3,
+          "label": "PLACEHOLDER - item 5 option value 3"
+        }
+      ]
+    },
+    {
+      "code": "epds_6",
+      "index": 5,
+      "text": "PLACEHOLDER - EPDS item 6 text goes here.",
+      "is_safety_item": false,
+      "options": [
+        {
+          "value": 0,
+          "label": "PLACEHOLDER - item 6 option value 0"
+        },
+        {
+          "value": 1,
+          "label": "PLACEHOLDER - item 6 option value 1"
+        },
+        {
+          "value": 2,
+          "label": "PLACEHOLDER - item 6 option value 2"
+        },
+        {
+          "value": 3,
+          "label": "PLACEHOLDER - item 6 option value 3"
+        }
+      ]
+    },
+    {
+      "code": "epds_7",
+      "index": 6,
+      "text": "PLACEHOLDER - EPDS item 7 text goes here.",
+      "is_safety_item": false,
+      "options": [
+        {
+          "value": 0,
+          "label": "PLACEHOLDER - item 7 option value 0"
+        },
+        {
+          "value": 1,
+          "label": "PLACEHOLDER - item 7 option value 1"
+        },
+        {
+          "value": 2,
+          "label": "PLACEHOLDER - item 7 option value 2"
+        },
+        {
+          "value": 3,
+          "label": "PLACEHOLDER - item 7 option value 3"
+        }
+      ]
+    },
+    {
+      "code": "epds_8",
+      "index": 7,
+      "text": "PLACEHOLDER - EPDS item 8 text goes here.",
+      "is_safety_item": false,
+      "options": [
+        {
+          "value": 0,
+          "label": "PLACEHOLDER - item 8 option value 0"
+        },
+        {
+          "value": 1,
+          "label": "PLACEHOLDER - item 8 option value 1"
+        },
+        {
+          "value": 2,
+          "label": "PLACEHOLDER - item 8 option value 2"
+        },
+        {
+          "value": 3,
+          "label": "PLACEHOLDER - item 8 option value 3"
+        }
+      ]
+    },
+    {
+      "code": "epds_9",
+      "index": 8,
+      "text": "PLACEHOLDER - EPDS item 9 text goes here.",
+      "is_safety_item": false,
+      "options": [
+        {
+          "value": 0,
+          "label": "PLACEHOLDER - item 9 option value 0"
+        },
+        {
+          "value": 1,
+          "label": "PLACEHOLDER - item 9 option value 1"
+        },
+        {
+          "value": 2,
+          "label": "PLACEHOLDER - item 9 option value 2"
+        },
+        {
+          "value": 3,
+          "label": "PLACEHOLDER - item 9 option value 3"
+        }
+      ]
+    },
+    {
+      "code": "epds_10",
+      "index": 9,
+      "text": "PLACEHOLDER - EPDS item 10 text goes here. This is the self-harm item; it creates a SafetyEvent when answered at or above the trigger threshold.",
+      "is_safety_item": true,
+      "options": [
+        {
+          "value": 0,
+          "label": "PLACEHOLDER - item 10 option value 0"
+        },
+        {
+          "value": 1,
+          "label": "PLACEHOLDER - item 10 option value 1"
+        },
+        {
+          "value": 2,
+          "label": "PLACEHOLDER - item 10 option value 2"
+        },
+        {
+          "value": 3,
+          "label": "PLACEHOLDER - item 10 option value 3"
+        }
+      ],
+      "safety_trigger_min_value": 1
+    }
+  ],
+  "scoring": {
+    "max_score": 30,
+    "bands": [
+      {
+        "status": "PLACEHOLDER_band_low",
+        "min": 0,
+        "max": 9,
+        "next": "end"
+      },
+      {
+        "status": "PLACEHOLDER_band_mid",
+        "min": 10,
+        "max": 19,
+        "next": "end"
+      },
+      {
+        "status": "PLACEHOLDER_band_high",
+        "min": 20,
+        "max": 30,
+        "next": "end"
+      }
+    ],
+    "safety_override": {
+      "status": "PLACEHOLDER_band_high",
+      "next": "end"
+    }
+  },
+  "results": {
+    "PLACEHOLDER_band_low": {
+      "title": "PLACEHOLDER - low band result title",
+      "body": "PLACEHOLDER - what she reads when her total falls in the low band."
+    },
+    "PLACEHOLDER_band_mid": {
+      "title": "PLACEHOLDER - mid band result title",
+      "body": "PLACEHOLDER - what she reads when her total falls in the mid band."
+    },
+    "PLACEHOLDER_band_high": {
+      "title": "PLACEHOLDER - high band result title",
+      "body": "PLACEHOLDER - what she reads when her total falls in the high band."
+    }
+  },
+  "safety_response": {
+    "title": "PLACEHOLDER - safety response title",
+    "body": "PLACEHOLDER - what she reads immediately after answering the self-harm item above threshold. Must not contain an unverified phone number. Route her to the crisis hub, which already holds the verified contacts.",
+    "action_label": "PLACEHOLDER - safety action label"
+  },
+  "continue_label": "PLACEHOLDER - continue",
+  "back_label": "PLACEHOLDER - back"
+}

@@ -35,6 +35,12 @@ def reset() -> None:
             User, UserSession, DailyLog,
             ForumPost, ForumReply, ForumReaction,
             Circle, CirclePost, CircleMembership,
+            # Two-stage postpartum depression screening (research pilot)
+            ScreeningContentVersion, ScreeningParticipant, ScreeningConsent,
+            ScreeningSession, ScreeningItemResponse,
+            SafetyEvent, SafetyAlertAttempt,
+            ScreeningFollowUp, FollowUpTransition, ScreeningParticipantLink,
+            ScreeningAccessToken,
         )
         db.drop_all()
         db.create_all()

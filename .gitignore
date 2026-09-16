@@ -16,13 +16,11 @@ ENV/
 instance/
 *.db
 *.sqlite3
-.env               # NEVER commit real secrets
-
-# ─── ML Artifacts ─────────────────────────────────────────────────────────────
-src/ml/artifacts/*.joblib
-src/ml/artifacts/*.json
-# Keep the data directory but not generated CSVs (re-generate with synthesize_data.py)
-src/ml/data/*.csv
+# NEVER commit real secrets. A trailing comment on the same line as a
+# pattern does NOT work in .gitignore - it becomes part of the pattern.
+.env
+.env.*
+!.env.example
 
 # ─── Testing ──────────────────────────────────────────────────────────────────
 .pytest_cache/
@@ -42,3 +40,11 @@ htmlcov/
 dist/
 build/
 *.egg-info/
+
+# ─── Node / Frontend ──────────────────────────────────────────────────────────
+node_modules/
+frontend/dist/
+*.tsbuildinfo
+
+# ─── Agent session logs (local tooling, never project code) ───────────────────
+sessions/

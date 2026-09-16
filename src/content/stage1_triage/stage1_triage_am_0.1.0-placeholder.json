@@ -1,0 +1,159 @@
+{
+  "content_key": "stage1_triage",
+  "version": "0.1.0-placeholder",
+  "language": "am",
+  "stage": 1,
+  "status": "draft",
+  "review_required": true,
+  "notes": "PLACEHOLDER - NOT CLINICAL CONTENT, AND NOT AMHARIC. Structural mirror of the English placeholder so the engine can be exercised in both languages. The real Amharic instrument must be translated and reviewed by a native speaker (Dawit is the final authority, constitution section 4) and clinically checked before publishing. Status is 'draft' and must stay that way until both happen.",
+  "title": "PLACEHOLDER - Stage 1 title",
+  "intro": "PLACEHOLDER - Stage 1 introduction. The real text will explain the recall window and that there are no right answers.",
+  "instruction": "PLACEHOLDER - recall window instruction, e.g. how the participant should think about the past seven days.",
+  "items": [
+    {
+      "code": "s1_q1",
+      "index": 0,
+      "text": "PLACEHOLDER - Stage 1 item 1 text goes here.",
+      "is_safety_item": false,
+      "options": [
+        {
+          "value": 0,
+          "label": "PLACEHOLDER - option value 0"
+        },
+        {
+          "value": 1,
+          "label": "PLACEHOLDER - option value 1"
+        },
+        {
+          "value": 2,
+          "label": "PLACEHOLDER - option value 2"
+        },
+        {
+          "value": 3,
+          "label": "PLACEHOLDER - option value 3"
+        }
+      ]
+    },
+    {
+      "code": "s1_q2",
+      "index": 1,
+      "text": "PLACEHOLDER - Stage 1 item 2 text goes here.",
+      "is_safety_item": false,
+      "options": [
+        {
+          "value": 0,
+          "label": "PLACEHOLDER - option value 0"
+        },
+        {
+          "value": 1,
+          "label": "PLACEHOLDER - option value 1"
+        },
+        {
+          "value": 2,
+          "label": "PLACEHOLDER - option value 2"
+        },
+        {
+          "value": 3,
+          "label": "PLACEHOLDER - option value 3"
+        }
+      ]
+    },
+    {
+      "code": "s1_q3",
+      "index": 2,
+      "text": "PLACEHOLDER - Stage 1 item 3 text goes here.",
+      "is_safety_item": false,
+      "options": [
+        {
+          "value": 0,
+          "label": "PLACEHOLDER - option value 0"
+        },
+        {
+          "value": 1,
+          "label": "PLACEHOLDER - option value 1"
+        },
+        {
+          "value": 2,
+          "label": "PLACEHOLDER - option value 2"
+        },
+        {
+          "value": 3,
+          "label": "PLACEHOLDER - option value 3"
+        }
+      ]
+    },
+    {
+      "code": "s1_safety",
+      "index": 3,
+      "text": "PLACEHOLDER - the Stage 1 safety question. This is the item that creates a SafetyEvent when answered above the trigger threshold.",
+      "is_safety_item": true,
+      "safety_trigger_min_value": 1,
+      "options": [
+        {
+          "value": 0,
+          "label": "PLACEHOLDER - no such thoughts"
+        },
+        {
+          "value": 1,
+          "label": "PLACEHOLDER - rarely"
+        },
+        {
+          "value": 2,
+          "label": "PLACEHOLDER - sometimes"
+        },
+        {
+          "value": 3,
+          "label": "PLACEHOLDER - often"
+        }
+      ]
+    }
+  ],
+  "scoring": {
+    "max_score": 12,
+    "tiers": [
+      {
+        "tier": "green",
+        "min": 0,
+        "max": 3,
+        "next": "end"
+      },
+      {
+        "tier": "amber",
+        "min": 4,
+        "max": 7,
+        "next": "stage2"
+      },
+      {
+        "tier": "orange",
+        "min": 8,
+        "max": 12,
+        "next": "stage2"
+      }
+    ],
+    "safety_override": {
+      "tier": "orange",
+      "next": "stage2"
+    }
+  },
+  "results": {
+    "green": {
+      "title": "PLACEHOLDER - green result title",
+      "body": "PLACEHOLDER - what she reads when the total falls in the green band."
+    },
+    "amber": {
+      "title": "PLACEHOLDER - amber result title",
+      "body": "PLACEHOLDER - what she reads when the total falls in the amber band."
+    },
+    "orange": {
+      "title": "PLACEHOLDER - orange result title",
+      "body": "PLACEHOLDER - what she reads when the total falls in the orange band."
+    }
+  },
+  "safety_response": {
+    "title": "PLACEHOLDER - safety response title",
+    "body": "PLACEHOLDER - what she reads immediately after disclosing thoughts of self-harm. Must not contain an unverified phone number. Route her to the crisis hub, which already holds the verified contacts.",
+    "action_label": "PLACEHOLDER - safety action label"
+  },
+  "continue_label": "PLACEHOLDER - continue",
+  "back_label": "PLACEHOLDER - back"
+}

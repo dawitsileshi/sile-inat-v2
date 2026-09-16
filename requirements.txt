@@ -3,12 +3,6 @@ flask-cors==4.0.1
 Flask-SQLAlchemy==3.1.1
 SQLAlchemy==2.0.30
 
-# ML Stack
-scikit-learn==1.5.0
-pandas==2.2.2
-numpy==1.26.4
-joblib==1.4.2
-
 # Dev / Testing
 python-dotenv==1.0.1
 pytest==8.2.2

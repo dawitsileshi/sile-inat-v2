@@ -29,7 +29,6 @@ from src.models import (
     User, DailyLog, Circle,
     ForumPost, ForumReply, ForumReaction,
 )
-from src.services.ml_service import get_ml_service
 
 SEED_EMAIL = "seed-user@maternalwellness.com"
 SEED_PASSWORD = "password123"
@@ -326,19 +325,16 @@ def seed(email: str = SEED_EMAIL, password: str = SEED_PASSWORD, n_days: int = N
         else:
             print(f"ℹ️  Seed user already exists: {email}")
 
-        ml = get_ml_service()
         added = 0
 
         for i in range(n_days):
             log_date      = date.today() - timedelta(days=n_days - i - 1)
-            gestational_w = max(1, min(40, 20 + i // 7))
 
             # Simulate a realistic progression: slightly improving over time
             sleep_hours   = round(random.gauss(7.0 + i * 0.01, 1.0), 1)
             water_liters  = round(random.gauss(2.2, 0.4), 2)
             symptom_score = random.randint(1, 4)
             mood_score    = random.randint(1, 4)
-            hrv_delta     = round(random.gauss(-4.0, 8.0), 2) if random.random() > 0.1 else None
 
             # Skip if log already exists for this date
             exists = (
@@ -349,28 +345,13 @@ def seed(email: str = SEED_EMAIL, password: str = SEED_PASSWORD, n_days: int = N
             if exists:
                 continue
 
-            # Run ML prediction
-            prediction = None
-            if ml and ml.is_ready():
-                prediction = ml.predict(
-                    gestational_week = gestational_w,
-                    sleep_hours      = max(3.0, min(12.0, sleep_hours)),
-                    water_liters     = max(0.5, min(5.0, water_liters)),
-                    symptom_score    = symptom_score,
-                    mood_score       = mood_score,
-                    hrv_delta        = hrv_delta,
-                )
-
             log_entry = DailyLog(
                 user_id                = user.id,
                 log_date               = log_date,
-                gestational_week       = gestational_w,
                 sleep_hours            = max(3.0, min(12.0, sleep_hours)),
                 water_liters           = max(0.5, min(5.0, water_liters)),
                 symptom_score          = symptom_score,
                 mood_score             = mood_score,
-                hrv_delta              = hrv_delta,
-                predicted_stress_index = prediction,
             )
             db.session.add(log_entry)
             added += 1

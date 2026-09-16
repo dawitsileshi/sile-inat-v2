@@ -11,11 +11,9 @@ from pathlib import Path
 # ─── Base Paths ────────────────────────────────────────────────────────────────
 BASE_DIR = Path(__file__).resolve().parent
 INSTANCE_DIR = BASE_DIR / "instance"
-ML_ARTIFACTS_DIR = BASE_DIR / "src" / "ml" / "artifacts"
 
 # Ensure critical directories exist at import time
 INSTANCE_DIR.mkdir(exist_ok=True)
-ML_ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
 
 
 class BaseConfig:
@@ -47,26 +45,11 @@ class BaseConfig:
         "pool_recycle": 280,  # under Render's 300s timeout
     }
 
-    # ── ML Artifacts ─────────────────────────────────────────────────────────
-    # Set ML_INFERENCE_ENABLED=false to skip model loading (logs still work)
-    ML_INFERENCE_ENABLED: bool = os.getenv(
-        "ML_INFERENCE_ENABLED", "true"
-    ).lower() not in ("0", "false", "no")
-    MODEL_PATH: Path = ML_ARTIFACTS_DIR / "wellbeing_model.joblib"
-    SCALER_PATH: Path = ML_ARTIFACTS_DIR / "feature_scaler.joblib"
-    METRICS_PATH: Path = ML_ARTIFACTS_DIR / "model_metrics.json"
-    SYNTH_DATA_PATH: Path = BASE_DIR / "src" / "ml" / "data" / "synthetic_maternal_data.csv"
-
-    # ── Feature Engineering ───────────────────────────────────────────────────
-    FEATURE_COLUMNS: list = [
-        "gestational_week",
-        "sleep_hours",
-        "water_liters",
-        "symptom_score",
-        "mood_score",
-        "hrv_delta",           # Optional; imputed with median if missing
-    ]
-    TARGET_COLUMN: str = "wellbeing_index"
+    # ── ML Artifacts ──────────────────────────────────────────────────────────
+    # REMOVED 2026-09-15 (decisions #1, #8). ML_INFERENCE_ENABLED, MODEL_PATH,
+    # SCALER_PATH, METRICS_PATH, SYNTH_DATA_PATH, FEATURE_COLUMNS and
+    # TARGET_COLUMN all belonged to the retired well-being index. Screening
+    # content is versioned in the database, not in a model artifact.
 
     # ── CORS / Security ───────────────────────────────────────────────────────
     # In production, restrict to your mobile app's actual origin
@@ -92,10 +75,7 @@ class DevelopmentConfig(BaseConfig):
 class TestingConfig(BaseConfig):
     """In-memory DB for unit tests — never persists to disk."""
     TESTING = True
-    ML_INFERENCE_ENABLED = False
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
-    # MODEL_PATH intentionally inherited from BaseConfig — points to the
-    # real trained artifact so inference tests work without re-training.
 
 
 class ProductionConfig(BaseConfig):

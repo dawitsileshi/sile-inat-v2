@@ -1,7 +1,9 @@
 import { motion } from 'framer-motion'
 import { ShieldCheck, Mail } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 export function HostWithUsPage() {
+  const { t } = useTranslation()
   return (
     <div className="px-6 py-16">
       <motion.div
@@ -11,49 +13,43 @@ export function HostWithUsPage() {
       >
         <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-brand-light px-4 py-1.5 text-xs font-medium text-brand">
           <ShieldCheck className="h-3.5 w-3.5" />
-          For clinicians and community partners
+          {t('host.eyebrow')}
         </div>
 
         <h1 className="text-3xl font-extrabold tracking-tight text-text-primary">
-          Host with us
+          {t('host.title')}
         </h1>
         <p className="mt-3 text-base leading-relaxed text-text-secondary">
-          ስለ እናት partners with vetted clinicians, doulas, midwives, and community
-          organizations to hold space for new mothers in Ethiopia. Every event on
-          this platform is reviewed by our team before it goes live.
+          {t('host.intro')}
         </p>
 
         <div className="mt-10 space-y-6">
           <section>
             <h2 className="text-base font-semibold text-text-primary">
-              Who we list
+              {t('host.whoTitle')}
             </h2>
             <ul className="mt-2 space-y-2 text-sm leading-relaxed text-text-secondary">
-              <li>· Licensed clinicians: OBGYNs, lactation consultants, psychologists, counselors.</li>
-              <li>· Community facilitators with experience holding mother groups.</li>
-              <li>· Partner organizations like Amanuel Hospital and accredited maternal clinics.</li>
+              {(t('host.whoList', { returnObjects: true }) as string[]).map((item) => (
+                <li key={item}>· {item}</li>
+              ))}
             </ul>
           </section>
 
           <section>
             <h2 className="text-base font-semibold text-text-primary">
-              How vetting works
+              {t('host.vettingTitle')}
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-text-secondary">
-              We verify credentials, talk to two prior clients, and review your
-              session format before listing your first event. Hosts agree to our
-              code of conduct around anonymity, cultural sensitivity, and
-              non-clinical framing in any peer-support contexts.
+              {t('host.vettingBody')}
             </p>
           </section>
 
           <section>
             <h2 className="text-base font-semibold text-text-primary">
-              Interested?
+              {t('host.interestedTitle')}
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-text-secondary">
-              Email us a short note about your work and a few proposed event ideas.
-              We respond within a week.
+              {t('host.interestedBody')}
             </p>
             <a
               href="mailto:hosts@sileinat.app"

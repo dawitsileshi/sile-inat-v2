@@ -1,24 +1,26 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Pause, Play, ExternalLink } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 
+// Link labels live under comfort.links.<key> in the locale files.
 // TODO: Replace with curated playlist URLs
 const ORTHODOX_LINKS = [
   {
-    label: 'Mezmur for peace of mind',
+    key: 'mezmurPeace',
     href: 'https://www.youtube.com/results?search_query=ethiopian+orthodox+mezmur+peace',
   },
   {
-    label: 'Mahlet — morning comfort',
+    key: 'mahletMorning',
     href: 'https://www.youtube.com/results?search_query=mahlet+ethiopian+orthodox+morning',
   },
   {
-    label: 'Kidasie — gentle listening',
+    key: 'kidasie',
     href: 'https://www.youtube.com/results?search_query=ethiopian+orthodox+kidasie',
   },
   {
-    label: 'Tsome Dildiy mezmur',
+    key: 'tsomeDildiy',
     href: 'https://www.youtube.com/results?search_query=tsome+dildiy+mezmur',
   },
 ]
@@ -26,60 +28,29 @@ const ORTHODOX_LINKS = [
 // TODO: Replace with curated playlist URLs
 const MUSLIM_LINKS = [
   {
-    label: 'Nasheed for mothers',
+    key: 'nasheedMothers',
     href: 'https://www.youtube.com/results?search_query=nasheed+for+mothers+peaceful',
   },
   {
-    label: 'Quran recitation for peace',
+    key: 'quranPeace',
     href: 'https://www.youtube.com/results?search_query=quran+recitation+peace+calm',
   },
   {
-    label: 'Islamic lullabies',
+    key: 'islamicLullabies',
     href: 'https://www.youtube.com/results?search_query=islamic+lullabies+nasheed',
   },
   {
-    label: 'Ruqyah for anxiety',
+    key: 'ruqyah',
     href: 'https://www.youtube.com/results?search_query=ruqyah+anxiety+peace',
   },
 ]
 
-const PASSAGES = [
-  {
-    heading: 'On the days that feel too heavy:',
-    body:
-      'There is a kind of tired that sleep does not fix. Ethiopian mothers know this. ' +
-      'It lives in the bones, not the eyes. If you are carrying that tired today — it does ' +
-      'not mean you are failing. It means you are human, and you have been asked to do ' +
-      'something enormous. Rest is not weakness. It is how you survive this.',
-  },
-  {
-    heading: 'On not feeling like yourself:',
-    body:
-      'The woman you were before this baby has not disappeared. She is resting. She is watching ' +
-      'you learn something she did not yet know how to do. One day — not today, maybe not ' +
-      'this month — she will return, changed, but still yours. You do not have to find her ' +
-      'right now. You only have to get through today.',
-  },
-  {
-    heading: "On the love that doesn't feel like you imagined:",
-    body:
-      'Nobody tells you that love for a child can arrive slowly. That you can feed them, ' +
-      'protect them, lose sleep for them — and still be waiting to feel what the songs ' +
-      'describe. This is not a sign that something is wrong with you. It is a sign that ' +
-      'you are honest. The love is coming. It builds itself quietly, in the middle of the ' +
-      'night, in ways you will only recognize later.',
-  },
-]
+// Passage text lives under comfort.passages.<key>.
+const PASSAGES = ['tooHeavy', 'notYourself', 'slowLove']
 
 type BreathPhase = 'in' | 'hold' | 'out'
 
 const PHASE_DURATION_MS = 4000
-
-const PHASE_LABEL: Record<BreathPhase, string> = {
-  in: 'Breathe in',
-  hold: 'Hold',
-  out: 'Breathe out',
-}
 
 const NEXT_PHASE: Record<BreathPhase, BreathPhase> = {
   in: 'hold',
@@ -90,6 +61,7 @@ const NEXT_PHASE: Record<BreathPhase, BreathPhase> = {
 function BreathingExercise() {
   const [running, setRunning] = useState(false)
   const [phase, setPhase] = useState<BreathPhase>('in')
+  const { t } = useTranslation()
 
   useEffect(() => {
     if (!running) return
@@ -135,7 +107,7 @@ function BreathingExercise() {
           className="absolute h-44 w-44 rounded-full bg-brand/25"
         />
         <span className="relative text-base font-medium tracking-wide text-brand">
-          {running ? PHASE_LABEL[phase] : 'Ready when you are'}
+          {running ? t(`comfort.breath.${phase}`) : t('comfort.breath.ready')}
         </span>
       </div>
 
@@ -151,13 +123,14 @@ function BreathingExercise() {
         aria-pressed={running}
       >
         {running ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-        {running ? 'Pause' : 'Begin'}
+        {running ? t('comfort.breath.pause') : t('comfort.breath.begin')}
       </button>
     </div>
   )
 }
 
-function LinkList({ links }: { links: { label: string; href: string }[] }) {
+function LinkList({ links }: { links: { key: string; href: string }[] }) {
+  const { t } = useTranslation()
   return (
     <ul className="mt-4 grid gap-2 sm:grid-cols-2">
       {links.map((l) => (
@@ -168,7 +141,7 @@ function LinkList({ links }: { links: { label: string; href: string }[] }) {
             rel="noopener noreferrer"
             className="flex items-center justify-between rounded-xl border border-gray-100 bg-white px-4 py-3 text-sm text-text-primary transition-colors hover:border-brand/40 hover:bg-brand-light/40"
           >
-            <span>{l.label}</span>
+            <span>{t(`comfort.links.${l.key}`)}</span>
             <ExternalLink className="h-4 w-4 text-text-muted" />
           </a>
         </li>
@@ -178,6 +151,7 @@ function LinkList({ links }: { links: { label: string; href: string }[] }) {
 }
 
 export function ComfortPage() {
+  const { t } = useTranslation()
   return (
     <div className="px-6 py-12">
       <div className="mx-auto max-w-3xl">
@@ -186,8 +160,8 @@ export function ComfortPage() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-12 text-center"
         >
-          <h1 className="text-4xl font-extrabold tracking-tight text-text-primary">A quiet moment</h1>
-          <p className="mt-3 text-base text-text-secondary">No agenda. Just this.</p>
+          <h1 className="text-4xl font-extrabold tracking-tight text-text-primary">{t('comfort.title')}</h1>
+          <p className="mt-3 text-base text-text-secondary">{t('comfort.subtitle')}</p>
         </motion.header>
 
         <motion.section
@@ -205,9 +179,9 @@ export function ComfortPage() {
           transition={{ delay: 0.1 }}
           className="mt-10"
         >
-          <h2 className="text-xl font-bold text-text-primary">For Orthodox Christian mothers</h2>
+          <h2 className="text-xl font-bold text-text-primary">{t('comfort.orthodoxTitle')}</h2>
           <p className="mt-2 text-sm text-text-secondary">
-            Some mothers find Mahlet grounding during difficult moments. Choose what feels right.
+            {t('comfort.orthodoxBody')}
           </p>
           <LinkList links={ORTHODOX_LINKS} />
         </motion.section>
@@ -218,9 +192,9 @@ export function ComfortPage() {
           transition={{ delay: 0.15 }}
           className="mt-10"
         >
-          <h2 className="text-xl font-bold text-text-primary">For Muslim mothers</h2>
+          <h2 className="text-xl font-bold text-text-primary">{t('comfort.muslimTitle')}</h2>
           <p className="mt-2 text-sm text-text-secondary">
-            Quiet nasheed and Quran recitation for difficult moments.
+            {t('comfort.muslimBody')}
           </p>
           <LinkList links={MUSLIM_LINKS} />
         </motion.section>
@@ -231,14 +205,14 @@ export function ComfortPage() {
           transition={{ delay: 0.2 }}
           className="mt-12"
         >
-          <h2 className="text-xl font-bold text-text-primary text-center">Words that ground</h2>
+          <h2 className="text-xl font-bold text-text-primary text-center">{t('comfort.wordsTitle')}</h2>
           <div className="mt-6 space-y-6">
             {PASSAGES.map((p) => (
               <article
-                key={p.heading}
+                key={p}
                 className="mx-auto max-w-[600px] rounded-2xl bg-stone-50 px-7 py-8 text-center card-shadow-sm"
               >
-                <p className="text-sm italic text-text-muted">{p.heading}</p>
+                <p className="text-sm italic text-text-muted">{t(`comfort.passages.${p}.heading`)}</p>
                 <p
                   className="mt-4 text-base text-text-primary"
                   style={{
@@ -247,7 +221,7 @@ export function ComfortPage() {
                     lineHeight: 1.8,
                   }}
                 >
-                  {p.body}
+                  {t(`comfort.passages.${p}.body`)}
                 </p>
               </article>
             ))}

@@ -1,6 +1,7 @@
 import { useEffect, type ReactNode } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 
 interface ModalProps {
@@ -19,6 +20,7 @@ const sizeClasses = {
 }
 
 export function Modal({ isOpen, onClose, children, className, size = 'lg' }: ModalProps) {
+  const { t } = useTranslation()
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
@@ -61,7 +63,7 @@ export function Modal({ isOpen, onClose, children, className, size = 'lg' }: Mod
             <button
               onClick={onClose}
               className="absolute right-4 top-4 z-20 rounded-full p-2 text-text-muted hover:bg-gray-100 hover:text-text-primary"
-              aria-label="Close modal"
+              aria-label={t('common.close')}
             >
               <X className="h-5 w-5" />
             </button>

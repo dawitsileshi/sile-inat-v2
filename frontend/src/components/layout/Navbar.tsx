@@ -6,10 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { navLinks, isNavActive } from '@/data/navigation'
 import { cn } from '@/lib/utils'
 import { JoinModal } from '@/components/layout/JoinModal'
-// LanguageSwitcher is intentionally hidden for now. The i18n plumbing (locale
-// JSON, t() calls, language detector) stays wired so re-enabling is a single
-// import + two render sites in this file.
-// import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher'
+import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher'
 
 interface StoredAuthUser {
   user_id?: number
@@ -128,6 +125,12 @@ export function Navbar() {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Hidden on the smallest screens - the mobile drawer carries the
+                wide variant instead, so the switcher is always reachable. */}
+            <div className="hidden sm:block">
+              <LanguageSwitcher />
+            </div>
+
             {auth ? (
               <div ref={accountWrapperRef} className="relative hidden sm:block">
                 <button
@@ -144,7 +147,7 @@ export function Navbar() {
                     {initial}
                   </span>
                   <span className="hidden max-w-[140px] truncate text-text-secondary xl:inline">
-                    {auth.user.email ?? 'You'}
+                    {auth.user.email ?? t('common.you')}
                   </span>
                 </button>
 
@@ -160,10 +163,10 @@ export function Navbar() {
                     >
                       <div className="px-4 py-3">
                         <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">
-                          Signed in as
+                          {t('common.signedInAs')}
                         </p>
                         <p className="mt-0.5 truncate text-sm text-text-primary">
-                          {auth.user.email ?? 'You'}
+                          {auth.user.email ?? t('common.you')}
                         </p>
                       </div>
                       <div className="h-px bg-black/[0.05]" />
@@ -174,7 +177,7 @@ export function Navbar() {
                         role="menuitem"
                       >
                         <LogOut className="h-4 w-4 text-text-secondary" />
-                        Sign out
+                        {t('common.signOut')}
                       </button>
                     </motion.div>
                   )}
@@ -193,7 +196,7 @@ export function Navbar() {
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
               className="rounded-lg p-2 text-text-secondary hover:bg-brand-light lg:hidden"
-              aria-label="Toggle menu"
+              aria-label={t('common.toggleMenu')}
               aria-expanded={mobileOpen}
             >
               {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -229,6 +232,10 @@ export function Navbar() {
                   )
                 })}
 
+                <div className="mt-3 sm:hidden">
+                  <LanguageSwitcher wide />
+                </div>
+
                 {auth ? (
                   <>
                     <div className="mt-2 flex items-center gap-3 rounded-xl bg-white px-4 py-3">
@@ -237,10 +244,10 @@ export function Navbar() {
                       </span>
                       <div className="min-w-0 flex-1">
                         <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">
-                          Signed in
+                          {t('common.signedIn')}
                         </p>
                         <p className="truncate text-sm text-text-primary">
-                          {auth.user.email ?? 'You'}
+                          {auth.user.email ?? t('common.you')}
                         </p>
                       </div>
                     </div>
@@ -252,7 +259,7 @@ export function Navbar() {
                       className="mt-2 flex w-full items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-5 py-3 text-sm font-medium text-text-primary"
                     >
                       <LogOut className="h-4 w-4" />
-                      Sign out
+                      {t('common.signOut')}
                     </button>
                   </>
                 ) : (

@@ -11,8 +11,10 @@ import { CounselorsPage } from '@/pages/CounselorsPage'
 import { FindHelpPage } from '@/pages/FindHelpPage'
 import { HostWithUsPage } from '@/pages/HostWithUsPage'
 import { JournalPage } from '@/pages/JournalPage'
-import { DashboardPage } from '@/pages/DashboardPage'
 import { ReflectionPage } from '@/pages/ReflectionPage'
+import { ScreeningConsentPage } from '@/pages/ScreeningConsentPage'
+import { ScreeningStage1Page } from '@/pages/ScreeningStage1Page'
+import { ScreeningStage2Page } from '@/pages/ScreeningStage2Page'
 
 export default function App() {
   return (
@@ -20,7 +22,6 @@ export default function App() {
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<HomePage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/circles" element={<CirclesPage />} />
           <Route path="/comfort" element={<ComfortPage />} />
           <Route path="/counselors" element={<CounselorsPage />} />
@@ -31,6 +32,9 @@ export default function App() {
           <Route path="/check-in" element={<CheckInPage />} />
           <Route path="/journal" element={<JournalPage />} />
           <Route path="/reflection" element={<ReflectionPage />} />
+          <Route path="/screening/consent" element={<ScreeningConsentPage />} />
+          <Route path="/screening/stage1" element={<ScreeningStage1Page />} />
+          <Route path="/screening/stage2" element={<ScreeningStage2Page />} />
           <Route path="/ai-assistant" element={<AIAssistantPage />} />
         </Route>
       </Routes>

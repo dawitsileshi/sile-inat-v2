@@ -72,12 +72,12 @@ export function CrisisButton() {
           <button
             type="button"
             onClick={() => { setLane('hub'); setOpen(true) }}
-            aria-label={t('crisis.button', 'Get help now')}
+            aria-label={t('crisis.button')}
             className="relative inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium text-white shadow-lg transition-transform hover:scale-[1.03]"
             style={{ backgroundColor: '#C0392B' }}
           >
             <LifeBuoy className="h-4 w-4" />
-            {t('crisis.button', 'Get help now')}
+            {t('crisis.button')}
           </button>
         </div>
       </div>
@@ -115,35 +115,36 @@ function HubView({
   onPickSupport: () => void
   onPickCounselor: () => void
 }) {
+  const { t } = useTranslation()
   return (
     <>
       <h2 className="text-2xl font-bold text-text-primary">
-        You don’t have to carry this alone.
+        {t('crisis.hub.title')}
       </h2>
       <p className="mt-2 text-sm text-text-secondary">
-        What kind of help do you need right now?
+        {t('crisis.hub.subtitle')}
       </p>
 
       <div className="mt-6 space-y-3">
         <LaneCard
           icon={<Stethoscope className="h-5 w-5" />}
           accent="emergency"
-          title="This is a medical emergency"
-          subtitle="Call an ambulance or find a hospital near me."
+          title={t('crisis.hub.medicalTitle')}
+          subtitle={t('crisis.hub.medicalSubtitle')}
           onClick={onPickMedical}
         />
         <LaneCard
           icon={<HeartHandshake className="h-5 w-5" />}
           accent="brand"
-          title="I’m struggling and need support"
-          subtitle="Talk to someone now, find other mothers, or reach a professional."
+          title={t('crisis.hub.supportTitle')}
+          subtitle={t('crisis.hub.supportSubtitle')}
           onClick={onPickSupport}
         />
         <LaneCard
           icon={<MapPin className="h-5 w-5" />}
           accent="muted"
-          title="Find a counselor near me"
-          subtitle="See mental health clinics and psychologists on a map."
+          title={t('crisis.hub.counselorTitle')}
+          subtitle={t('crisis.hub.counselorSubtitle')}
           onClick={onPickCounselor}
         />
       </div>
@@ -190,12 +191,13 @@ function LaneCard({
 function MedicalView({
   onBack, onFindHospitals,
 }: { onBack: () => void; onFindHospitals: () => void }) {
+  const { t } = useTranslation()
   return (
     <>
       <BackButton onBack={onBack} />
-      <h2 className="mt-2 text-2xl font-bold text-text-primary">Medical emergency</h2>
+      <h2 className="mt-2 text-2xl font-bold text-text-primary">{t('crisis.medical.title')}</h2>
       <p className="mt-2 text-sm leading-relaxed text-text-secondary">
-        If you or your baby need urgent medical help, call an ambulance now.
+        {t('crisis.medical.body')}
       </p>
 
       <a
@@ -204,10 +206,10 @@ function MedicalView({
         style={{ backgroundColor: '#C0392B' }}
       >
         <Phone className="h-5 w-5" />
-        Call {AMBULANCE_NUMBER} — Ambulance
+        {t('crisis.medical.call', { number: AMBULANCE_NUMBER })}
       </a>
       <p className="mt-2 text-center text-xs text-text-muted">
-        Ethiopia’s national ambulance service.
+        {t('crisis.medical.callNote')}
       </p>
 
       <button
@@ -215,7 +217,7 @@ function MedicalView({
         onClick={onFindHospitals}
         className="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-brand hover:underline"
       >
-        Find a hospital near you <ArrowRight className="h-4 w-4" />
+        {t('crisis.medical.findHospital')} <ArrowRight className="h-4 w-4" />
       </button>
     </>
   )
@@ -224,14 +226,15 @@ function MedicalView({
 // ─── Support ──────────────────────────────────────────────────────────────────
 
 function SupportView({ onBack, onClose }: { onBack: () => void; onClose: () => void }) {
+  const { t } = useTranslation()
   return (
     <>
       <BackButton onBack={onBack} />
       <h2 className="mt-2 text-2xl font-bold text-text-primary">
-        You don’t have to be alone with this.
+        {t('crisis.support.title')}
       </h2>
       <p className="mt-2 text-sm leading-relaxed text-text-secondary">
-        Three ways to get support — start with whichever feels right.
+        {t('crisis.support.subtitle')}
       </p>
 
       <div className="mt-6 space-y-3">
@@ -244,9 +247,9 @@ function SupportView({ onBack, onClose }: { onBack: () => void; onClose: () => v
             <Sparkles className="h-5 w-5" />
           </div>
           <div className="flex-1">
-            <p className="text-sm font-semibold text-text-primary">Talk to the AI companion</p>
+            <p className="text-sm font-semibold text-text-primary">{t('crisis.support.aiTitle')}</p>
             <p className="mt-0.5 text-xs leading-relaxed text-text-secondary">
-              Right now. No phone call, no waiting.
+              {t('crisis.support.aiSubtitle')}
             </p>
           </div>
           <ArrowRight className="mt-2 h-4 w-4 flex-none text-text-muted transition-colors group-hover:text-brand" />
@@ -261,9 +264,9 @@ function SupportView({ onBack, onClose }: { onBack: () => void; onClose: () => v
             <Users className="h-5 w-5" />
           </div>
           <div className="flex-1">
-            <p className="text-sm font-semibold text-text-primary">Find mothers like you</p>
+            <p className="text-sm font-semibold text-text-primary">{t('crisis.support.circlesTitle')}</p>
             <p className="mt-0.5 text-xs leading-relaxed text-text-secondary">
-              Peer support from women in the same moment.
+              {t('crisis.support.circlesSubtitle')}
             </p>
           </div>
           <ArrowRight className="mt-2 h-4 w-4 flex-none text-text-muted transition-colors group-hover:text-brand" />
@@ -276,11 +279,10 @@ function SupportView({ onBack, onClose }: { onBack: () => void; onClose: () => v
             </div>
             <div className="flex-1">
               <p className="text-sm font-semibold text-text-primary">
-                Amanuel Mental Specialized Hospital
+                {t('crisis.support.amanuelTitle')}
               </p>
               <p className="mt-0.5 text-xs leading-relaxed text-text-secondary">
-                The main public psychiatric hospital in Addis Ababa. You can walk
-                in, or call ahead.
+                {t('crisis.support.amanuelBody')}
               </p>
               <a
                 href={`tel:${AMANUEL_PHONE_TEL}`}
@@ -298,7 +300,7 @@ function SupportView({ onBack, onClose }: { onBack: () => void; onClose: () => v
           onClick={onClose}
           className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand hover:underline"
         >
-          Browse the counselor directory <ArrowRight className="h-4 w-4" />
+          {t('crisis.support.browseCounselors')} <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
     </>
@@ -308,6 +310,7 @@ function SupportView({ onBack, onClose }: { onBack: () => void; onClose: () => v
 // ─── Shared bits ──────────────────────────────────────────────────────────────
 
 function BackButton({ onBack }: { onBack: () => void }) {
+  const { t } = useTranslation()
   return (
     <button
       type="button"
@@ -315,7 +318,7 @@ function BackButton({ onBack }: { onBack: () => void }) {
       className="inline-flex items-center gap-1.5 text-xs font-medium text-text-secondary hover:text-brand"
     >
       <ArrowLeft className="h-3.5 w-3.5" />
-      Back
+      {t('common.back')}
     </button>
   )
 }

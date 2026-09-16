@@ -83,7 +83,7 @@ export function ReflectionPage() {
     })
       .then((r) => parseResponse<Reflection>(r))
       .then((d) => !cancelled && setData(d))
-      .catch((e) => !cancelled && setError(e instanceof Error ? e.message : 'Could not load.'))
+      .catch((e) => !cancelled && setError(e instanceof Error ? e.message : t('errors.couldNotLoad')))
     return () => {
       cancelled = true
     }
@@ -92,8 +92,8 @@ export function ReflectionPage() {
   if (!isSignedIn) {
     return (
       <SignInPrompt
-        title="Sign in to see your reflection"
-        body="Your weekly look-back is built from your own check-ins. Sign in to see it."
+        title={t('reflection.signInTitle')}
+        body={t('reflection.signInBody')}
       />
     )
   }
@@ -332,6 +332,7 @@ function MonthNavigator({
   locale: string
   currentLabel: string
 }) {
+  const { t } = useTranslation()
   // The "effective" month we're showing. When cursor is null, treat as
   // the current calendar month so the arrows always have a stable anchor.
   const now = new Date()
@@ -361,7 +362,7 @@ function MonthNavigator({
       <button
         type="button"
         onClick={() => step(-1)}
-        aria-label="Previous month"
+        aria-label={t('reflection.previousMonth')}
         className="rounded-full p-1.5 text-text-secondary transition-colors hover:text-text-primary"
       >
         <ChevronLeft className="h-4 w-4" />
@@ -378,7 +379,7 @@ function MonthNavigator({
         type="button"
         onClick={() => step(1)}
         disabled={atCurrentMonth}
-        aria-label="Next month"
+        aria-label={t('reflection.nextMonth')}
         className="rounded-full p-1.5 text-text-secondary transition-colors hover:text-text-primary disabled:cursor-not-allowed disabled:opacity-30"
       >
         <ChevronRight className="h-4 w-4" />

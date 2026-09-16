@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Info } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 /**
  * Always-on advisory shown when the visitor is signed in as a demo
@@ -35,6 +36,7 @@ function isDemoEmail(email: string | null): boolean {
 
 export function DemoBanner() {
   const [email, setEmail] = useState<string | null>(() => readEmail())
+  const { t } = useTranslation()
 
   useEffect(() => {
     function refresh() { setEmail(readEmail()) }
@@ -53,9 +55,8 @@ export function DemoBanner() {
       <div className="mx-auto flex max-w-4xl items-start justify-center gap-2.5 px-6 py-2.5 text-center sm:px-8 lg:px-12">
         <Info className="mt-0.5 h-4 w-4 flex-none text-brand" aria-hidden />
         <p className="text-xs leading-relaxed text-text-secondary">
-          <span className="font-semibold text-text-primary">This is a demo session.</span>{' '}
-          Please don&rsquo;t enter anything personal &mdash; check-ins, notes, and voice memos
-          made here are visible to the project team and may be cleared after the review round.
+          <span className="font-semibold text-text-primary">{t('demoBanner.title')}</span>{' '}
+          {t('demoBanner.body')}
         </p>
       </div>
     </div>

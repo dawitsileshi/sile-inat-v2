@@ -1,0 +1,327 @@
+"""
+tests/test_screening.py — Consent gate, Stage 1, Stage 2, and the ML guard
+==========================================================================
+
+These replace the throwaway verification scripts used while building the
+screening feature. They use `create_app(TestingConfig)` so the in-memory URI is
+bound before the engine is created — passing the config in is the only safe
+pattern here; mutating app.config after create_app() silently keeps the real
+on-disk database.
+
+The last class is a regression guard: it fails if the retired ML well-being
+index is reintroduced, so "there is exactly one EPDS path" stays true rather
+than being a claim someone made once.
+"""
+
+import pathlib
+
+import pytest
+
+from app import create_app
+from config import TestingConfig
+from src.extensions import db as _db
+
+HEADER = "X-Screening-Token"
+REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
+
+
+@pytest.fixture(scope="module")
+def screening_app():
+    application = create_app(TestingConfig)
+    with application.app_context():
+        _db.create_all()
+        from src.services.screening_content import publish, sync_content
+        sync_content()
+        # Placeholder instruments ship as drafts; publishing is normally a
+        # deliberate human act. Tests publish explicitly so the draft gate is
+        # exercised first (see test_stage1_draft_not_servable).
+        yield application
+        _db.session.remove()
+        _db.drop_all()
+
+
+@pytest.fixture(scope="module")
+def api(screening_app):
+    return screening_app.test_client()
+
+
+def _publish_instruments(screening_app):
+    with screening_app.app_context():
+        from src.services.screening_content import publish
+        for key in ("stage1_triage", "epds"):
+            publish(key, "0.1.0-placeholder", "en")
+
+
+def _consented(api):
+    token = api.post("/api/screening/participants",
+                     json={"language": "en"}).get_json()["screening_token"]
+    api.post("/api/screening/consent", headers={HEADER: token},
+             json={"decision": "accepted", "agreed": True, "language": "en"})
+    return token
+
+
+def _run_stage1(api, token, answers):
+    api.get("/api/screening/stage1", headers={HEADER: token})
+    for code, value in answers:
+        api.post("/api/screening/stage1/answer", headers={HEADER: token},
+                 json={"item_code": code, "value": value})
+    return api.post("/api/screening/stage1/complete", headers={HEADER: token}).get_json()
+
+
+class TestConsentGate:
+    def test_content_served_per_language(self, api):
+        body = api.get("/api/screening/consent/content?language=am").get_json()
+        assert body["language"] == "am"
+        assert len(body["content"]["sections"]) == 10
+
+    def test_no_language_fallback(self, api):
+        assert api.get("/api/screening/consent/content?language=fr").status_code == 400
+
+    def test_screening_requires_token(self, api):
+        r = api.get("/api/screening/stage1")
+        assert r.status_code == 401
+        assert r.get_json()["code"] == "screening_token_missing"
+
+    def test_forged_token_rejected(self, api):
+        r = api.get("/api/screening/stage1", headers={HEADER: "not-a-real-token"})
+        assert r.status_code == 401
+
+    def test_consent_required_before_screening(self, api):
+        token = api.post("/api/screening/participants",
+                         json={"language": "en"}).get_json()["screening_token"]
+        r = api.get("/api/screening/stage1", headers={HEADER: token})
+        assert r.status_code == 403
+        assert r.get_json()["code"] == "consent_required"
+
+    def test_accept_requires_ticked_box(self, api):
+        token = api.post("/api/screening/participants",
+                         json={"language": "en"}).get_json()["screening_token"]
+        r = api.post("/api/screening/consent", headers={HEADER: token},
+                     json={"decision": "accepted", "agreed": False, "language": "en"})
+        assert r.status_code == 400
+        assert r.get_json()["code"] == "confirmation_required"
+
+    def test_decline_is_recorded_and_blocks(self, api):
+        token = api.post("/api/screening/participants",
+                         json={"language": "en"}).get_json()["screening_token"]
+        body = api.post("/api/screening/consent", headers={HEADER: token},
+                        json={"decision": "declined", "language": "en"}).get_json()
+        assert body["consent"]["status"] == "declined"
+        assert api.get("/api/screening/stage1", headers={HEADER: token}).status_code == 403
+
+    def test_withdrawal_is_appended_not_edited(self, api, screening_app):
+        token = _consented(api)
+        api.post("/api/screening/consent/withdraw", headers={HEADER: token},
+                 json={"reason": "test"})
+        state = api.get("/api/screening/status", headers={HEADER: token}).get_json()
+        assert state["consent"]["status"] == "withdrawn"
+        with screening_app.app_context():
+            from src.models import ScreeningConsent
+            rows = ScreeningConsent.query.order_by(ScreeningConsent.id).all()
+            statuses = [r.status for r in rows]
+            # The acceptance survives; withdrawal is a new row pointing at it.
+            assert "accepted" in statuses and "withdrawn" in statuses
+            assert rows[-1].supersedes_id is not None
+
+
+class TestStage1:
+    def test_stage1_draft_not_servable(self, api):
+        """Unpublished clinical content must never reach a participant."""
+        token = _consented(api)
+        r = api.get("/api/screening/stage1", headers={HEADER: token})
+        assert r.status_code == 409
+        assert r.get_json()["code"] == "content_unavailable"
+
+    def test_full_run_and_banding(self, api, screening_app):
+        _publish_instruments(screening_app)
+        token = _consented(api)
+        result = _run_stage1(api, token,
+                             [("s1_q1", 0), ("s1_q2", 1), ("s1_q3", 0), ("s1_safety", 0)])
+        assert result["total_score"] == 1
+        assert result["tier"] == "green"
+        assert result["next"] == "end"
+        assert result["safety_triggered"] is False
+
+    def test_answer_validation(self, api):
+        token = _consented(api)
+        api.get("/api/screening/stage1", headers={HEADER: token})
+        for payload, code in (
+            ({"item_code": "nope", "value": 1}, "unknown_item"),
+            ({"item_code": "s1_q1", "value": 99}, "invalid_option"),
+            ({"item_code": "s1_q1", "value": "x"}, "invalid_value"),
+        ):
+            r = api.post("/api/screening/stage1/answer", headers={HEADER: token}, json=payload)
+            assert r.get_json()["code"] == code, payload
+
+    def test_incomplete_cannot_be_scored(self, api):
+        token = _consented(api)
+        api.get("/api/screening/stage1", headers={HEADER: token})
+        api.post("/api/screening/stage1/answer", headers={HEADER: token},
+                 json={"item_code": "s1_q1", "value": 1})
+        r = api.post("/api/screening/stage1/complete", headers={HEADER: token})
+        assert r.status_code == 409
+        assert r.get_json()["code"] == "incomplete"
+
+    def test_safety_disclosure_records_event_and_overrides_band(self, api, screening_app):
+        token = _consented(api)
+        api.get("/api/screening/stage1", headers={HEADER: token})
+        for code in ("s1_q1", "s1_q2", "s1_q3"):
+            api.post("/api/screening/stage1/answer", headers={HEADER: token},
+                     json={"item_code": code, "value": 0})
+        answered = api.post("/api/screening/stage1/answer", headers={HEADER: token},
+                            json={"item_code": "s1_safety", "value": 2}).get_json()
+        assert answered["safety_triggered"] is True
+        assert answered["safety_response"] is not None
+
+        result = api.post("/api/screening/stage1/complete",
+                          headers={HEADER: token}).get_json()
+        # Arithmetic alone would put a total of 2 in the green band; the
+        # disclosure must override that.
+        assert result["total_score"] == 2
+        assert result["tier"] == "orange"
+        assert result["by_safety_override"] is True
+
+        with screening_app.app_context():
+            from src.models import SafetyEvent, ScreeningFollowUp
+            event = (SafetyEvent.query
+                     .filter_by(trigger_source="stage1_safety_question")
+                     .order_by(SafetyEvent.id.desc()).first())
+            assert event is not None
+            assert event.alert_status == "pending"   # no channel wired yet
+            assert ScreeningFollowUp.query.filter_by(
+                safety_event_id=event.id, status="new").count() == 1
+
+
+class TestStage2:
+    def test_requires_completed_stage1(self, api, screening_app):
+        _publish_instruments(screening_app)
+        token = _consented(api)
+        r = api.get("/api/screening/stage2", headers={HEADER: token})
+        assert r.status_code == 409
+        assert r.get_json()["code"] == "stage1_required"
+
+    def test_refused_when_not_indicated(self, api, screening_app):
+        _publish_instruments(screening_app)
+        token = _consented(api)
+        result = _run_stage1(api, token,
+                             [("s1_q1", 0), ("s1_q2", 1), ("s1_q3", 0), ("s1_safety", 0)])
+        assert result["next"] == "end"
+        r = api.get("/api/screening/stage2", headers={HEADER: token})
+        assert r.status_code == 409
+        assert r.get_json()["code"] == "stage2_not_indicated"
+
+    def test_gate_holds_on_every_route(self, api, screening_app):
+        """Not just the opener — /answer and /complete re-check too."""
+        _publish_instruments(screening_app)
+        token = _consented(api)
+        for path in ("/api/screening/stage2/answer", "/api/screening/stage2/complete"):
+            r = api.post(path, headers={HEADER: token},
+                         json={"item_code": "epds_1", "value": 0})
+            assert r.status_code == 409
+            assert r.get_json()["code"] == "stage1_required"
+
+    def test_epds_run_and_item_10_safety(self, api, screening_app):
+        _publish_instruments(screening_app)
+        token = _consented(api)
+        stage1 = _run_stage1(api, token,
+                             [("s1_q1", 2), ("s1_q2", 2), ("s1_q3", 1), ("s1_safety", 0)])
+        assert stage1["next"] == "stage2"
+
+        start = api.get("/api/screening/stage2", headers={HEADER: token}).get_json()
+        assert start["completed"] is False
+        assert len(start["content"]["items"]) == 10
+
+        for n in range(1, 10):
+            api.post("/api/screening/stage2/answer", headers={HEADER: token},
+                     json={"item_code": f"epds_{n}", "value": 0})
+        answered = api.post("/api/screening/stage2/answer", headers={HEADER: token},
+                            json={"item_code": "epds_10", "value": 2}).get_json()
+        assert answered["safety_triggered"] is True
+
+        result = api.post("/api/screening/stage2/complete",
+                          headers={HEADER: token}).get_json()
+        assert result["stage"] == 2
+        assert result["epds_status"] is not None
+        assert result["tier"] is None          # stage-2 result, not a stage-1 tier
+        assert result["by_safety_override"] is True
+
+        with screening_app.app_context():
+            from src.models import SafetyEvent, ScreeningSession
+            assert SafetyEvent.query.filter_by(trigger_source="epds_item_10").count() >= 1
+            session = (ScreeningSession.query.filter_by(stage=2, status="completed")
+                       .order_by(ScreeningSession.id.desc()).first())
+            assert session.epds_total_score is not None
+            assert session.stage1_total_score is None   # stage columns stay separate
+            assert session.preceded_by_session_id is not None
+
+    def test_completed_stage2_returns_result_not_a_rerun(self, api, screening_app):
+        _publish_instruments(screening_app)
+        token = _consented(api)
+        _run_stage1(api, token,
+                    [("s1_q1", 2), ("s1_q2", 2), ("s1_q3", 1), ("s1_safety", 0)])
+        api.get("/api/screening/stage2", headers={HEADER: token})
+        for n in range(1, 11):
+            api.post("/api/screening/stage2/answer", headers={HEADER: token},
+                     json={"item_code": f"epds_{n}", "value": 0})
+        api.post("/api/screening/stage2/complete", headers={HEADER: token})
+
+        again = api.get("/api/screening/stage2", headers={HEADER: token}).get_json()
+        assert again["completed"] is True
+        assert again["result"]["total_score"] == 0
+
+
+class TestLegacyMLRemoved:
+    """
+    Regression guard for decisions #1 and #8.
+
+    The unvalidated ML well-being index once produced risk labels it described
+    as "informed by EPDS". With a real screening engine in place, any return of
+    that code would give the codebase two EPDS-flavoured scoring paths, one of
+    them ungoverned. These tests fail if it comes back.
+    """
+
+    LEGACY_PATHS = [
+        "src/services/ml_service.py",
+        "src/routes/ml_metrics.py",
+        "src/ml",
+        "frontend/src/pages/DashboardPage.tsx",
+    ]
+
+    def test_legacy_modules_absent(self):
+        present = [p for p in self.LEGACY_PATHS if (REPO_ROOT / p).exists()]
+        assert not present, f"legacy ML artefacts are back: {present}"
+
+    def test_legacy_endpoints_gone(self, api):
+        for path in ("/api/ml/health", "/api/ml/metrics"):
+            assert api.get(path).status_code == 404, path
+
+    def test_no_legacy_symbols_in_source(self):
+        """
+        Tokenised, not grepped: only real NAME tokens count, so comments and
+        docstrings explaining the removal do not trip the guard while actual
+        code using the symbols does.
+        """
+        import io
+        import tokenize
+
+        banned = {"get_ml_service", "create_ml_service", "MLService",
+                  "get_stress_label", "predicted_stress_index"}
+        offenders = []
+        for path in list(REPO_ROOT.glob("src/**/*.py")) +                     list(REPO_ROOT.glob("scripts/*.py")) + [REPO_ROOT / "app.py"]:
+            source = path.read_text(encoding="utf-8")
+            for tok in tokenize.generate_tokens(io.StringIO(source).readline):
+                if tok.type == tokenize.NAME and tok.string in banned:
+                    offenders.append(f"{path.name}:{tok.start[0]} {tok.string}")
+        assert not offenders, offenders
+
+    def test_only_one_epds_engine(self):
+        """Every module that scores an EPDS must be the new engine."""
+        scorers = []
+        for path in REPO_ROOT.glob("src/**/*.py"):
+            text = path.read_text(encoding="utf-8").lower()
+            if "epds" in text and ("score" in text or "threshold" in text):
+                scorers.append(path.relative_to(REPO_ROOT).as_posix())
+        unexpected = [s for s in scorers if not (
+            s.startswith("src/services/screening_") or s == "src/routes/screening.py"
+            or s == "src/models.py")]
+        assert not unexpected, f"unexpected EPDS scoring modules: {unexpected}"

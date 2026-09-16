@@ -188,7 +188,6 @@ def _seed_demo_check_ins(user: User) -> None:
             user_id=user.id,
             log_date=log_date,
             created_at=created_at,
-            gestational_week=20,
             sleep_hours=sleep,
             water_liters=water,
             symptom_score=symptom,

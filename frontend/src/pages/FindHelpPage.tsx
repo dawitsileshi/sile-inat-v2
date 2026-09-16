@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Phone, Navigation, Star, ChevronDown, LocateFixed } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import {
   GOOGLE_MAPS_API_KEY, SERVICE_TYPES, RADIUS_OPTIONS, ADDIS_CENTER,
   useGeolocation, searchTextNearby, haversineKm, formatDistance, embedMapSrc,
@@ -10,6 +11,7 @@ import {
 
 export function FindHelpPage() {
   const [params, setParams] = useSearchParams()
+  const { t } = useTranslation()
   const initialType =
     SERVICE_TYPES.find((s) => s.value === params.get('type'))?.value ?? SERVICE_TYPES[0].value
   const initialRadius = Number(params.get('radius')) as RadiusKm
@@ -49,7 +51,7 @@ export function FindHelpPage() {
       .then((result) => { if (!cancelled) setPlaces(result) })
       .catch((err) => {
         if (cancelled) return
-        setError(err instanceof Error ? err.message : 'Could not load places.')
+        setError(err instanceof Error ? err.message : t('findHelp.loadError'))
         setPlaces([])
       })
     return () => { cancelled = true }
@@ -64,25 +66,25 @@ export function FindHelpPage() {
           className="mb-6"
         >
           <h1 className="text-3xl font-extrabold tracking-tight text-text-primary">
-            Find help near you
+            {t('findHelp.title')}
           </h1>
           <p className="mt-2 text-sm text-text-secondary">
-            Mental health, maternity, and emergency care nearby.
+            {t('findHelp.subtitle')}
           </p>
         </motion.header>
 
         <div className="grid gap-4 rounded-2xl bg-white p-4 card-shadow-sm sm:grid-cols-2">
           <Dropdown
-            label="Service Type"
+            label={t('findHelp.serviceType')}
             value={serviceType}
             onChange={setServiceType}
-            options={SERVICE_TYPES.map((s) => ({ value: s.value, label: s.label }))}
+            options={SERVICE_TYPES.map((s) => ({ value: s.value, label: t(`findHelp.types.${s.value}`) }))}
           />
           <Dropdown
-            label="Distance"
+            label={t('findHelp.distance')}
             value={String(radiusKm)}
             onChange={(v) => setRadiusKm(Number(v) as RadiusKm)}
-            options={RADIUS_OPTIONS.map((r) => ({ value: String(r), label: `Within ${r} km` }))}
+            options={RADIUS_OPTIONS.map((r) => ({ value: String(r), label: t('findHelp.withinKm', { km: r }) }))}
           />
         </div>
 
@@ -94,17 +96,17 @@ export function FindHelpPage() {
           <span className="inline-flex items-center gap-1.5">
             <LocateFixed className="h-3.5 w-3.5" />
             {denied
-              ? 'Location off — showing results centered on Addis Ababa.'
+              ? t('findHelp.locationOff')
               : coords
-                ? 'Using your current location.'
-                : 'Locating you…'}
+                ? t('findHelp.usingLocation')
+                : t('findHelp.locating')}
           </span>
           <button
             type="button"
             onClick={refreshLocation}
             className="rounded-full px-3 py-1 text-xs font-medium text-brand transition-colors hover:bg-brand-light/60"
           >
-            Refresh location
+            {t('findHelp.refreshLocation')}
           </button>
         </div>
 
@@ -127,31 +129,31 @@ export function FindHelpPage() {
                 loading="lazy"
                 style={{ border: 0 }}
                 referrerPolicy="no-referrer-when-downgrade"
-                title="Nearby places map"
+                title={t('findHelp.mapTitle')}
                 allowFullScreen
               />
             </div>
 
             {denied && (
               <p className="mt-3 rounded-lg bg-stone-50 px-3 py-2 text-xs text-text-secondary">
-                Showing results around Addis Ababa. Allow location to see places near you.
+                {t('findHelp.deniedNote')}
               </p>
             )}
 
             <section className="mt-8">
               <h2 className="mb-3 text-sm font-semibold text-text-primary">
-                {current.label} — results
+                {t('findHelp.results', { type: t(`findHelp.types.${current.value}`) })}
               </h2>
 
               {places === null && (
-                <p className="text-sm text-text-muted">Looking nearby…</p>
+                <p className="text-sm text-text-muted">{t('findHelp.looking')}</p>
               )}
               {error && (
                 <p className="text-sm text-text-secondary">{error}</p>
               )}
               {places && places.length === 0 && !error && (
                 <p className="text-sm text-text-muted">
-                  None found within {radiusKm} km. Try expanding the distance.
+                  {t('findHelp.noneFound', { km: radiusKm })}
                 </p>
               )}
 
@@ -202,6 +204,7 @@ function Dropdown({
 }
 
 function PlaceCard({ place, center }: { place: PlaceResult; center: { lat: number; lng: number } }) {
+  const { t } = useTranslation()
   const phone = place.nationalPhoneNumber || place.internationalPhoneNumber
   const telHref = phone ? `tel:${phone.replace(/\s+/g, '')}` : null
   const distance =
@@ -217,7 +220,7 @@ function PlaceCard({ place, center }: { place: PlaceResult; center: { lat: numbe
   return (
     <div className="flex h-full flex-col rounded-2xl border border-gray-200 bg-white p-4">
       <p className="text-sm font-semibold text-text-primary">
-        {place.displayName?.text ?? 'Unknown place'}
+        {place.displayName?.text ?? t('findHelp.unknownPlace')}
       </p>
       {(place.shortFormattedAddress || place.formattedAddress) && (
         <p className="mt-0.5 text-xs leading-snug text-text-secondary">
@@ -225,7 +228,7 @@ function PlaceCard({ place, center }: { place: PlaceResult; center: { lat: numbe
         </p>
       )}
       <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-muted">
-        {distance !== null && <span>{formatDistance(distance)} away</span>}
+        {distance !== null && <span>{t('findHelp.away', { distance: formatDistance(distance) })}</span>}
         {place.rating !== undefined && (
           <span className="inline-flex items-center gap-1">
             <Star className="h-3 w-3 fill-current text-brand" />
@@ -243,7 +246,7 @@ function PlaceCard({ place, center }: { place: PlaceResult; center: { lat: numbe
               className="inline-flex items-center gap-1.5 rounded-full bg-brand px-3 py-1 text-xs font-semibold text-white hover:bg-brand-dark"
             >
               <Phone className="h-3 w-3" />
-              Call
+              {t('findHelp.call')}
             </a>
           )}
           <a
@@ -253,7 +256,7 @@ function PlaceCard({ place, center }: { place: PlaceResult; center: { lat: numbe
             className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-semibold text-text-secondary hover:border-brand/40 hover:text-brand"
           >
             <Navigation className="h-3 w-3" />
-            Directions
+            {t('findHelp.directions')}
           </a>
         </div>
       </div>

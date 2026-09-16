@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mic, Square, AlertTriangle, Sparkles } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { useSpeechRecognition } from "@/lib/useSpeechRecognition";
 
@@ -195,6 +196,7 @@ function IdleState({
   onLang: (l: Lang) => void;
   error: string | null;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="relative">
       {/* Big mic with halo + floating "more languages coming" badge */}
@@ -218,7 +220,7 @@ function IdleState({
           aria-hidden
         >
           <Sparkles className="h-2.5 w-2.5" />
-          Afaan Oromoo · ትግርኛ soon
+          {t('voiceMemo.moreLanguagesSoon')}
         </span>
       </div>
 
@@ -267,6 +269,7 @@ function ErrorHint({
   lang: Lang
   onTryEnglish: () => void
 }) {
+  const { t } = useTranslation()
   const en: Record<string, string> = {
     "not-allowed":
       "Microphone access is blocked. Click the 🔒 lock icon next to the URL and allow microphone.",
@@ -312,7 +315,7 @@ function ErrorHint({
           onClick={onTryEnglish}
           className="mt-2 inline-flex items-center gap-1 rounded-full bg-brand px-3 py-1 text-xs font-semibold text-white hover:bg-brand-dark"
         >
-          Switch to English
+          {t('voiceMemo.switchToEnglish')}
         </button>
       )}
     </div>
@@ -338,6 +341,7 @@ function ListeningState({
   lang: Lang;
   onTryEnglish: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="relative">
       {/* Stop button with two concentric ping rings */}
@@ -350,7 +354,7 @@ function ListeningState({
         <button
           type="button"
           onClick={onStop}
-          aria-label="Stop voice memo"
+          aria-label={t('voiceMemo.stop')}
           className="relative flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-brand to-brand-dark text-white shadow-lg transition-transform hover:scale-[1.03]"
         >
           <Square className="h-5 w-5 fill-white" />

@@ -1,15 +1,6 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-
-const QUOTES = [
-  'I love my baby. I didn’t feel like a mother for weeks. Both things were true.',
-  'Everyone kept saying I looked so happy. I was crying in the bathroom every morning.',
-  'I didn’t know there was a name for what I was feeling. I thought I was broken.',
-  'My mother-in-law said I just needed to pray more. Maybe she was right. Maybe she wasn’t. I needed somewhere to put it.',
-  'The baby was healthy. Everyone said that was enough. It didn’t feel like enough.',
-  'I called my sister at 3am. She didn’t answer. I wish I’d found this sooner.',
-  'Forty days inside and then the world expected me to be myself again.',
-]
+import { useTranslation } from 'react-i18next'
 
 const VISIBLE = 3
 const ROTATE_MS = 6000
@@ -22,15 +13,17 @@ const ROTATE_MS = 6000
  */
 export function Whispers() {
   const [start, setStart] = useState(0)
+  const { t } = useTranslation()
+  const quotes = t('whispers.quotes', { returnObjects: true }) as string[]
 
   useEffect(() => {
     const id = setInterval(() => {
-      setStart((s) => (s + 1) % QUOTES.length)
+      setStart((s) => s + 1)
     }, ROTATE_MS)
     return () => clearInterval(id)
   }, [])
 
-  const visible = Array.from({ length: VISIBLE }, (_, i) => QUOTES[(start + i) % QUOTES.length])
+  const visible = Array.from({ length: VISIBLE }, (_, i) => quotes[(start + i) % quotes.length])
 
   return (
     <section className="bg-white px-6 pt-14 pb-6">

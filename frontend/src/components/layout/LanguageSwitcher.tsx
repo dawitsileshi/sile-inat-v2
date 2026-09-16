@@ -12,7 +12,7 @@ const LABELS: Record<SupportedLang, string> = {
 }
 
 export function LanguageSwitcher({ wide = false }: { wide?: boolean }) {
-  const { i18n } = useTranslation()
+  const { t, i18n } = useTranslation()
   const current = (SUPPORTED_LANGS as readonly string[]).includes(i18n.language)
     ? (i18n.language as SupportedLang)
     : 'en'
@@ -24,7 +24,7 @@ export function LanguageSwitcher({ wide = false }: { wide?: boolean }) {
         wide && 'w-full justify-center gap-1 p-1.5',
       )}
       role="group"
-      aria-label="Language"
+      aria-label={t('common.language')}
     >
       <Globe className={cn('ml-1 h-3.5 w-3.5 text-text-muted', wide && 'h-4 w-4')} aria-hidden />
       {SUPPORTED_LANGS.map((lng) => (

@@ -26,8 +26,8 @@ export interface PlaceResult {
 }
 
 export interface ServiceType {
+  /** Also the i18n key suffix for the label: findHelp.types.<value>. */
   value: string
-  label: string
   /** Text query passed to Places API (New) Text Search. */
   query: string
 }
@@ -35,22 +35,18 @@ export interface ServiceType {
 export const SERVICE_TYPES: ServiceType[] = [
   {
     value: 'psychological',
-    label: 'Psychological service',
     query: 'psychologist OR mental health clinic OR counseling',
   },
   {
     value: 'maternity',
-    label: 'Maternity Clinic',
     query: 'maternity clinic OR obstetrics OR OBGYN',
   },
   {
     value: 'hospital',
-    label: 'Hospital',
     query: 'hospital',
   },
   {
     value: 'pharmacy',
-    label: 'Pharmacy',
     query: 'pharmacy',
   },
 ]

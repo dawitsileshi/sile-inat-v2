@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, X, ArrowLeft, Loader2, Send, HandHeart } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { cn } from '@/lib/utils'
 import { useDispatch, useSelector } from 'react-redux'
 import {
@@ -21,13 +23,20 @@ import type { AppDispatch, RootState } from '@/store/store'
 
 const POST_CATEGORIES = FORUM_CATEGORIES.filter((c) => c !== 'All')
 
-function reactionLabel(count: number, reacted: boolean): string {
-  if (count === 0) return reacted ? "You've been here" : "I've been there"
+// Category values are what the backend stores, so they stay in English;
+// the label comes from forum.categories.<camelCase value>.
+function categoryLabel(cat: string, t: TFunction): string {
+  const key = cat.charAt(0).toLowerCase() + cat.slice(1).replace(/ /g, '')
+  return t(`forum.categories.${key}`, { defaultValue: cat })
+}
+
+function reactionLabel(count: number, reacted: boolean, t: TFunction): string {
+  if (count === 0) return reacted ? t('forum.reaction.youBeenHere') : t('forum.reaction.iveBeenThere')
   if (reacted) {
-    if (count === 1) return "You've been here"
-    return `You and ${count - 1} ${count - 1 === 1 ? 'other mother has' : 'other mothers have'} been here`
+    if (count === 1) return t('forum.reaction.youBeenHere')
+    return t('forum.reaction.youAndOthers', { count: count - 1 })
   }
-  return `${count} ${count === 1 ? 'mother has' : 'mothers have'} been here`
+  return t('forum.reaction.mothersBeenHere', { count })
 }
 
 function IveBeenThereButton({
@@ -39,6 +48,7 @@ function IveBeenThereButton({
   onToggle: () => void
   size?: 'sm' | 'md'
 }) {
+  const { t } = useTranslation()
   const padding = size === 'md' ? 'px-4 py-2 text-sm' : 'px-3 py-1.5 text-xs'
   return (
     <button
@@ -62,23 +72,23 @@ function IveBeenThereButton({
           post.reacted ? 'fill-brand/20' : ''
         )}
       />
-      <span>{reactionLabel(post.reaction_count, post.reacted)}</span>
+      <span>{reactionLabel(post.reaction_count, post.reacted, t)}</span>
     </button>
   )
 }
 
-function formatDate(iso: string) {
+function formatDate(iso: string, t: TFunction) {
   try {
     const then = new Date(iso).getTime()
     if (Number.isNaN(then)) return iso
     const diffSec = Math.max(0, Math.floor((Date.now() - then) / 1000))
-    if (diffSec < 60) return 'just now'
+    if (diffSec < 60) return t('time.justNow')
     const diffMin = Math.floor(diffSec / 60)
-    if (diffMin < 60) return `${diffMin} min ago`
+    if (diffMin < 60) return t('time.minutesAgo', { count: diffMin })
     const diffHr = Math.floor(diffMin / 60)
-    if (diffHr < 24) return `${diffHr} ${diffHr === 1 ? 'hour' : 'hours'} ago`
+    if (diffHr < 24) return t('time.hoursAgo', { count: diffHr })
     const diffDay = Math.floor(diffHr / 24)
-    if (diffDay < 7) return `${diffDay} ${diffDay === 1 ? 'day' : 'days'} ago`
+    if (diffDay < 7) return t('time.daysAgo', { count: diffDay })
     return new Date(iso).toLocaleDateString(undefined, {
       month: 'short',
       day: 'numeric',
@@ -105,6 +115,7 @@ export function CommunityPage() {
   const [content, setContent] = useState('')
   const [postCategory, setPostCategory] = useState('General')
   const [replyText, setReplyText] = useState('')
+  const { t } = useTranslation()
 
   useEffect(() => {
     getAnonymousClientId()
@@ -159,7 +170,7 @@ export function CommunityPage() {
             className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-text-secondary hover:text-brand"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to forum
+            {t('forum.backToForum')}
           </button>
 
           <motion.article
@@ -169,9 +180,9 @@ export function CommunityPage() {
           >
             <div className="mb-3 flex flex-wrap items-center gap-2">
               <span className="rounded-full bg-brand-light px-3 py-0.5 text-xs font-medium text-brand">
-                {selectedPost.category}
+                {categoryLabel(selectedPost.category, t)}
               </span>
-              <span className="text-xs text-text-muted">{formatDate(selectedPost.created_at)}</span>
+              <span className="text-xs text-text-muted">{formatDate(selectedPost.created_at, t)}</span>
               <span className="text-xs text-text-secondary">· {selectedPost.author_label}</span>
             </div>
             <h1 className="text-2xl font-bold text-text-primary">{selectedPost.title}</h1>
@@ -188,7 +199,7 @@ export function CommunityPage() {
           </motion.article>
 
           <h2 className="mt-8 mb-4 text-lg font-bold text-text-primary">
-            Replies ({selectedPost.replies?.length ?? 0})
+            {t('forum.replies', { count: selectedPost.replies?.length ?? 0 })}
           </h2>
 
           <div className="space-y-3">
@@ -202,7 +213,7 @@ export function CommunityPage() {
               >
                 <div className="mb-1 flex items-center gap-2 text-xs text-text-muted">
                   <span className="font-medium text-text-secondary">{reply.author_label}</span>
-                  <span>· {formatDate(reply.created_at)}</span>
+                  <span>· {formatDate(reply.created_at, t)}</span>
                 </div>
                 <p className="text-sm leading-relaxed text-text-primary whitespace-pre-wrap">
                   {reply.content}
@@ -216,7 +227,7 @@ export function CommunityPage() {
               rows={3}
               value={replyText}
               onChange={(e) => setReplyText(e.target.value)}
-              placeholder="Write a supportive reply…"
+              placeholder={t('forum.replyPlaceholder')}
               className="w-full resize-none rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-brand focus:outline-none"
             />
             {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
@@ -226,7 +237,7 @@ export function CommunityPage() {
               className="mt-3 inline-flex items-center gap-2 rounded-full bg-brand px-5 py-2 text-sm font-semibold text-white hover:bg-brand-dark disabled:opacity-50"
             >
               {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-              Post Reply
+              {t('forum.postReply')}
             </button>
           </form>
         </div>
@@ -243,9 +254,9 @@ export function CommunityPage() {
           className="mb-8 flex flex-wrap items-end justify-between gap-4"
         >
           <div>
-            <h1 className="text-4xl font-extrabold tracking-tight text-text-primary">Community Forum</h1>
+            <h1 className="text-4xl font-extrabold tracking-tight text-text-primary">{t('forum.title')}</h1>
             <p className="mt-2 text-base text-text-secondary">
-              Ask questions and share experiences anonymously
+              {t('forum.subtitle')}
             </p>
           </div>
           <button
@@ -254,7 +265,7 @@ export function CommunityPage() {
             className="inline-flex items-center gap-2 rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
           >
             <Plus className="h-4 w-4" />
-            New Post
+            {t('forum.newPost')}
           </button>
         </motion.div>
 
@@ -271,7 +282,7 @@ export function CommunityPage() {
                   : 'bg-stone-100 text-text-secondary hover:bg-stone-200'
               )}
             >
-              {cat === 'All' ? 'All Topics' : cat}
+              {cat === 'All' ? t('forum.allTopics') : categoryLabel(cat, t)}
             </button>
           ))}
         </div>
@@ -279,7 +290,7 @@ export function CommunityPage() {
         {isLoading && posts.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-text-secondary">
             <Loader2 className="h-8 w-8 animate-spin text-brand mb-3" />
-            <p>Loading posts…</p>
+            <p>{t('forum.loadingPosts')}</p>
           </div>
         ) : posts.length === 0 ? (
           <EmptyForum activeCategory={activeCategory} onCreate={() => setShowNewPost(true)} />
@@ -296,16 +307,16 @@ export function CommunityPage() {
               >
                 <div className="mb-2 flex flex-wrap items-center gap-2">
                   <span className="rounded-full bg-brand-light px-2.5 py-0.5 text-xs font-medium text-brand">
-                    {post.category}
+                    {categoryLabel(post.category, t)}
                   </span>
-                  <span className="text-xs text-text-muted">{formatDate(post.created_at)}</span>
+                  <span className="text-xs text-text-muted">{formatDate(post.created_at, t)}</span>
                   <span className="text-xs text-text-secondary">· {post.author_label}</span>
                 </div>
                 <h3 className="text-lg font-bold text-text-primary">{post.title}</h3>
                 <p className="mt-2 line-clamp-2 text-sm text-text-secondary">{post.content}</p>
                 <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
                   <p className="text-xs font-medium text-text-muted">
-                    {post.reply_count} {post.reply_count === 1 ? 'reply' : 'replies'}
+                    {t('forum.replyCount', { count: post.reply_count })}
                   </p>
                   <IveBeenThereButton
                     post={post}
@@ -339,11 +350,12 @@ export function CommunityPage() {
               className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl"
             >
               <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-xl font-bold text-text-primary">New Post</h2>
+                <h2 className="text-xl font-bold text-text-primary">{t('forum.newPost')}</h2>
                 <button
                   type="button"
                   onClick={() => setShowNewPost(false)}
                   className="rounded-full p-1 text-text-muted hover:bg-gray-100"
+                  aria-label={t('common.close')}
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -351,19 +363,19 @@ export function CommunityPage() {
 
               <form onSubmit={handleCreatePost} className="space-y-4">
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-text-primary">Category</label>
+                  <label className="mb-1 block text-sm font-medium text-text-primary">{t('forum.category')}</label>
                   <select
                     value={postCategory}
                     onChange={(e) => setPostCategory(e.target.value)}
                     className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-brand focus:outline-none"
                   >
                     {POST_CATEGORIES.map((c) => (
-                      <option key={c} value={c}>{c}</option>
+                      <option key={c} value={c}>{categoryLabel(c, t)}</option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-text-primary">Title</label>
+                  <label className="mb-1 block text-sm font-medium text-text-primary">{t('forum.postTitle')}</label>
                   <input
                     type="text"
                     value={title}
@@ -371,18 +383,18 @@ export function CommunityPage() {
                     maxLength={200}
                     required
                     className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-brand focus:outline-none"
-                    placeholder="What's on your mind?"
+                    placeholder={t('forum.titlePlaceholder')}
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-text-primary">Content</label>
+                  <label className="mb-1 block text-sm font-medium text-text-primary">{t('forum.content')}</label>
                   <textarea
                     rows={5}
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
                     required
                     className="w-full resize-none rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-brand focus:outline-none"
-                    placeholder="Share your experience or question…"
+                    placeholder={t('forum.contentPlaceholder')}
                   />
                 </div>
                 {error && submitStatus === 'failed' && (
@@ -394,7 +406,7 @@ export function CommunityPage() {
                   className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand py-3 text-sm font-semibold text-white hover:bg-brand-dark disabled:opacity-50"
                 >
                   {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                  Publish Post
+                  {t('forum.publish')}
                 </button>
               </form>
             </motion.div>
@@ -405,14 +417,9 @@ export function CommunityPage() {
   )
 }
 
-const WHISPERS = [
-  { text: 'I love my baby. I miss who I was. Both are true.', when: '3 days postpartum' },
-  { text: "Cried in the shower again. He didn't notice. Maybe that's okay.", when: '2 weeks postpartum' },
-  { text: "It's 3am and I'm Googling whether this is normal. I hope it is.", when: '6 days postpartum' },
-  { text: "I haven't told anyone how scared I am. I'm telling you.", when: '11 days postpartum' },
-]
-
 function EmptyForum({ activeCategory, onCreate }: { activeCategory: string; onCreate: () => void }) {
+  const { t } = useTranslation()
+  const whispers = t('forum.empty.whispers', { returnObjects: true }) as { text: string; when: string }[]
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -422,15 +429,17 @@ function EmptyForum({ activeCategory, onCreate }: { activeCategory: string; onCr
     >
       <div className="mx-auto max-w-xl text-center">
         <h2 className="text-xl font-bold text-text-primary">
-          {activeCategory === 'All' ? "You're the first one here right now." : `Nothing in ${activeCategory} yet.`}
+          {activeCategory === 'All'
+            ? t('forum.empty.firstHere')
+            : t('forum.empty.nothingIn', { category: categoryLabel(activeCategory, t) })}
         </h2>
         <p className="mt-2 text-sm text-text-secondary">
-          But you're not the first to feel what you're feeling. Recent whispers from other mothers:
+          {t('forum.empty.notFirst')}
         </p>
       </div>
 
       <div className="mx-auto mt-8 max-w-xl space-y-3">
-        {WHISPERS.map((w, i) => (
+        {whispers.map((w, i) => (
           <motion.div
             key={i}
             initial={{ opacity: 0, y: 8 }}
@@ -441,7 +450,7 @@ function EmptyForum({ activeCategory, onCreate }: { activeCategory: string; onCr
             <span className="text-2xl leading-none text-brand/40">"</span>
             <div className="flex-1">
               <p className="text-sm leading-relaxed text-text-primary">{w.text}</p>
-              <p className="mt-1 text-xs italic text-text-muted">— Anonymous, {w.when}</p>
+              <p className="mt-1 text-xs italic text-text-muted">— {t('forum.empty.anonymous', { when: w.when })}</p>
             </div>
           </motion.div>
         ))}
@@ -449,14 +458,14 @@ function EmptyForum({ activeCategory, onCreate }: { activeCategory: string; onCr
 
       <div className="mx-auto mt-8 max-w-xl text-center">
         <p className="text-sm text-text-secondary">
-          Your turn, when you're ready.
+          {t('forum.empty.yourTurn')}
         </p>
         <button
           type="button"
           onClick={onCreate}
           className="mt-4 inline-flex items-center gap-2 rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
         >
-          Write something
+          {t('forum.empty.write')}
         </button>
       </div>
     </motion.div>
