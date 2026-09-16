@@ -1,11 +1,11 @@
 {
   "content_key": "epds",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "language": "en",
   "stage": 2,
-  "status": "draft",
+  "status": "active",
   "review_required": true,
-  "notes": "Edinburgh Postnatal Depression Scale, original English wording and item scoring as published in Cox, Holden & Sagovsky (1987). Items 1, 2 and 4 score 0-3 top to bottom; items 3 and 5-10 are reverse-scored (3-0 top to bottom). The option values below encode that, so the engine needs no special case. Reproduced under the authors' published terms, which require the authors, title and source to appear on every reproduced copy - see `attribution`, which the Stage 2 screen renders. STILL PENDING THE CLINICAL LEAD before publishing (decision #8): (1) every scoring band boundary and label - the bands below are the old placeholders, NOT EPDS cut-offs, and the cut-off validated for Ethiopian mothers may differ from the UK original; (2) safety_trigger_min_value on item 10 (set to 1 = any answer other than 'Never', the most conservative choice); (3) all result copy and the safety response copy; (4) the screen title, which is Sile Enat copy rather than instrument wording. The Amharic EPDS must be the validated Amharic version supplied by the clinical lead - never a translation of this file.",
+  "notes": "Edinburgh Postnatal Depression Scale, original English wording and item scoring as published in Cox, Holden & Sagovsky (1987) — unchanged from 1.0.0, as is every option value and the item order. CHANGED IN 1.0.1: safety_response now carries real copy instead of a placeholder. It is the Stage 1 safety response verbatim, because item 10 is the same disclosure and that copy was already written and translated; the action opens the crisis hub, which holds the verified contacts, and the text contains no phone number of its own. STILL PENDING THE CLINICAL LEAD: (1) every scoring band boundary and label — the bands below are still the old placeholders, NOT EPDS cut-offs, and the cut-off validated for Ethiopian mothers may differ from the UK original; (2) all three band result texts; (3) confirmation that safety_trigger_min_value on item 10 stays at 1 (any answer other than \"Never\"), which is the most conservative choice; (4) the screen title, which is Sile Enat copy rather than instrument wording. The Amharic EPDS must be the validated Amharic version supplied by the clinical lead — never a translation of this file.",
   "attribution": "Edinburgh Postnatal Depression Scale (EPDS). Source: Cox, J.L., Holden, J.M., and Sagovsky, R. 1987. Detection of postnatal depression: Development of the 10-item Edinburgh Postnatal Depression Scale. British Journal of Psychiatry 150:782-786.",
   "title": "How you have been feeling",
   "intro": "As you are pregnant or have recently had a baby, we would like to know how you are feeling.",
@@ -175,9 +175,9 @@
     }
   },
   "safety_response": {
-    "title": "PLACEHOLDER - safety response title",
-    "body": "PLACEHOLDER - what she reads immediately after answering item 10 above threshold. Must not contain an unverified phone number. Route her to the crisis hub, which already holds the verified contacts.",
-    "action_label": "PLACEHOLDER - safety action label"
+    "title": "Thank you for telling us this",
+    "body": "Thoughts like these can feel frightening and lonely, and saying so takes courage. You do not have to carry this by yourself. There are people ready to talk with you right now.",
+    "action_label": "Talk to someone now"
   },
   "continue_label": "Continue",
   "back_label": "Back"
