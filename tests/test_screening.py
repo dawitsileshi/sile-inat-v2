@@ -443,3 +443,30 @@ class TestContentPublication:
         from src.models import ScreeningContentVersion
         return ScreeningContentVersion.query.filter_by(
             content_key=key, version=version, language=language).one()
+
+    def test_band_identifiers_are_not_translatable(self):
+        """Band labels and `next` are identifiers, not words anyone reads.
+
+        Translating them yields a bundle that validates, serves, and then
+        fails at the end of a real questionnaire — stage1_tier is constrained
+        to green/amber/orange, so the 500 lands after she has answered
+        everything. This moves that failure to boot.
+        """
+        import copy
+        import json as _json
+        from src.services.screening_content import ContentError, validate_bundle
+
+        path = (REPO_ROOT / "src" / "content" / "stage1_triage"
+                / "stage1_triage_en_1.0.0.json")
+        base = _json.loads(path.read_text(encoding="utf-8"))
+        validate_bundle(base, source="baseline")     # unchanged, still valid
+
+        translated_tier = copy.deepcopy(base)
+        translated_tier["scoring"]["tiers"][0]["tier"] = "አረንጣዴ"
+        with pytest.raises(ContentError, match="results"):
+            validate_bundle(translated_tier, source="translated_tier")
+
+        translated_next = copy.deepcopy(base)
+        translated_next["scoring"]["tiers"][1]["next"] = "ደረጃ 2"
+        with pytest.raises(ContentError, match="next"):
+            validate_bundle(translated_next, source="translated_next")

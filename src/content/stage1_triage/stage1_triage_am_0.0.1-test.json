@@ -3,7 +3,7 @@
   "version": "0.0.1-test",
   "language": "am",
   "stage": 1,
-  "status": "active",
+  "status": "draft",
   "review_required": true,
   "notes": "TEST BUNDLE — NOT A CLINICAL INSTRUMENT. Exists so the Amharic path can be exercised end to end (Ethiopic rendering, layout, scoring, banding, the safety trigger and the route into Stage 2) before the validated Amharic wording exists. Structure is cloned from the English 1.0.0 bundle, so every item code, option value, scoring band and safety threshold behaves identically; only the words differ, and they are obvious sample text that could not be mistaken for a real question. The Amharic here was written as scaffolding, not by a native speaker reviewing copy — reword it freely, it carries no clinical meaning. This is deliberately version 0.0.1-test so that publishing the real am@1.0.0 later supersedes it automatically: get_active_content orders by published_at DESC, so the newer publication wins. To withdraw it sooner, run scripts/publish_screening_content.py --unpublish --content-key stage1_triage --version 0.0.1-test --language am.",
   "attribution": "Questions 1-4: PHQ-4. Kroenke K, Spitzer RL, Williams JBW, Lowe B. An ultra-brief screening scale for anxiety and depression: the PHQ-4. Psychosomatics 2009;50(6):613-621. Question 5: PHQ-9, item 9. The PHQ was developed by Drs. Robert L. Spitzer, Janet B.W. Williams, Kurt Kroenke and colleagues, with an educational grant from Pfizer Inc. No permission required to reproduce, translate, display or distribute.",

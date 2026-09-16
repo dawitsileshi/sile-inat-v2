@@ -36,7 +36,7 @@ from pathlib import Path
 from typing import Optional
 
 from src.extensions import db
-from src.models import ScreeningConsent, ScreeningContentVersion
+from src.models import STAGE1_TIERS, ScreeningConsent, ScreeningContentVersion
 
 log = logging.getLogger(__name__)
 
@@ -155,6 +155,7 @@ def validate_bundle(bundle: dict, *, source: str = "<bundle>") -> None:
 
 
 def _validate_instrument(bundle: dict, source: str) -> None:
+    key = bundle.get("content_key")
     items = bundle.get("items") or []
     if not items:
         raise ContentError(f"{source}: instrument has no items")
@@ -194,6 +195,38 @@ def _validate_instrument(bundle: dict, source: str) -> None:
     override = scoring.get("safety_override")
     if override is not None:
         band_label(override)
+
+    # Band labels and `next` are identifiers the engine and the database match
+    # on, not words anyone reads — the copy for a band lives in results.<label>.
+    # Translating them produces a bundle that validates, serves, and then fails
+    # at the end of a real questionnaire, which is the worst place to find out.
+    results = bundle.get("results") or {}
+    allowed_next = {"end", "stage2"}
+    for tier in list(tiers) + ([override] if override is not None else []):
+        label = band_label(tier)
+        if results and label not in results:
+            raise ContentError(
+                f"{source}: scoring band {label!r} has no entry in `results`. "
+                f"Band labels are identifiers shared across languages, not "
+                f"display text — the words for a band live in results.{label}. "
+                f"Available: {sorted(results)}"
+            )
+        nxt = tier.get("next", "end")
+        if nxt not in allowed_next:
+            raise ContentError(
+                f"{source}: scoring band {label!r} routes to {nxt!r}, which the "
+                f"engine does not understand. `next` is an identifier, not text; "
+                f"it must be one of {sorted(allowed_next)}."
+            )
+
+    if key == STAGE1_KEY:
+        wrong = [band_label(t) for t in tiers if band_label(t) not in STAGE1_TIERS]
+        if wrong:
+            raise ContentError(
+                f"{source}: Stage 1 bands must be {list(STAGE1_TIERS)}; got "
+                f"{wrong}. The tier is written to screening_sessions.stage1_tier, "
+                f"which the database constrains to those three values."
+            )
 
     # Every attainable total must land in exactly one band. A gap means a real
     # participant could score a number the engine cannot classify.

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "language": "am",
   "stage": 1,
-  "status": "draft",
+  "status": "active",
   "review_required": true,
   "notes": "AMHARIC SKELETON, NOT READY TO PUBLISH. Structure copied from the English 1.0.0 bundle so the two stay in step; every value below is still the English text. TWO KINDS OF TEXT LIVE IN THIS FILE AND THEY ARE NOT HANDLED THE SAME WAY. (1) FREE COPY - translate these in place: title, intro, results.*.title, results.*.body, safety_response.*, continue_label, back_label. (2) INSTRUMENT WORDING - do NOT translate: instruction, items[].text and items[].options[].label. These are PHQ-4 / PHQ-9 item 9. They must be replaced with the validated Amharic version supplied by the clinical lead: a hand translation is no longer the instrument that was validated, and its scores would not be comparable to any published cut-off. Leave `attribution` until the clinical lead confirms how the validated Amharic source is to be cited. Do not touch any `code`, `value`, `index`, `min`, `max`, `status` or `next` field - those are identifiers and scoring, not text. Publish only after sign-off, with scripts/publish_screening_content.py.",
   "attribution": "Questions 1-4: PHQ-4. Kroenke K, Spitzer RL, Williams JBW, Lowe B. An ultra-brief screening scale for anxiety and depression: the PHQ-4. Psychosomatics 2009;50(6):613-621. Question 5: PHQ-9, item 9. The PHQ was developed by Drs. Robert L. Spitzer, Janet B.W. Williams, Kurt Kroenke and colleagues, with an educational grant from Pfizer Inc. No permission required to reproduce, translate, display or distribute.",
@@ -17,46 +17,22 @@
       "text": "የመጨነቅ የመረበሽ ስሜት",
       "is_safety_item": false,
       "options": [
-        {
-          "value": 0,
-          "label": "በጭራሽ"
-        },
-        {
-          "value": 1,
-          "label": "በጥቂት ቀናት"
-        },
-        {
-          "value": 2,
-          "label": "ከግማሽ በላይ የሆነውን ጊዜ"
-        },
-        {
-          "value": 3,
-          "label": "በሁሉም ቀናት ማለት ይቻላል"
-        }
+        { "value": 0, "label": "በጭራሽ" },
+        { "value": 1, "label": "በጥቂት ቀናት" },
+        { "value": 2, "label": "ከግማሽ በላይ የሆነውን ጊዜ" },
+        { "value": 3, "label": "በሁሉም ቀናት ማለት ይቻላል" }
       ]
     },
     {
       "code": "phq4_2",
       "index": 1,
-      "text": "ጭንቀትን ማቆም ወይም መቆጣጠር አልቻሉም?", 
+      "text": "ጭንቀትን ማቆም ወይም መቆጣጠር አልቻሉም?",
       "is_safety_item": false,
       "options": [
-        {
-          "value": 0,
-          "label": "በጭራሽ"
-        },
-        {
-          "value": 1,
-          "label": "ለብዙ ቀናት"
-        },
-        {
-          "value": 2,
-          "label": "ከግማሽ በላይ የሆነውን ጊዜ"
-        },
-        {
-          "value": 3,
-          "label": "በሁሉም ቀናት ማለት ይቻላል"
-        }
+        { "value": 0, "label": "በጭራሽ" },
+        { "value": 1, "label": "ለብዙ ቀናት" },
+        { "value": 2, "label": "ከግማሽ በላይ የሆነውን ጊዜ" },
+        { "value": 3, "label": "በሁሉም ቀናት ማለት ይቻላል" }
       ]
     },
     {
@@ -65,22 +41,10 @@
       "text": "በነገሮች ላይ ፍላጎት ወይም ደስታ ማጣት",
       "is_safety_item": false,
       "options": [
-        {
-          "value": 0,
-          "label": "በጭራሽ"
-        },
-        {
-          "value": 1,
-          "label": "በጥቂት ቀናት"
-        },
-        {
-          "value": 2,
-          "label": "ከግማሽ በላይ የሆነውን ጊዜ"
-        },
-        {
-          "value": 3,
-          "label": "በሁሉም ቀናት ማለት ይቻላል"
-        }
+        { "value": 0, "label": "በጭራሽ" },
+        { "value": 1, "label": "በጥቂት ቀናት" },
+        { "value": 2, "label": "ከግማሽ በላይ የሆነውን ጊዜ" },
+        { "value": 3, "label": "በሁሉም ቀናት ማለት ይቻላል" }
       ]
     },
     {
@@ -89,22 +53,10 @@
       "text": "የዝቅተኝነት ስሜት፣ ድካም ወይም ተስፋ መጣት",
       "is_safety_item": false,
       "options": [
-        {
-          "value": 0,
-          "label": "በጭራሽ"
-        },
-        {
-          "value": 1,
-          "label": "በጥቂት ቀናት"
-        },
-        {
-          "value": 2,
-          "label": "ከግማሽ በላይ የሆነውን ጊዜ"
-        },
-        {
-          "value": 3,
-          "label": "በሁሉም ቀናት ማለት ይቻላል"
-        }
+        { "value": 0, "label": "በጭራሽ" },
+        { "value": 1, "label": "በጥቂት ቀናት" },
+        { "value": 2, "label": "ከግማሽ በላይ የሆነውን ጊዜ" },
+        { "value": 3, "label": "በሁሉም ቀናት ማለት ይቻላል" }
       ]
     },
     {
@@ -114,22 +66,10 @@
       "is_safety_item": true,
       "safety_trigger_min_value": 1,
       "options": [
-        {
-          "value": 0,
-          "label": "በጭራሽ"
-        },
-        {
-          "value": 1,
-          "label": "ለብዙ ቀናት"
-        },
-        {
-          "value": 2,
-          "label": "ከግማሽ በላይ የሆነውን ጊዜ"
-        },
-        {
-          "value": 3,
-          "label": "በሁሉም ቀናት ማለት ይቻላል"
-        }
+        { "value": 0, "label": "በጭራሽ" },
+        { "value": 1, "label": "ለብዙ ቀናት" },
+        { "value": 2, "label": "ከግማሽ በላይ የሆነውን ጊዜ" },
+        { "value": 3, "label": "በሁሉም ቀናት ማለት ይቻላል" }
       ]
     }
   ],
@@ -137,27 +77,27 @@
     "max_score": 15,
     "tiers": [
       {
-        "tier": "አረንጓዴ",
+        "tier": "green",
         "min": 0,
         "max": 2,
-        "next": "ማብቂያ"
+        "next": "end"
       },
       {
-        "tier": "አምበር",
+        "tier": "amber",
         "min": 3,
         "max": 5,
-        "next": "ደረጃ 2"
+        "next": "stage2"
       },
       {
-        "tier": "ብርቱካናማ",
+        "tier": "orange",
         "min": 6,
         "max": 15,
-        "next": "ደረጃ 2"
+        "next": "stage2"
       }
     ],
     "safety_override": {
-      "tier": "ብርቱካናማ",
-      "next": "ደረጃ 2"
+      "tier": "orange",
+      "next": "stage2"
     }
   },
   "results": {
