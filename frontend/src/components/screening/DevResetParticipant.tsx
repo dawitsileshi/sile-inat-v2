@@ -1,4 +1,4 @@
-import { clearScreeningToken } from '@/lib/screening'
+import { clearAppStorage } from '@/lib/session'
 
 /**
  * DevResetParticipant — local-development escape hatch.
@@ -8,10 +8,13 @@ import { clearScreeningToken } from '@/lib/screening'
  * keeps the same token forever, so every later visit lands on "You have
  * withdrawn". That is right for a mother and impossible to test against.
  *
- * This forgets the stored token so the next load enrols a fresh participant.
- * It changes nothing on the server — the withdrawn participant stays
- * withdrawn and its consent rows stay exactly as recorded, which is what the
- * append-only consent log requires.
+ * This forgets everything the browser holds, so the next load enrols a fresh
+ * participant. It changes nothing on the server — the withdrawn participant
+ * stays withdrawn and its consent rows stay exactly as recorded, which is
+ * what the append-only consent log requires.
+ *
+ * On the deployed site the same reset is reachable as `?reset` (see main.tsx),
+ * which needs no DevTools and no dev build.
  *
  * Vite replaces `import.meta.env.DEV` with `false` when building for
  * production, so this returns null there and the button is dropped from the
@@ -21,7 +24,7 @@ export function DevResetParticipant() {
   if (!import.meta.env.DEV) return null
 
   function startOver() {
-    clearScreeningToken()
+    clearAppStorage()
     window.location.assign('/screening/consent')
   }
 

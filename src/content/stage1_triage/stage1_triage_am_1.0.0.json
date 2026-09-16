@@ -7,69 +7,129 @@
   "review_required": true,
   "notes": "AMHARIC SKELETON, NOT READY TO PUBLISH. Structure copied from the English 1.0.0 bundle so the two stay in step; every value below is still the English text. TWO KINDS OF TEXT LIVE IN THIS FILE AND THEY ARE NOT HANDLED THE SAME WAY. (1) FREE COPY - translate these in place: title, intro, results.*.title, results.*.body, safety_response.*, continue_label, back_label. (2) INSTRUMENT WORDING - do NOT translate: instruction, items[].text and items[].options[].label. These are PHQ-4 / PHQ-9 item 9. They must be replaced with the validated Amharic version supplied by the clinical lead: a hand translation is no longer the instrument that was validated, and its scores would not be comparable to any published cut-off. Leave `attribution` until the clinical lead confirms how the validated Amharic source is to be cited. Do not touch any `code`, `value`, `index`, `min`, `max`, `status` or `next` field - those are identifiers and scoring, not text. Publish only after sign-off, with scripts/publish_screening_content.py.",
   "attribution": "Questions 1-4: PHQ-4. Kroenke K, Spitzer RL, Williams JBW, Lowe B. An ultra-brief screening scale for anxiety and depression: the PHQ-4. Psychosomatics 2009;50(6):613-621. Question 5: PHQ-9, item 9. The PHQ was developed by Drs. Robert L. Spitzer, Janet B.W. Williams, Kurt Kroenke and colleagues, with an educational grant from Pfizer Inc. No permission required to reproduce, translate, display or distribute.",
-  "title": "A few questions about how you have been",
-  "intro": "There are no right or wrong answers. This is only about how things have really been for you.",
-  "instruction": "Over the last 2 weeks, how often have you been bothered by the following problems?",
+  "title": "ስለ ሁኔታሽ ጥቂት ጥያቄዎች",
+  "intro": "ትክክል ወይም ስህተት የሚባል መልስ የለም። ይህ ጥያቄ የሚመለከተው በእውነት ምን እየተሰማሽ እንዳለ ብቻ ነው።",
+  "instruction": "ባለፉት 2 ሳምንታት ከሚከተሉት ችግሮች የትኛው ያህል ጊዜ አስቸግሮሽ ነበር?",
   "items": [
     {
       "code": "phq4_1",
       "index": 0,
-      "text": "Feeling nervous, anxious or on edge",
+      "text": "የመጨነቅ የመረበሽ ስሜት",
       "is_safety_item": false,
       "options": [
-        { "value": 0, "label": "Not at all" },
-        { "value": 1, "label": "Several days" },
-        { "value": 2, "label": "More than half the days" },
-        { "value": 3, "label": "Nearly every day" }
+        {
+          "value": 0,
+          "label": "በጭራሽ"
+        },
+        {
+          "value": 1,
+          "label": "በጥቂት ቀናት"
+        },
+        {
+          "value": 2,
+          "label": "ከግማሽ በላይ የሆነውን ጊዜ"
+        },
+        {
+          "value": 3,
+          "label": "በሁሉም ቀናት ማለት ይቻላል"
+        }
       ]
     },
     {
       "code": "phq4_2",
       "index": 1,
-      "text": "Not being able to stop or control worrying",
+      "text": "ጭንቀትን ማቆም ወይም መቆጣጠር አልቻሉም?", 
       "is_safety_item": false,
       "options": [
-        { "value": 0, "label": "Not at all" },
-        { "value": 1, "label": "Several days" },
-        { "value": 2, "label": "More than half the days" },
-        { "value": 3, "label": "Nearly every day" }
+        {
+          "value": 0,
+          "label": "በጭራሽ"
+        },
+        {
+          "value": 1,
+          "label": "ለብዙ ቀናት"
+        },
+        {
+          "value": 2,
+          "label": "ከግማሽ በላይ የሆነውን ጊዜ"
+        },
+        {
+          "value": 3,
+          "label": "በሁሉም ቀናት ማለት ይቻላል"
+        }
       ]
     },
     {
       "code": "phq4_3",
       "index": 2,
-      "text": "Little interest or pleasure in doing things",
+      "text": "በነገሮች ላይ ፍላጎት ወይም ደስታ ማጣት",
       "is_safety_item": false,
       "options": [
-        { "value": 0, "label": "Not at all" },
-        { "value": 1, "label": "Several days" },
-        { "value": 2, "label": "More than half the days" },
-        { "value": 3, "label": "Nearly every day" }
+        {
+          "value": 0,
+          "label": "በጭራሽ"
+        },
+        {
+          "value": 1,
+          "label": "በጥቂት ቀናት"
+        },
+        {
+          "value": 2,
+          "label": "ከግማሽ በላይ የሆነውን ጊዜ"
+        },
+        {
+          "value": 3,
+          "label": "በሁሉም ቀናት ማለት ይቻላል"
+        }
       ]
     },
     {
       "code": "phq4_4",
       "index": 3,
-      "text": "Feeling down, depressed, or hopeless",
+      "text": "የዝቅተኝነት ስሜት፣ ድካም ወይም ተስፋ መጣት",
       "is_safety_item": false,
       "options": [
-        { "value": 0, "label": "Not at all" },
-        { "value": 1, "label": "Several days" },
-        { "value": 2, "label": "More than half the days" },
-        { "value": 3, "label": "Nearly every day" }
+        {
+          "value": 0,
+          "label": "በጭራሽ"
+        },
+        {
+          "value": 1,
+          "label": "በጥቂት ቀናት"
+        },
+        {
+          "value": 2,
+          "label": "ከግማሽ በላይ የሆነውን ጊዜ"
+        },
+        {
+          "value": 3,
+          "label": "በሁሉም ቀናት ማለት ይቻላል"
+        }
       ]
     },
     {
       "code": "phq9_9",
       "index": 4,
-      "text": "Thoughts that you would be better off dead, or of hurting yourself in some way",
+      "text": "ሞትን የመምረጥ ወይም ራስን በሆነ መንገድ የመጉዳት ስሜት አለብሽ?",
       "is_safety_item": true,
       "safety_trigger_min_value": 1,
       "options": [
-        { "value": 0, "label": "Not at all" },
-        { "value": 1, "label": "Several days" },
-        { "value": 2, "label": "More than half the days" },
-        { "value": 3, "label": "Nearly every day" }
+        {
+          "value": 0,
+          "label": "በጭራሽ"
+        },
+        {
+          "value": 1,
+          "label": "ለብዙ ቀናት"
+        },
+        {
+          "value": 2,
+          "label": "ከግማሽ በላይ የሆነውን ጊዜ"
+        },
+        {
+          "value": 3,
+          "label": "በሁሉም ቀናት ማለት ይቻላል"
+        }
       ]
     }
   ],
@@ -77,50 +137,50 @@
     "max_score": 15,
     "tiers": [
       {
-        "tier": "green",
+        "tier": "አረንጓዴ",
         "min": 0,
         "max": 2,
-        "next": "end"
+        "next": "ማብቂያ"
       },
       {
-        "tier": "amber",
+        "tier": "አምበር",
         "min": 3,
         "max": 5,
-        "next": "stage2"
+        "next": "ደረጃ 2"
       },
       {
-        "tier": "orange",
+        "tier": "ብርቱካናማ",
         "min": 6,
         "max": 15,
-        "next": "stage2"
+        "next": "ደረጃ 2"
       }
     ],
     "safety_override": {
-      "tier": "orange",
-      "next": "stage2"
+      "tier": "ብርቱካናማ",
+      "next": "ደረጃ 2"
     }
   },
   "results": {
     "green": {
-      "title": "Thank you for sharing this",
-      "body": "It sounds like the past two weeks have been fairly steady for you. Things can change, and if they do, you can come back to these questions any time. Everything else here is still open to you."
+      "title": "ይህንን ስላካፈልሽን እናመሰግናለን",
+      "body": "ባለፉት ሁለት ሳምንታት ሁኔታሽ በአብዛኛው የተረጋጋ ይመስላል። ሁኔታዎች ሊለዋወጡ ይችላሉ፤ ከተለወጡም በማንኛውም ጊዜ ወደእነዚህ ጥያቄዎች ተመልሰሽ መልስ መስጠት ትችያለሽ። እዚህ ያሉት ሌሎች ነገሮችም ለአንቺ ክፍት ናቸው።"
     },
     "amber": {
-      "title": "Thank you for being honest",
-      "body": "Some of what you have been carrying lately sounds heavy, and you do not have to sort it out alone. There are a few more questions next, so we can understand a little better how you have been feeling."
+      "title": "በታማኝነት ስለመለስሽ እናመሰግናለን",
+      "body": "በቅርቡ የተሸከምሽው አንዳንድ ነገር ከባድ እንደነበር ይሰማናል፣ እና ይህንን ብቻሽን ማስተናገድ አይጠበቅብሽም። ቀጥሎ ጥቂት ተጨማሪ ጥያቄዎች አሉ፣ ይህም በቅርቡ ምን እየተሰማሽ እንደነበር በተሻለ ሁኔታ እንድንረዳ ይረዳናል።"
     },
     "orange": {
-      "title": "Thank you for telling us",
-      "body": "It sounds like the past two weeks have been really hard. That matters, and so do you. There are a few more questions next, so we can understand how best to support you."
+      "title": "ይህንን ስለነገርሽን እናመሰግናለን",
+      "body": "ባለፉት ሁለት ሳምንታት ጊዜው በጣም ከባድ እንደነበር ይሰማናል። ይህ አስፈላጊ ነው፣ አንቺም አስፈላጊ ነሽ። ቀጥሎ ጥቂት ተጨማሪ ጥያቄዎች አሉ፣ ይህም እንዴት በተሻለ ሁኔታ ልንደግፍሽ እንደምንችል እንድንረዳ ይረዳናል።"
     }
   },
   "safety_response": {
-    "title": "Thank you for telling us this",
-    "body": "Thoughts like these can feel frightening and lonely, and saying so takes courage. You do not have to carry this by yourself. There are people ready to talk with you right now.",
-    "action_label": "Talk to someone now"
+    "title": "ይህንን ስለነገርሽን እናመሰግናለን",
+    "body": "እንደእነዚህ ያሉ ሐሳቦች አስፈሪና ብቸኝነት የሚያሰማቸው ሊሆኑ ይችላሉ፣ እንዲህ መሰማቱን መናገርም ድፍረት ይጠይቃል። ይህንን ብቻሽን መሸከም አይጠበቅብሽም። አሁን ከአንቺ ጋር ለመነጋገር ዝግጁ የሆኑ ሰዎች አሉ።",
+    "action_label": "አሁን ከአንድ ሰው ጋር ተነጋገሪ"
   },
-  "continue_label": "Continue",
-  "back_label": "Back",
+  "continue_label": "ቀጥይ",
+  "back_label": "ተመለሺ",
   "translation_note": {
     "free_copy": "TRANSLATE IN PLACE - this is Sile Enat copy, not instrument wording.",
     "instrument_wording": "DO NOT TRANSLATE BY HAND - replace with the validated Amharic PHQ-4 / PHQ-9 item 9 wording from the clinical lead.",

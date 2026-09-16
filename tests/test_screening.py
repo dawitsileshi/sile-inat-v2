@@ -398,25 +398,46 @@ class TestContentPublication:
     def test_cannot_publish_a_bundle_written_in_another_language(self, screening_app):
         """A bundle may not be published in a language it is not written in.
 
-        The Amharic instruments ship as English skeletons awaiting the
-        validated Amharic wording. Publishing one would put English PHQ items
-        in front of a mother who chose Amharic and score her answers to them —
-        a file that is structurally perfect and clinically wrong.
+        The condition is built here rather than leaning on whichever bundle
+        happens to be untranslated today: which files are translated changes,
+        the rule must not. Note the guard only proves the script is right, not
+        that the wording is the validated instrument — a hand translation of
+        the PHQ passes this and is still not the PHQ.
         """
+        import json
+        from src.models import ScreeningContentVersion
         from src.services.screening_content import (
-            ContentError, publish, script_violations)
-        with screening_app.app_context():
-            with pytest.raises(ContentError) as exc:
-                publish("stage1_triage", "1.0.0", "am")
-            assert "Ethiopic" in str(exc.value)
-            assert self._row_any("stage1_triage", "1.0.0", "am").status == "draft"
+            ContentError, bundle_of, canonical_json, publish, script_violations)
 
-            # The Amharic consent bundle is really translated, so it passes.
-            from src.models import ScreeningContentVersion
-            from src.services.screening_content import bundle_of
+        with screening_app.app_context():
+            row = self._row_any("stage1_triage", "1.0.0", "am")
+            before = (row.payload, row.status)
+            english = bundle_of(row)
+            english["items"] = [
+                dict(item, text="Feeling nervous, anxious or on edge")
+                for item in english["items"]
+            ]
+            row.payload = canonical_json(english)
+            row.status = "draft"
+            _db.session.commit()
+            try:
+                with pytest.raises(ContentError) as exc:
+                    publish("stage1_triage", "1.0.0", "am")
+                assert "Ethiopic" in str(exc.value)
+                assert self._row_any("stage1_triage", "1.0.0", "am").status == "draft"
+            finally:
+                row = self._row_any("stage1_triage", "1.0.0", "am")
+                row.payload, row.status = before
+                _db.session.commit()
+
+            # An English bundle is unconstrained; a real Amharic one passes.
+            assert script_violations(
+                {"language": "en", "items": [{"code": "x", "text": "Feeling nervous"}]}
+            ) == []
             consent = ScreeningContentVersion.query.filter_by(
                 content_key="consent", language="am").first()
             assert script_violations(bundle_of(consent)) == []
+
 
     def _row_any(self, key, version, language):
         from src.models import ScreeningContentVersion
