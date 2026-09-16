@@ -12,6 +12,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 
 import type { SupportedLang } from '@/lib/i18n'
+import { DevResetParticipant } from '@/components/screening/DevResetParticipant'
 import { InstrumentRunner } from '@/components/screening/InstrumentRunner'
 import { Loading } from '@/pages/ScreeningStage1Page'
 import {
@@ -121,6 +122,7 @@ export function ScreeningStage2Page() {
         >
           {copy.label}
         </Link>
+        <DevResetParticipant />
       </div>
     )
   }

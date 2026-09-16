@@ -12,6 +12,7 @@ import { Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import type { SupportedLang } from '@/lib/i18n'
+import { DevResetParticipant } from '@/components/screening/DevResetParticipant'
 import { InstrumentRunner } from '@/components/screening/InstrumentRunner'
 import {
   answerStage1,
@@ -88,6 +89,7 @@ export function ScreeningStage1Page() {
         >
           {t('screening.backHome', 'Back to home')}
         </Link>
+        <DevResetParticipant />
       </div>
     )
   }

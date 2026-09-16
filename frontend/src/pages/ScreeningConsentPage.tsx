@@ -17,6 +17,7 @@ import { Loader2, Check, ArrowLeft } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { SUPPORTED_LANGS, type SupportedLang } from '@/lib/i18n'
+import { DevResetParticipant } from '@/components/screening/DevResetParticipant'
 import {
   fetchConsentContent,
   fetchConsentState,
@@ -330,6 +331,7 @@ function Outcome({
           </Link>
         )}
       </div>
+      <DevResetParticipant />
     </Panel>
   )
 }
