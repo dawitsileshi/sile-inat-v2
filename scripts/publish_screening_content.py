@@ -35,6 +35,7 @@ from src.services.screening_content import (                 # noqa: E402
     ContentError,
     bundle_of,
     publish,
+    unpublish,
 )
 
 
@@ -63,6 +64,8 @@ def main() -> int:
     parser.add_argument("--content-key")
     parser.add_argument("--version")
     parser.add_argument("--language")
+    parser.add_argument("--unpublish", action="store_true",
+                        help="Take an active version back to draft.")
     parser.add_argument("--yes", action="store_true",
                         help="Skip the confirmation prompt (for automation).")
     args = parser.parse_args()
@@ -83,6 +86,21 @@ def main() -> int:
         if row is None:
             print(f"No such content: {args.content_key}@{args.version}/{args.language}")
             return 1
+
+        if args.unpublish:
+            if row.status != "active":
+                print(f"{row.label} is not active ({row.status}).")
+                return 0
+            print("")
+            print(f"About to UNPUBLISH: {row.label}")
+            print("  Participants will stop being served this version.")
+            if not args.yes:
+                if input("Type UNPUBLISH to confirm: ").strip() != "UNPUBLISH":
+                    print("Aborted. Nothing changed.")
+                    return 1
+            unpublish(args.content_key, args.version, args.language)
+            print(f"Unpublished {row.label}.")
+            return 0
 
         if row.status == "active":
             print(f"{row.label} is already active.")

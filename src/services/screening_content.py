@@ -376,6 +376,44 @@ def available_languages(content_key: str) -> list:
     return sorted({r.language for r in rows})
 
 
+def unpublish(content_key: str, version: str, language: str) -> ScreeningContentVersion:
+    """
+    Takes an active version back to draft. The only supported demotion.
+
+    sync_content cannot do this — rule 4 is one-way on purpose, so that a
+    redeploy can never quietly un-publish something a human published. That
+    leaves no way back for a publication made in error or on purpose for a
+    while, short of hand-written SQL, which is worse. This is that way back,
+    and it is still a human at a terminal.
+
+    Warns when the bundle file itself declares "active", because the next boot
+    would then re-publish it under rule 4. Changing the file is the durable
+    half of withdrawing something.
+    """
+    row = ScreeningContentVersion.query.filter_by(
+        content_key=content_key, version=version, language=language
+    ).one_or_none()
+    if row is None:
+        raise ContentError(f"No such content: {content_key}@{version}/{language}")
+
+    row.status = "draft"
+    # published_at is left as it was: it records that this version *was*
+    # served, which stays true whatever its status becomes.
+    db.session.commit()
+    log.warning("Unpublished %s", row.label)
+
+    for path, bundle in discover_bundles():
+        if (bundle["content_key"], bundle["version"], bundle["language"]) == (
+            content_key, version, language
+        ) and bundle.get("status", "active") == "active":
+            log.warning(
+                "%s still declares \"status\": \"active\". The next boot will "
+                "publish it again. Set it to \"draft\" (or remove the file) to "
+                "withdraw it for good.", path.name,
+            )
+    return row
+
+
 def publish(content_key: str, version: str, language: str) -> ScreeningContentVersion:
     """
     Flips a draft to active. Called by scripts/publish_screening_content.py.
