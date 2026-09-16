@@ -1,5 +1,5 @@
 """
-src/services/safety_alert.py — raising the alarm on a safety disclosure
+src/services/screening_alert.py — telling the team what happened
 
 When a mother discloses thoughts of self-harm, the consent she agreed to says
 "a trained person from our team may try to reach you". This module is the part
@@ -151,6 +151,81 @@ def dispatch_safety_alert(event: SafetyEvent, *, recipient_role: Optional[str] =
     )
     log.warning("Safety alert sent for %s to %s.", event.event_uid, role)
     return "sent"
+
+
+# ─── Completion notices ───────────────────────────────────────────────────────
+#
+# A different thing from a safety alert, and it must never be mistaken for one.
+# This says "a screening finished, here is the band"; the safety alert says
+# "someone disclosed thoughts of self-harm". They carry different urgency, so
+# they are deliberately shaped differently — a distinct marker, a distinct
+# opening line, and no siren.
+#
+# The band and the total are the instrument's output, not her words. No item
+# answer, label or note appears here either.
+
+
+def build_completion_message(
+    *, session_uid: str, stage: int, band: str, total: int,
+    max_score: Optional[int], safety_triggered: bool,
+    language: Optional[str], completed_at,
+) -> str:
+    when = completed_at.strftime("%d %b %Y %H:%M UTC") if completed_at else "unknown time"
+    out_of = f" of {max_score}" if max_score is not None else ""
+    return "\n".join([
+        "📋 Screening completed",
+        "",
+        f"Session:  {session_uid}",
+        f"Stage:    {stage}",
+        f"Result:   {band} (total {total}{out_of})",
+        f"Safety:   {'yes - see the separate alert' if safety_triggered else 'no'}",
+        f"Language: {language or 'unknown'}",
+        f"Time:     {when}",
+    ])
+
+
+def notify_screening_completed(
+    *, session_uid: str, stage: int, band: str, total: int,
+    max_score: Optional[int] = None, safety_triggered: bool = False,
+    language: Optional[str] = None, completed_at=None,
+) -> Optional[str]:
+    """
+    Tells the team a screening finished. Returns "sent", "failed", or None
+    when no channel is configured.
+
+    Nothing is written to the database. safety_alert_attempts is evidence
+    behind a SafetyEvent's alert_status, and a completion is not a safety
+    event — borrowing that table would make the safety log mean less, which
+    is the opposite of why it exists.
+    """
+    if not is_configured():
+        return None
+
+    text = build_completion_message(
+        session_uid=session_uid, stage=stage, band=band, total=total,
+        max_score=max_score, safety_triggered=safety_triggered,
+        language=language, completed_at=completed_at,
+    )
+    try:
+        _send_telegram(text)
+    except Exception as exc:      # noqa: BLE001 — a notice must never cost her the result
+        log.error("Completion notice failed for session %s: %s: %s",
+                  session_uid, type(exc).__name__, exc)
+        return "failed"
+    log.info("Completion notice sent for session %s (stage %s, band %s).",
+             session_uid, stage, band)
+    return "sent"
+
+
+def notify_completion_safely(**kwargs) -> Optional[str]:
+    """notify_screening_completed with a total guard. Her result is already
+    saved and returned; a notification must not be able to disturb it."""
+    try:
+        return notify_screening_completed(**kwargs)
+    except Exception:             # noqa: BLE001 — deliberately total
+        log.exception("Completion notice raised for session %s",
+                      kwargs.get("session_uid"))
+        return None
 
 
 def dispatch_safely(event: SafetyEvent, *, recipient_role: Optional[str] = None) -> Optional[str]:

@@ -323,7 +323,7 @@ def record_safety_event(*, session, content, item, value, label) -> SafetyEvent:
     # allowed to raise: the disclosure and the follow-up are already written,
     # and a notification problem must not cost her the session. Committed
     # together with them so the attempt cannot survive a rolled-back event.
-    from src.services.safety_alert import dispatch_safely
+    from src.services.screening_alert import dispatch_safely
     outcome = dispatch_safely(event)
     db.session.commit()
 
@@ -420,6 +420,21 @@ def complete_session(*, session: ScreeningSession, content) -> dict:
     session.status = "completed"
     session.completed_at = datetime.utcnow()
     db.session.commit()
+
+    # Her result is saved and about to be returned. Telling the team is a
+    # courtesy on top of that, never a condition of it, so this runs after the
+    # commit and cannot raise.
+    from src.services.screening_alert import notify_completion_safely
+    notify_completion_safely(
+        session_uid=session.session_uid,
+        stage=session.stage,
+        band=outcome["band"],
+        total=total,
+        max_score=(bundle.get("scoring") or {}).get("max_score"),
+        safety_triggered=safety_triggered,
+        language=session.language,
+        completed_at=session.completed_at,
+    )
 
     log.info("Stage %s complete: total=%s band=%s next=%s (override=%s)",
              session.stage, total, outcome["band"], outcome["next"],
