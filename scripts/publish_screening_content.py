@@ -3,12 +3,16 @@ scripts/publish_screening_content.py — Publish a screening content bundle
 
 Content lands in the database in whatever status its file declares. Clinical
 instruments declare "draft", which means `get_active_content` ignores them and
-the screening routes return 409. This script is the only way to flip one to
-'active'.
+the screening routes return 409.
 
-That separation is deliberate. Committing a bundle, deploying it, and serving
-it to a mother are three different decisions, and the third one should require
-a human at a terminal who has read what they are about to publish.
+There are two ways to publish one. This script flips a row directly, for when
+you have a shell on the database. Alternatively the bundle file itself may
+declare "active": sync_content promotes a registered draft on the next boot
+(see rule 4 there), which is how a deployment with no shell publishes.
+
+Either way it is a deliberate act by a human who has read what they are
+publishing. Neither route can un-publish: nothing demotes an active version
+back to draft except a hand at the database.
 
 Usage:
     python scripts/publish_screening_content.py --list

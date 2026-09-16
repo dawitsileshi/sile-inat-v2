@@ -9,12 +9,14 @@ The rule this module exists to enforce:
 
     Content is served only when a human has deliberately published it.
 
-A bundle file appearing on disk is NOT publication. New bundles land in
-whatever status the file declares, and a bundle that declares `"status":
-"draft"` is invisible to `get_active_content` until someone runs
-scripts/publish_screening_content.py. That is the safety valve for clinical
-content: placeholder or unreviewed questions physically cannot reach a mother,
-even if they are committed, deployed, and sitting in the database.
+A bundle file appearing on disk is NOT publication. A bundle that declares
+`"status": "draft"` is invisible to `get_active_content` until a human
+publishes it — either by running scripts/publish_screening_content.py against
+the database, or by changing that word to "active" in the file and committing
+it. That is the safety valve for clinical content: placeholder or unreviewed
+questions physically cannot reach a mother, even if they are committed,
+deployed, and sitting in the database. Publication only ever moves in one
+direction here; taking something back to draft is a hand at the database.
 
 Layout: src/content/<content_key>/<anything>.json
 
@@ -210,9 +212,18 @@ def sync_content() -> dict:
     3. A checksum change is REFUSED when any participant record already points
        at that version. Editing text under a version people have already been
        served would silently invalidate their records. Bump the version.
+    4. A file that declares "active" for a version already registered as
+       'draft' PUBLISHES it. Promotion is one-way: nothing here can ever take
+       a published version back to draft, so a redeploy cannot un-publish
+       something a human published.
 
-    `status` is applied on insert only, never on update, so a deliberate
-    publication is never undone by a redeploy.
+    Rule 4 exists because the status on a new row (rule 1) only reaches a
+    database that is being populated for the first time. Where the database
+    outlives the deploy — which is the normal case — editing the file and
+    committing it would otherwise do nothing at all, silently. Publishing
+    stays a deliberate human act either way: it is a reviewed change to a
+    version-controlled file, or a run of
+    scripts/publish_screening_content.py against the database directly.
 
     Returns {content_key: rows_written}.
     """
@@ -246,19 +257,33 @@ def sync_content() -> dict:
             written[key] = written.get(key, 0) + 1
             log.info("Content registered: %s [%s]", row.label, declared_status)
 
-        elif row.checksum != digest:
-            if _has_dependent_records(row):
-                log.error(
-                    "Refusing to rewrite %s: participant records already reference "
-                    "this version. Bump the version instead.", row.label
-                )
-                continue
-            row.payload = payload
-            row.checksum = digest
-            row.notes = bundle.get("notes")
-            row.item_count = len(bundle.get("items", bundle.get("sections", [])))
-            written[key] = written.get(key, 0) + 1
-            log.info("Content updated: %s", row.label)
+        else:
+            if row.checksum != digest:
+                if _has_dependent_records(row):
+                    # The stored payload stays exactly as served. Publication
+                    # below is still allowed: it changes which version is
+                    # served, not a word of what it says.
+                    log.error(
+                        "Refusing to rewrite %s: participant records already "
+                        "reference this version. Bump the version instead.",
+                        row.label,
+                    )
+                else:
+                    row.payload = payload
+                    row.checksum = digest
+                    row.notes = bundle.get("notes")
+                    row.item_count = len(
+                        bundle.get("items", bundle.get("sections", []))
+                    )
+                    written[key] = written.get(key, 0) + 1
+                    log.info("Content updated: %s", row.label)
+
+            # Rule 4. Never the other way round.
+            if bundle.get("status", "active") == "active" and row.status == "draft":
+                row.status = "active"
+                row.published_at = row.published_at or datetime.utcnow()
+                written[key] = written.get(key, 0) + 1
+                log.info("Content PUBLISHED from file: %s", row.label)
 
     if written:
         db.session.commit()

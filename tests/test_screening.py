@@ -346,3 +346,51 @@ class TestLegacyMLRemoved:
             s.startswith("src/services/screening_") or s == "src/routes/screening.py"
             or s == "src/models.py")]
         assert not unexpected, f"unexpected EPDS scoring modules: {unexpected}"
+
+
+class TestContentPublication:
+    """Rule 4 in screening_content.sync_content: the file can publish, only up."""
+
+    def _row(self, version):
+        from src.models import ScreeningContentVersion
+        return ScreeningContentVersion.query.filter_by(
+            content_key="stage1_triage", version=version, language="en").one()
+
+    def test_file_active_publishes_a_registered_draft(self, screening_app):
+        """A database that outlives the deploy must still see a publication.
+
+        The status on a new row only ever reaches a database being populated
+        for the first time. Without this, editing the file and shipping it
+        would do nothing at all, silently.
+        """
+        from src.services.screening_content import sync_content
+        with screening_app.app_context():
+            row = self._row("1.0.0")           # the file declares "active"
+            before = (row.status, row.published_at)
+            row.status, row.published_at = "draft", None
+            _db.session.commit()
+            try:
+                sync_content()
+                after = self._row("1.0.0")
+                assert after.status == "active"
+                assert after.published_at is not None
+            finally:
+                row = self._row("1.0.0")
+                row.status, row.published_at = before
+                _db.session.commit()
+
+    def test_sync_never_unpublishes(self, screening_app):
+        """A redeploy must not take back something a human published."""
+        from src.services.screening_content import sync_content
+        with screening_app.app_context():
+            row = self._row("0.1.0-placeholder")   # the file declares "draft"
+            before = row.status
+            row.status = "active"
+            _db.session.commit()
+            try:
+                sync_content()
+                assert self._row("0.1.0-placeholder").status == "active"
+            finally:
+                row = self._row("0.1.0-placeholder")
+                row.status = before
+                _db.session.commit()
