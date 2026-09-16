@@ -63,6 +63,14 @@ class BaseConfig:
 
     # ── Logging ───────────────────────────────────────────────────────────────
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
+
+    # ── Safety alerts ─────────────────────────────────────────────────────
+    # Where a self-harm disclosure is announced. Unset means no channel: the
+    # event is still recorded and the follow-up still opens, but nobody is
+    # told, and the log says so on every disclosure.
+    TELEGRAM_BOT_TOKEN: str = os.getenv("TELEGRAM_BOT_TOKEN", "")
+    TELEGRAM_ALERT_CHAT_ID: str = os.getenv("TELEGRAM_ALERT_CHAT_ID", "")
+    SAFETY_ALERT_TIMEOUT: int = int(os.getenv("SAFETY_ALERT_TIMEOUT", "10"))
     LOG_FORMAT: str = "[%(asctime)s] %(levelname)s in %(module)s: %(message)s"
 
 

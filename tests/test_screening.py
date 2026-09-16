@@ -470,3 +470,105 @@ class TestContentPublication:
         translated_next["scoring"]["tiers"][1]["next"] = "ደረጃ 2"
         with pytest.raises(ContentError, match="next"):
             validate_bundle(translated_next, source="translated_next")
+
+
+class TestSafetyAlert:
+    """The channel that tells a clinician a disclosure happened."""
+
+    def _disclose(self, api, screening_app):
+        """Runs a Stage 1 disclosure and returns the SafetyEvent."""
+        _publish_instruments(screening_app)
+        token = _consented(api)
+        api.get("/api/screening/stage1", headers={HEADER: token})
+        api.post("/api/screening/stage1/answer", headers={HEADER: token},
+                 json={"item_code": "s1_safety", "value": 3})
+        with screening_app.app_context():
+            from src.models import SafetyEvent
+            return SafetyEvent.query.order_by(SafetyEvent.id.desc()).first()
+
+    def test_no_channel_configured_records_nothing_and_says_so(self, api, screening_app):
+        """Without a channel, 'pending' is the honest status: nobody was told."""
+        event = self._disclose(api, screening_app)
+        assert event is not None
+        with screening_app.app_context():
+            from src.models import SafetyAlertAttempt
+            assert event.alert_status == "pending"
+            assert SafetyAlertAttempt.query.filter_by(
+                safety_event_id=event.id).count() == 0
+
+    def test_successful_send_is_logged_and_advances_status(self, api, screening_app, monkeypatch):
+        from src.models import SafetyAlertAttempt, SafetyEvent
+        from src.services import safety_alert
+
+        event = self._disclose(api, screening_app)
+        with screening_app.app_context():
+            monkeypatch.setitem(screening_app.config, "TELEGRAM_BOT_TOKEN", "t")
+            monkeypatch.setitem(screening_app.config, "TELEGRAM_ALERT_CHAT_ID", "c")
+            monkeypatch.setattr(safety_alert, "_send_telegram", lambda text: None)
+
+            row = _db.session.get(SafetyEvent, event.id)
+            assert safety_alert.dispatch_safety_alert(row) == "sent"
+            _db.session.commit()
+
+            attempts = SafetyAlertAttempt.query.filter_by(safety_event_id=row.id).all()
+            assert [a.outcome for a in attempts] == ["sent"]
+            assert attempts[0].channel == "telegram"
+            assert row.alert_status == "sent"
+
+    def test_failure_is_recorded_not_swallowed(self, api, screening_app, monkeypatch):
+        """A channel that fails must look different from one that works."""
+        from src.models import SafetyAlertAttempt, SafetyEvent
+        from src.services import safety_alert
+
+        event = self._disclose(api, screening_app)
+        with screening_app.app_context():
+            monkeypatch.setitem(screening_app.config, "TELEGRAM_BOT_TOKEN", "t")
+            monkeypatch.setitem(screening_app.config, "TELEGRAM_ALERT_CHAT_ID", "c")
+
+            def boom(text):
+                raise RuntimeError("Telegram refused the message: 'chat not found'")
+            monkeypatch.setattr(safety_alert, "_send_telegram", boom)
+
+            row = _db.session.get(SafetyEvent, event.id)
+            assert safety_alert.dispatch_safety_alert(row) == "failed"
+            _db.session.commit()
+
+            attempt = SafetyAlertAttempt.query.filter_by(
+                safety_event_id=row.id).order_by(SafetyAlertAttempt.id.desc()).first()
+            assert attempt.outcome == "failed"
+            assert "chat not found" in attempt.error_detail
+            assert row.alert_status == "failed"
+
+    def test_message_carries_no_answers(self, api, screening_app):
+        """It lands on a lock screen. Her words must not be in it."""
+        from src.models import SafetyEvent
+        from src.services.safety_alert import build_message
+
+        event = self._disclose(api, screening_app)
+        with screening_app.app_context():
+            row = _db.session.get(SafetyEvent, event.id)
+            text = build_message(row)
+            assert row.event_uid in text
+            for leak in (row.item_response_label, str(row.item_response_value)):
+                if leak:
+                    assert leak not in text, f"alert leaked {leak!r}"
+
+    def test_dispatch_never_raises(self, api, screening_app, monkeypatch):
+        """A notification problem must not cost her the session."""
+        from src.models import SafetyEvent
+        from src.services import safety_alert
+
+        event = self._disclose(api, screening_app)
+        with screening_app.app_context():
+            monkeypatch.setitem(screening_app.config, "TELEGRAM_BOT_TOKEN", "t")
+            monkeypatch.setitem(screening_app.config, "TELEGRAM_ALERT_CHAT_ID", "c")
+
+            # Not one of the errors dispatch_safety_alert foresees — that is
+            # the point. A BaseException such as KeyboardInterrupt is left to
+            # propagate deliberately; this guard is for ordinary bugs.
+            def explode(text):
+                raise AttributeError("something nobody foresaw")
+            monkeypatch.setattr(safety_alert, "_send_telegram", explode)
+
+            row = _db.session.get(SafetyEvent, event.id)
+            assert safety_alert.dispatch_safely(row) is None

@@ -317,13 +317,22 @@ def record_safety_event(*, session, content, item, value, label) -> SafetyEvent:
         changed_by=None,          # system-opened
         note=f"Opened automatically by a stage {session.stage} safety disclosure.",
     ))
+    db.session.flush()
+
+    # Tell the on-call clinician. Recorded as an attempt either way, and never
+    # allowed to raise: the disclosure and the follow-up are already written,
+    # and a notification problem must not cost her the session. Committed
+    # together with them so the attempt cannot survive a rolled-back event.
+    from src.services.safety_alert import dispatch_safely
+    outcome = dispatch_safely(event)
     db.session.commit()
 
     log.warning(
         "SAFETY EVENT recorded (stage %s, trigger %s, item %s, event %s). "
-        "Follow-up %s is open and no alert channel is configured.",
+        "Follow-up %s is open; alert %s.",
         session.stage, cfg["trigger_source"], item["code"],
         event.event_uid, follow_up.id,
+        outcome or "NOT SENT (no channel configured)",
     )
     return event
 
